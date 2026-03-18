@@ -1,4 +1,4 @@
-package components;
+package components.office;
 
 import main.GamePanel;
 import utilities.FontManager;
@@ -7,15 +7,15 @@ import utilities.Utility;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class MainView
+public class DoorView
 {
-    private final BufferedImage mainImage;
-    public MainView() { mainImage = Utility.loadImage("/office/main.png"); }
+    private final BufferedImage doorImage;
+    public DoorView() { doorImage = Utility.loadImage("/office/door.png"); }
 
     public void draw(Graphics2D g2)
     {
-        if(mainImage != null)
-            g2.drawImage(mainImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        if(doorImage != null)
+            g2.drawImage(doorImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
         else
             drawPlaceholder(g2);
     }
@@ -31,6 +31,6 @@ public class MainView
 
         g2.setColor(Color.WHITE);
         g2.setFont(FontManager.LCD_SMALL);
-        Utility.drawCentered(g2, "you are in MAIN VIEW", GamePanel.HEIGHT / 2 + 20);
+        Utility.drawCentered(g2, "you are in DOOR VIEW", GamePanel.HEIGHT / 2 + 20);
     }
 }

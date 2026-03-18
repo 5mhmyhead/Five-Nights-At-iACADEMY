@@ -1,4 +1,4 @@
-package components;
+package components.office;
 
 import main.GamePanel;
 import utilities.Utility;
@@ -9,8 +9,8 @@ import java.awt.image.BufferedImage;
 public class OfficeView
 {
     // TWO VIEWS IN THE OFFICE
-    private MainView mainView;
-    private DoorView doorView;
+    private final MainView mainView;
+    private final DoorView doorView;
 
     // IF PLAYER IS AT DOOR VIEW
     private boolean playerAtDoor = false;
@@ -61,8 +61,8 @@ public class OfficeView
             transitionIndex++;
             if(transitionIndex >= TRANSITION_LENGTH)
             {
-                transitioning   = false;
-                playerAtDoor    = true;
+                transitioning = false;
+                playerAtDoor = true;
                 transitionIndex = 0;
             }
         }
@@ -71,8 +71,8 @@ public class OfficeView
             transitionIndex--;
             if(transitionIndex < 0)
             {
-                transitioning   = false;
-                playerAtDoor    = false;
+                transitioning = false;
+                playerAtDoor = false;
                 transitionIndex = 0;
             }
         }
@@ -80,6 +80,8 @@ public class OfficeView
 
     public void mouseMoved(int mouseX, int mouseY)
     {
+        if(transitioning) return;
+
         // HOVER ZONE CHANGES DEPENDING ON IF THE PLAYER IS AT THE DOOR OR NOT
         int zoneXMin = playerAtDoor ? DOOR_HOVER_X_MIN : MAIN_HOVER_X_MIN;
         int zoneXMax = playerAtDoor ? DOOR_HOVER_X_MAX : MAIN_HOVER_X_MAX;
@@ -102,9 +104,16 @@ public class OfficeView
 
     public void draw(Graphics2D g2)
     {
-        if(transitioning) drawTransitionFrame(g2);
-        else if(playerAtDoor) doorView.draw(g2);
-        else mainView.draw(g2);
+        if(transitioning)
+        {
+            drawTransitionFrame(g2);
+            return;
+        }
+
+        if(playerAtDoor)
+            doorView.draw(g2);
+        else
+            mainView.draw(g2);
 
         drawHoverZone(g2);
     }
@@ -182,4 +191,5 @@ public class OfficeView
     }
 
     public boolean isPlayerAtDoor() { return playerAtDoor; }
+    public boolean isTransitioning() { return transitioning; }
 }

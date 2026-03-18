@@ -1,9 +1,7 @@
 package state;
 
-import state.states.GameState;
-import state.states.LoseState;
-import state.states.TitleState;
-import state.states.WinState;
+import components.nights.NightManager;
+import state.states.*;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -11,8 +9,11 @@ import java.awt.event.KeyEvent;
 // HANDLES SWITCHING BETWEEN AND MOVING THROUGH DIFFERENT STATES DURING GAMEPLAY
 public class StateManager
 {
+    // MANAGES THE FIVE NIGHTS AND ITS AI LEVELS OF THE ANIMATRONICS
+    private final NightManager nightManager = new NightManager();
+
     // GAME STATES
-    private static final int NUMBER_OF_STATES = 4;
+    private static final int NUMBER_OF_STATES = 5;
 
     public static final int TITLE_STATE = 0;
     public static final int GAME_STATE = 1;
@@ -81,4 +82,6 @@ public class StateManager
     // PASSES MOUSE ACTIONS TO ACTIVE STATE
     public void mouseMoved(int x, int y) { if(states[currentState] != null) states[currentState].mouseMoved(x, y); }
     public void mouseClicked(int x, int y) { if(states[currentState] != null) states[currentState].mouseClicked(x, y); }
+
+    public NightManager getNightManager() { return nightManager; }
 }
