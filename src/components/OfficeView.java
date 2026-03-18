@@ -1,13 +1,18 @@
 package components;
 
 import main.GamePanel;
-import utilities.FontManager;
 import utilities.Utility;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class OfficeView
 {
+    // TWO VIEWS IN THE OFFICE
+    private MainView mainView;
+    private DoorView doorView;
+
+    // IF PLAYER IS AT DOOR VIEW
     private boolean playerAtDoor = false;
     private boolean wasInHoverZone = false;
 
@@ -21,20 +26,57 @@ public class OfficeView
     private static final int HOVER_ZONE_Y_MIN  = (int)(GamePanel.HEIGHT * 0.20);
     private static final int HOVER_ZONE_Y_MAX  = (int)(GamePanel.HEIGHT * 0.80);
 
-    private static final Color HOVER_FILL = new Color(255, 255, 255, 40);
-    private static final Color HOVER_BORDER = new Color(255, 255, 255, 140);
+    // TRANSITION BETWEEN THE MAIN AND DOOR VIEWS
+    private static final int TRANSITION_LENGTH = 6;
+    private final BufferedImage[] transitionFrames;
 
-    // TWO VIEWS IN THE OFFICE
-    private MainView mainView;
-    private DoorView doorView;
+    private int transitionIndex = 0;
+    private boolean transitioning = false;
+    private boolean transitionForward = true;
+
+    private static final int FRAMES_PER_IMAGE = 1;  // VARIABLE TO TUNE TRANSITION ANIMATION
+    private int frameHoldCounter = 0;
 
     public OfficeView()
     {
         mainView = new MainView();
         doorView = new DoorView();
+
+        // LOAD TRANSITION FRAMES
+        transitionFrames = new BufferedImage[TRANSITION_LENGTH];
+        for(int i = 0; i < TRANSITION_LENGTH; i++)
+            transitionFrames[i] = Utility.applyMotionBlur(Utility.loadImage("/office/transitions/transition" + (i + 1) + ".png"));
     }
 
-    public void update() {}
+    public void update()
+    {
+        if(!transitioning) return;
+
+        frameHoldCounter++;
+        if(frameHoldCounter < FRAMES_PER_IMAGE) return;
+        frameHoldCounter = 0;
+
+        if(transitionForward)
+        {
+            transitionIndex++;
+            if(transitionIndex >= TRANSITION_LENGTH)
+            {
+                transitioning   = false;
+                playerAtDoor    = true;
+                transitionIndex = 0;
+            }
+        }
+        else
+        {
+            transitionIndex--;
+            if(transitionIndex < 0)
+            {
+                transitioning   = false;
+                playerAtDoor    = false;
+                transitionIndex = 0;
+            }
+        }
+    }
 
     public void mouseMoved(int mouseX, int mouseY)
     {
@@ -49,17 +91,36 @@ public class OfficeView
                 && mouseY <= HOVER_ZONE_Y_MAX;
 
         if(inHoverZone && !wasInHoverZone)
-            playerAtDoor = !playerAtDoor;
+        {
+            transitioning = true;
+            transitionForward = !playerAtDoor;
+            transitionIndex = transitionForward ? 0 : TRANSITION_LENGTH - 1;
+        }
 
         wasInHoverZone = inHoverZone;
     }
 
     public void draw(Graphics2D g2)
     {
-        if(playerAtDoor) doorView.draw(g2);
+        if(transitioning) drawTransitionFrame(g2);
+        else if(playerAtDoor) doorView.draw(g2);
         else mainView.draw(g2);
 
         drawHoverZone(g2);
+    }
+
+    private void drawTransitionFrame(Graphics2D g2)
+    {
+        // CURRENT FRAME IS LOADED DEPENDING ON THE INDEX
+        BufferedImage frame = transitionFrames[transitionIndex];
+
+        if(frame != null)
+            g2.drawImage(frame, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        else
+        {
+            g2.setColor(Color.BLACK);
+            g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
+        }
     }
 
     private void drawHoverZone(Graphics2D g2)
@@ -72,11 +133,11 @@ public class OfficeView
         int midY = HOVER_ZONE_Y_MIN + zoneH / 2;
 
         // FILL THE HOVER ZONE
-        g2.setColor(HOVER_FILL);
+        g2.setColor(new Color(255, 255, 255, 40));
         g2.fillRoundRect(zoneXMin, HOVER_ZONE_Y_MIN, zoneW, zoneH, 10, 10);
 
         // DRAW THE BORDER
-        g2.setColor(HOVER_BORDER);
+        g2.setColor(new Color(255, 255, 255, 140));
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(zoneXMin, HOVER_ZONE_Y_MIN, zoneW, zoneH, 10, 10);
 

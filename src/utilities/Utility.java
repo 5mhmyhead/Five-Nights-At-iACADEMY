@@ -5,7 +5,10 @@ import main.GamePanel;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Utility
@@ -48,5 +51,20 @@ public class Utility
             System.out.println("Font not found: " + path);
             return new Font("Monospaced", Font.PLAIN, (int) size);
         }
+    }
+
+    // APPLIES MOTION BLUR
+    public static BufferedImage applyMotionBlur(BufferedImage image)
+    {
+        if(image == null) return null;
+
+        // HORIZONTAL MOTION BLUR KERNEL
+        int blurLength = 20;
+        float[] kernel = new float[blurLength];
+        Arrays.fill(kernel, 1.0f / blurLength);
+
+        Kernel k  = new Kernel(blurLength, 1, kernel);
+        ConvolveOp op = new ConvolveOp(k, ConvolveOp.EDGE_NO_OP, null);
+        return op.filter(image, null);
     }
 }
