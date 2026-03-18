@@ -7,7 +7,6 @@ import utilities.FontManager;
 import utilities.Utility;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 
 public class WinState extends State
 {
@@ -45,8 +44,13 @@ public class WinState extends State
     @Override
     public void keyPressed(int key)
     {
-        if(key == KeyEvent.VK_ENTER)
+        if(stateManager.getNightManager().isFinalNight())
+            stateManager.setState(StateManager.TITLE_STATE); // OR CREDITS LATER
+        else
+        {
+            stateManager.getNightManager().advanceNight();
             stateManager.setState(StateManager.INTRO_STATE);
+        }
     }
 
     @Override

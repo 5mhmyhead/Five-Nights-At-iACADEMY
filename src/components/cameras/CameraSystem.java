@@ -29,6 +29,10 @@ public class CameraSystem
     private static final int HOVER_ZONE_X_MIN = (int)(GamePanel.WIDTH * 0.05);
     private static final int HOVER_ZONE_X_MAX = (int)(GamePanel.WIDTH * 0.45);
 
+    // STATIC WHEN FLIPPING CAMERAS
+    private int staticTimer = 0;
+    private static final int STATIC_DURATION = 20;
+
     // TODO: REFACTOR
     // --- CAMERA BUTTON LAYOUT ---
     private static final int[] BUTTON_X = { 285, 160, 245, 160, 285, 185, 85 };
@@ -70,13 +74,16 @@ public class CameraSystem
             rebootTimer--;
             if(rebootTimer <= 0)
             {
-                rebooting     = false;
+                rebooting = false;
                 brokenCameras = new boolean[cameras.length];
             }
         }
 
         // UPDATE CAMERA SWAY ANIMATION
         cameras[currentCamera].update();
+
+        // UPDATE THE TIMER STATIC
+        if(staticTimer > 0) staticTimer--;
     }
 
     public void mouseMoved(int mouseX, int mouseY)
@@ -87,7 +94,10 @@ public class CameraSystem
                 && mouseY >= HOVER_ZONE_Y;
 
         if(inHoverZone && !wasInHoverZone)
+        {
             monitorUp = !monitorUp;
+            if(monitorUp) staticTimer = STATIC_DURATION;
+        }
 
         wasInHoverZone = inHoverZone;
     }
@@ -104,6 +114,7 @@ public class CameraSystem
             && mouseY >= BUTTON_Y[i] && mouseY <= BUTTON_Y[i] + BUTTON_H)
             {
                 currentCamera = i;
+                if(!rebooting) staticTimer = STATIC_DURATION; // ADD STATIC EFFECT
                 return;
             }
         }
@@ -123,9 +134,15 @@ public class CameraSystem
         if(!monitorUp) return;
 
         if(key == KeyEvent.VK_A)
+        {
             currentCamera = (currentCamera - 1 + cameras.length) % cameras.length;
+            if(!rebooting) staticTimer = STATIC_DURATION;
+        }
         if(key == KeyEvent.VK_D)
+        {
             currentCamera = (currentCamera + 1) % cameras.length;
+            if(!rebooting) staticTimer = STATIC_DURATION;
+        }
     }
 
     public void draw(Graphics2D g2, boolean showHover, Animatronic[] animatronics)
@@ -137,6 +154,7 @@ public class CameraSystem
             drawCameraButtons(g2);
             drawRebootButton(g2);
             drawCameraLabel(g2);
+            drawStatic(g2);
         }
 
         if(showHover) drawHoverZone(g2);
@@ -309,6 +327,7 @@ public class CameraSystem
         g.setStroke(new BasicStroke(1));
     }
 
+    // CAMERA FUNCTIONS FOR JIRSTEN
     public void breakCamera(int index)
     {
         if(index >= 0 && index < brokenCameras.length)
@@ -321,6 +340,39 @@ public class CameraSystem
         return !brokenCameras[cameraIndex]
                 && !rebooting;
     }
+
+    public void triggerStatic()
+    {
+        staticTimer = STATIC_DURATION;
+    }
+
+    private void drawStatic(Graphics2D g2)
+    {
+        float minAlpha  = 0.10f;
+        float maxAlpha  = 0.80f;
+        float fadeRange = maxAlpha - minAlpha;
+        float alpha = minAlpha;
+
+        // ALPHA FADES FROM 80% TO 10% OPACITY AS TIMER COUNTS DOWN
+        if(staticTimer > 0)
+            alpha = minAlpha + ((float) staticTimer / STATIC_DURATION) * fadeRange;
+
+        // DRAW RANDOM NOISE PIXELS OVER THE FEED
+        for(int y = 0; y < GamePanel.HEIGHT; y += 2)
+        {
+            for(int x = 0; x < GamePanel.WIDTH; x += 2)
+            {
+                if(Math.random() > 0.5) // HALF OF THE PIXELS GET NOISE
+                {
+                    int brightness = (int)(Math.random() * 255); // RANDOM BRIGHTNESS FOR EACH PIXEL
+                    g2.setColor(new Color(brightness / 2, brightness, brightness / 2,
+                            (int)(alpha * 180)));
+                    g2.fillRect(x, y, 2, 2);
+                }
+            }
+        }
+    }
+
 
     public boolean isMonitorUp() { return monitorUp; }
     public int getCurrentCamera() { return currentCamera; }

@@ -46,10 +46,10 @@ public class IntroState extends State
 
         g2.setColor(Color.WHITE);
         g2.setFont(FontManager.LCD_LARGE);
-        Utility.drawCentered(g2, getNightName(), h / 2 - 40);
+        Utility.drawCentered(g2, getNightName(), h / 2 - 30);
 
         g2.setFont(FontManager.LCD_CLOCK);
-        Utility.drawCentered(g2, "12:00 AM", h / 2 + 40);
+        Utility.drawCentered(g2, "12:00 AM", h / 2 + 30);
     }
 
     private String getNightName()
