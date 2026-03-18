@@ -3,6 +3,7 @@ package state.states;
 import main.GamePanel;
 import state.State;
 import state.StateManager;
+import utilities.FontManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -32,12 +33,12 @@ public class LoseState extends State
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, w, h);
 
-        g.setColor(new Color(200, 0, 0));
-        g.setFont(new Font("Serif", Font.BOLD, 28));
+        g.setColor(Color.RED);
+        g.setFont(FontManager.LCD_LARGE);
         Utility.drawCentered(g, "GAME OVER", h / 2 - 20);
 
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Serif", Font.PLAIN, 12));
+        g.setFont(FontManager.LCD_SMALL);
         Utility.drawCentered(g, "Press R to try again", h / 2 + 20);
     }
 

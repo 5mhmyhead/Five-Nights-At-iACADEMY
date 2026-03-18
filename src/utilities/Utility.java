@@ -5,10 +5,7 @@ import main.GamePanel;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class Utility

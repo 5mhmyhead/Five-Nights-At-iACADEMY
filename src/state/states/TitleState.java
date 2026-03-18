@@ -3,6 +3,7 @@ package state.states;
 import main.GamePanel;
 import state.State;
 import state.StateManager;
+import utilities.FontManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -32,13 +33,13 @@ public class TitleState extends State
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, w, h);
 
-        g.setColor(new Color(180, 0, 0));
-        g.setFont(new Font("Serif", Font.BOLD, 24));
-        Utility.drawCentered(g, "FIVE NIGHTS AT iACADEMY", h / 2 - 30);
+        g.setColor(Color.RED);
+        g.setFont(FontManager.LCD_LARGE);
+        Utility.drawCentered(g, "FIVE NIGHTS AT iACADEMY", h / 2 - 20);
 
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Serif", Font.PLAIN, 12));
-        Utility.drawCentered(g, "Press ENTER to start", h / 2 + 10);
+        g.setFont(FontManager.LCD_SMALL);
+        Utility.drawCentered(g, "Press ENTER to start", h / 2 + 20);
     }
 
     @Override

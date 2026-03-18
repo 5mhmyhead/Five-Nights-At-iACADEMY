@@ -29,6 +29,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
         this.setDoubleBuffered(true);
         this.setFocusable(true);
         this.requestFocus();
+        init();
     }
 
     @Override
@@ -56,8 +57,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
     @Override
     public void run()
     {
-        init();
-
         double drawInterval = 1_000_000_000.0 / FPS;
         double delta = 0;
 
@@ -71,7 +70,6 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
             delta += (currentTime - lastUpdate) / drawInterval;
             lastUpdate = currentTime;
 
-            // ONLY UPDATE AND DRAW ONCE FULL FRAME TIME HAS ACCUMULATED
             if(delta >= 1)
             {
                 update();
@@ -81,21 +79,21 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
         }
     }
 
+    private void update() { stateManager.update(); }
+
     @Override
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
 
+        // ADD ANTIALIASING
         Graphics2D g2 = (Graphics2D) g;
-        // ANTIALIASING
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        // DRAWS THE GAME
+
         stateManager.draw(g2);
         g2.dispose();
     }
-
-    private void update() { stateManager.update(); }
 
     @Override public void keyPressed(KeyEvent e)
     {
