@@ -40,13 +40,18 @@ public class TitleState extends State
         g2.setColor(Color.WHITE);
         g2.setFont(FontManager.LCD_SMALL);
         Utility.drawCentered(g2, "Press ENTER to start", h / 2 + 20);
+
+        // SHOW NIGHT NUMBER
+        g2.setColor(Color.DARK_GRAY);
+        g2.setFont(FontManager.LCD_SMALL);
+        Utility.drawCentered(g2, "Night " + stateManager.getNightManager().getNightNumber(), h - 40);
     }
 
     @Override
     public void keyPressed(int key)
     {
         if(key == KeyEvent.VK_ENTER)
-            stateManager.setState(StateManager.GAME_STATE);
+            stateManager.setState(StateManager.INTRO_STATE);
     }
 
     @Override public void keyReleased(int key) {}

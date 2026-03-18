@@ -1,5 +1,6 @@
 package components.cameras;
 
+import components.animatronics.Animatronic;
 import main.GamePanel;
 import utilities.FontManager;
 import utilities.Utility;
@@ -127,11 +128,11 @@ public class CameraSystem
             currentCamera = (currentCamera + 1) % cameras.length;
     }
 
-    public void draw(Graphics2D g2, boolean showHover)
+    public void draw(Graphics2D g2, boolean showHover, Animatronic[] animatronics)
     {
         if(monitorUp)
         {
-            drawCameraFeed(g2);
+            drawCameraFeed(g2, animatronics);
             drawCameraMap(g2);
             drawCameraButtons(g2);
             drawRebootButton(g2);
@@ -141,13 +142,24 @@ public class CameraSystem
         if(showHover) drawHoverZone(g2);
     }
 
-    private void drawCameraFeed(Graphics2D g2)
+    private void drawCameraFeed(Graphics2D g2, Animatronic[] animatronics)
     {
         if(rebooting) { drawRebootingScreen(g2); return; }
         if(brokenCameras[currentCamera]) { drawBrokenScreen(g2); return; }
 
         drawCameraImage(g2);
         drawCameraBorder(g2);
+        drawAnimatronics(g2, animatronics);
+    }
+
+    private void drawAnimatronics(Graphics2D g2, Animatronic[] animatronics)
+    {
+        int swayX = cameras[currentCamera].getSwayX();
+
+        for(Animatronic a : animatronics)
+            if(a.getLocation() == Animatronic.Location.CAMERA
+                    && a.getCurrentCamera() == currentCamera)
+                a.drawOnCamera(g2, swayX);
     }
 
     // TODO: THESE ARE PLACEHOLDERS, MAKE TRUE BROKEN AND REBOOT SCREEN

@@ -14,7 +14,7 @@ import java.awt.*;
 
 public class GameState extends State
 {
-    private GameContext ctx;                // A CONTEXT CLASS THAT HOLDS ALL THE MECHANICS OF THE GAME
+    private GameContext ctx;               // A CONTEXT CLASS THAT HOLDS ALL THE MECHANICS OF THE GAME
     private Animatronic[] animatronics;    // THE ANIMATRONICS IN THE GAME
 
     public GameState(StateManager stateManager)
@@ -27,6 +27,7 @@ public class GameState extends State
     public void init()
     {
         ctx = new GameContext(
+            stateManager,
             new CameraSystem(),
             new OfficeView(),
             new Clock()
@@ -63,8 +64,8 @@ public class GameState extends State
     public void draw(Graphics2D g2)
     {
         ctx.office.draw(g2);
-        ctx.cameras.draw(g2, ctx.getHoverState());
-        ctx.clock.draw(g2, ctx.getClockColor());
+        ctx.cameras.draw(g2, ctx.getHoverState(), animatronics);
+        ctx.clock.draw(g2, ctx.getClockColor(), ctx.getNightNumber());
     }
 
     @Override public void keyPressed(int key)

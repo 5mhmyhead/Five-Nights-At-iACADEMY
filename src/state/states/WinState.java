@@ -46,7 +46,7 @@ public class WinState extends State
     public void keyPressed(int key)
     {
         if(key == KeyEvent.VK_ENTER)
-            stateManager.setState(StateManager.TITLE_STATE);
+            stateManager.setState(StateManager.INTRO_STATE);
     }
 
     @Override

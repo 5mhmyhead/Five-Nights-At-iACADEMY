@@ -16,9 +16,10 @@ public class StateManager
     private static final int NUMBER_OF_STATES = 5;
 
     public static final int TITLE_STATE = 0;
-    public static final int GAME_STATE = 1;
-    public static final int LOSE_STATE = 2;
-    public static final int WIN_STATE = 3;
+    public static final int INTRO_STATE = 1;
+    public static final int GAME_STATE = 2;
+    public static final int LOSE_STATE = 3;
+    public static final int WIN_STATE = 4;
 
     private final State[] states;   // ARRAY HOLDING THE STATES
     private int currentState;       // ID REPRESENTING THE CURRENT STATE
@@ -59,6 +60,7 @@ public class StateManager
     private void loadState(int state)
     {
         if(state == TITLE_STATE) states[state] = new TitleState(this);
+        if(state == INTRO_STATE) states[state] = new IntroState(this);
         if(state == GAME_STATE) states[state] = new GameState(this);
         if(state == LOSE_STATE) states[state] = new LoseState(this);
         if(state == WIN_STATE) states[state] = new WinState(this);

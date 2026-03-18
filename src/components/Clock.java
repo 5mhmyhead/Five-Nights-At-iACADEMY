@@ -8,7 +8,7 @@ import java.awt.*;
 public class Clock
 {
     // 50 SECONDS TIMES 30 FPS EQUALS 1500 FRAMES PER HOUR
-    private static final int FRAMES_PER_HOUR = 1500;
+    private static final int FRAMES_PER_HOUR = 15;
     private static final String[] HOURS = { "12 AM", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM" };
 
     private int frameTick;
@@ -36,7 +36,7 @@ public class Clock
         }
     }
 
-    public void draw(Graphics2D g2, Color color)
+    public void draw(Graphics2D g2, Color color, int nightNum)
     {
         if(nightOver) return;
 
@@ -49,6 +49,10 @@ public class Clock
         int x = GamePanel.WIDTH - textWidth - 40;
 
         g2.drawString(HOURS[currentHour], x, 70);
+
+        // DRAW NIGHT NUMBER
+        g2.setFont(FontManager.LCD_MEDIUM);
+        g2.drawString("Night " + nightNum, GamePanel.WIDTH - 130, 105);
     }
 
     public boolean isNightOver()

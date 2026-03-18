@@ -2,6 +2,7 @@ package components;
 
 import components.cameras.CameraSystem;
 import components.office.OfficeView;
+import state.StateManager;
 
 import java.awt.*;
 
@@ -9,12 +10,16 @@ import java.awt.*;
 // ENABLES ANIMATRONICS TO ONLY REFER TO THIS CONTEXT WHEN MANAGING THEIR STATES
 public class GameContext
 {
+    public final StateManager stateManager;
+
+    // GAME UI ELEMENTS
     public final CameraSystem cameras;
     public final OfficeView office;
     public final Clock clock;
 
-    public GameContext(CameraSystem cameras, OfficeView office, Clock clock)
+    public GameContext(StateManager stateManager, CameraSystem cameras, OfficeView office, Clock clock)
     {
+        this.stateManager = stateManager;
         this.cameras = cameras;
         this.office = office;
         this.clock = clock;
@@ -29,5 +34,10 @@ public class GameContext
     public boolean getHoverState()
     {
         return !office.isPlayerAtDoor() && !office.isTransitioning();
+    }
+
+    public int getNightNumber()
+    {
+        return stateManager.getNightManager().getNightNumber();
     }
 }
