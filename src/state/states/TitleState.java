@@ -24,22 +24,22 @@ public class TitleState extends State
     public void update() {}
 
     @Override
-    public void draw(Graphics2D g)
+    public void draw(Graphics2D g2)
     {
         int w = GamePanel.WIDTH;
         int h = GamePanel.HEIGHT;
 
         // PLACEHOLDER TITLE SCREEN
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, w, h);
+        g2.setColor(Color.BLACK);
+        g2.fillRect(0, 0, w, h);
 
-        g.setColor(Color.RED);
-        g.setFont(FontManager.LCD_LARGE);
-        Utility.drawCentered(g, "FIVE NIGHTS AT iACADEMY", h / 2 - 20);
+        g2.setColor(Color.RED);
+        g2.setFont(FontManager.LCD_LARGE);
+        Utility.drawCentered(g2, "FIVE NIGHTS AT iACADEMY", h / 2 - 20);
 
-        g.setColor(Color.WHITE);
-        g.setFont(FontManager.LCD_SMALL);
-        Utility.drawCentered(g, "Press ENTER to start", h / 2 + 20);
+        g2.setColor(Color.WHITE);
+        g2.setFont(FontManager.LCD_SMALL);
+        Utility.drawCentered(g2, "Press ENTER to start", h / 2 + 20);
     }
 
     @Override

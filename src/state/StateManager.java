@@ -37,10 +37,10 @@ public class StateManager
     }
 
     // DRAWS THE CURRENT STATE
-    public void draw(Graphics2D g2d)
+    public void draw(Graphics2D g2)
     {
         if(states[currentState] != null)
-            states[currentState].draw(g2d);
+            states[currentState].draw(g2);
     }
 
     // SET STATE DEPENDING ON INDEX GIVEN

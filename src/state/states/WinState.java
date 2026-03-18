@@ -24,22 +24,22 @@ public class WinState extends State
     public void update() {}
 
     @Override
-    public void draw(Graphics2D g)
+    public void draw(Graphics2D g2)
     {
         int w = GamePanel.WIDTH;
         int h = GamePanel.HEIGHT;
 
         // PLACEHOLDER WIN SCREEN
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, w, h);
+        g2.setColor(Color.BLACK);
+        g2.fillRect(0, 0, w, h);
 
-        g.setColor(Color.YELLOW);
-        g.setFont(FontManager.LCD_LARGE);
-        Utility.drawCentered(g, "6 AM - YOU SURVIVED!", h / 2 - 20);
+        g2.setColor(Color.YELLOW);
+        g2.setFont(FontManager.LCD_LARGE);
+        Utility.drawCentered(g2, "6 AM - YOU SURVIVED!", h / 2 - 20);
 
-        g.setColor(Color.WHITE);
-        g.setFont(FontManager.LCD_SMALL);
-        Utility.drawCentered(g, "Press ENTER to continue", h / 2 + 20);
+        g2.setColor(Color.WHITE);
+        g2.setFont(FontManager.LCD_SMALL);
+        Utility.drawCentered(g2, "Press ENTER to continue", h / 2 + 20);
     }
 
     @Override
