@@ -53,6 +53,14 @@ public class GameState extends State
     @Override
     public void update()
     {
+        // CHECK FOR ACTIVE JUMPSCARE FIRST
+        for(Animatronic a : animatronics)
+            if(a.jumpscareIsPlaying())
+            {
+                a.update(ctx); // ONLY UPDATE THE ANIMATRONIC WITH ACTIVE JUMPSCARE
+                return;        // BLOCK EVERYTHING ELSE
+            }
+
         // NIGHT ENDS WHEN CLOCK HITS 6 AM
         if(ctx.clock.isNightOver()) stateManager.setState(StateManager.WIN_STATE);
 
@@ -94,6 +102,10 @@ public class GameState extends State
         ctx.cameras.draw(g2, ctx.isInMainView(), animatronics);
         ctx.clock.draw(g2, ctx.getClockColor(), ctx.getNightNumber());
         ctx.blink.draw(g2, !ctx.isInCameras(), ctx.office.isTransitioning());
+
+        // JUMPSCARE WILL PLAY IF A PLAYER LOSES
+        for(Animatronic a : animatronics)
+            if(a.jumpscareIsPlaying()) a.drawJumpscare(g2);
     }
 
     @Override public void keyPressed(int key)
@@ -114,7 +126,7 @@ public class GameState extends State
     {
         ctx.cameras.mouseClicked(x, y);
     }
-    @Override public void mouseReleased(int x, int y) { ctx.cameras.mouseReleased(x, y); }
 
+    @Override public void mouseReleased(int x, int y) { ctx.cameras.mouseReleased(x, y); }
     @Override public void keyReleased(int key) {}
 }

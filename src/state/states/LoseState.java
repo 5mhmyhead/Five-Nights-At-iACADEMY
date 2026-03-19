@@ -11,6 +11,9 @@ import java.awt.event.KeyEvent;
 
 public class LoseState extends State
 {
+    private static final int STATIC_DURATION = 20;
+    private int staticTimer = STATIC_DURATION;
+
     public LoseState(StateManager stateManager)
     {
         super(stateManager);
@@ -18,10 +21,16 @@ public class LoseState extends State
     }
 
     @Override
-    public void init() {}
+    public void init()
+    {
+        staticTimer = STATIC_DURATION;
+    }
 
     @Override
-    public void update() {}
+    public void update()
+    {
+        if(staticTimer > 0) staticTimer--;
+    }
 
     @Override
     public void draw(Graphics2D g2)
@@ -40,6 +49,8 @@ public class LoseState extends State
         g2.setColor(Color.WHITE);
         g2.setFont(FontManager.LCD_SMALL);
         Utility.drawCentered(g2, "Press R to try again", h / 2 + 20);
+
+        Utility.drawStatic(g2, staticTimer, STATIC_DURATION, new Color(255, 255, 255));
     }
 
     @Override

@@ -16,12 +16,12 @@ public class Cristian extends Animatronic
     // PATIENCE GOES DOWN BY 1 EVERY SUCCESSFUL MOVEMENT OPPORTUNITY
     // WHEN PATIENCE REACHES 0, THE PLAYER HAS 3 SECONDS OF BUFFER TIME TO REACT
     private static final int MAX_PATIENCE = 100;
-    private static final int CRITICAL_COUNTDOWN = 90;
+    private static final int CRITICAL_COUNTDOWN = 150;
 
     private int patience = 100;
     private int criticalTimer = 0;
 
-    private static final int MOVE_INTERVAL = 7;
+    private static final int MOVE_INTERVAL = 5;
     private int moveTimer = 0;
 
     public Cristian()
@@ -71,6 +71,10 @@ public class Cristian extends Animatronic
             patience++;
             if(patience >= MAX_PATIENCE)
                 patience = MAX_PATIENCE;
+
+            // EXIT CRITICAL IF PATIENCE RECOVERED ABOVE 0
+            if(state == CristianState.CRITICAL && patience > 0)
+                state = CristianState.AGGRESSIVE;
         }
         else
         {

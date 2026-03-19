@@ -20,6 +20,7 @@ public abstract class Animatronic
     public void drawOnCamera(Graphics2D g2, int swayX) {}
     public void drawOnOffice(Graphics2D g2) {}
     public void drawOnDoor(Graphics2D g2) {}
+    public void drawJumpscare(Graphics2D g2) {}
 
     // AI LEVEL IS BASED ON THE ORIGINAL GAME
     // IF ROLL IS LESS THAN OR EQUAL TO AI LEVEL, THEN THE ANIMATRONIC MOVES
@@ -27,6 +28,7 @@ public abstract class Animatronic
     {
         return (int)(Math.random() * 20) + 1 <= aiLevel;
     }
+    public boolean jumpscareIsPlaying() { return false; }
 
     public int getAiLevel() { return aiLevel; }
     public void setAiLevel(int level)

@@ -181,8 +181,8 @@ public class CameraSystem
         if(brokenCameras[currentCamera]) { drawBrokenScreen(g2); return; }
 
         drawCameraImage(g2);
-        drawCameraBorder(g2);
         drawAnimatronics(g2, animatronics);
+        drawCameraBorder(g2);
     }
 
     private void drawAnimatronics(Graphics2D g2, Animatronic[] animatronics)
