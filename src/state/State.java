@@ -18,4 +18,5 @@ public abstract class State
 
     public abstract void mouseMoved(int x, int y);
     public abstract void mouseClicked(int x, int y);
+    public abstract void mouseReleased(int x, int y);
 }

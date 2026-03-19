@@ -31,6 +31,6 @@ public class DoorView
 
         g2.setColor(Color.WHITE);
         g2.setFont(FontManager.LCD_SMALL);
-        Utility.drawCentered(g2, "you are in DOOR VIEW", GamePanel.HEIGHT / 2 + 20);
+        Utility.drawCentered(g2, "you are in MAIN VIEW", GamePanel.HEIGHT / 2 + 20);
     }
 }

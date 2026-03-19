@@ -5,9 +5,12 @@ public class NightManager
     private int currentNight = 0;
     private static final NightConfig[] NIGHTS =
     {
-        new NightConfig(1,  3),
-        new NightConfig(2, 10),
-        new NightConfig(3, 20),
+        // ORDER IS DAVE, EARL, TYRONE, CRISTIAN, JIRSTEN, LANZE
+        new NightConfig(1, 5, 8, 8, 0, 0, 2),
+        new NightConfig(2, 8, 10, 10, 0, 5, 5),
+        new NightConfig(3, 10, 12, 12, 10, 10, 10),
+        new NightConfig(4, 12, 15, 15, 12, 15, 12),
+        new NightConfig(5, 15, 18, 18, 15, 20, 15),
     };
 
     public NightConfig getConfig() { return NIGHTS[currentNight]; }

@@ -2,8 +2,7 @@ package state.states;
 
 import components.Clock;
 import components.GameContext;
-import components.animatronics.Animatronic;
-import components.animatronics.Lanze;
+import components.animatronics.*;
 import components.cameras.CameraSystem;
 import components.nights.NightConfig;
 import components.office.BlinkSystem;
@@ -37,6 +36,11 @@ public class GameState extends State
 
         animatronics = new Animatronic[]
         {
+            new Dave(),
+            new Earl(),
+            new Tyrone(),
+            new Cristian(),
+            new Jirsten(),
             new Lanze(),
         };
 
@@ -52,24 +56,44 @@ public class GameState extends State
         // NIGHT ENDS WHEN CLOCK HITS 6 AM
         if(ctx.clock.isNightOver()) stateManager.setState(StateManager.WIN_STATE);
 
+        // UPDATE ANIMATRONICS
+        for(Animatronic a : animatronics)
+            if(a.getAiLevel() > 0) a.update(ctx);
+
         // DRAW THE GAME UI
         ctx.cameras.update();
         ctx.office.update();
         ctx.blink.update();
         ctx.clock.update();
-
-        // UPDATE ANIMATRONICS
-        for(Animatronic a : animatronics)
-            a.update(ctx);
     }
 
     @Override
     public void draw(Graphics2D g2)
     {
         ctx.office.draw(g2);
+
+        // DRAW ANIMATRONICS
+        if(!ctx.cameras.isMonitorUp())
+        {
+            if(!ctx.office.isPlayerAtDoor())
+            {
+                // OFFICE ANIMATRONICS
+                for(Animatronic a : animatronics)
+                    if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.MAIN)
+                        a.drawOnOffice(g2);
+            }
+            else
+            {
+                // DOOR ANIMATRONICS
+                for(Animatronic a : animatronics)
+                    if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.DOOR)
+                        a.drawOnDoor(g2);
+            }
+        }
+
         ctx.cameras.draw(g2, ctx.isInMainView(), animatronics);
         ctx.clock.draw(g2, ctx.getClockColor(), ctx.getNightNumber());
-        ctx.blink.draw(g2, !ctx.isInCameras());
+        ctx.blink.draw(g2, !ctx.isInCameras(), ctx.office.isTransitioning());
     }
 
     @Override public void keyPressed(int key)
@@ -83,13 +107,14 @@ public class GameState extends State
         // LET THE PLAYER ACCESS THE CAMERAS ONLY WHEN THEY ARE IN MAIN VIEW
         if(ctx.isInMainView() && ctx.blink.getCloseTimer() == 0) ctx.cameras.mouseMoved(x, y);
         if(!ctx.isInCameras() && ctx.blink.getCloseTimer() == 0) ctx.office.mouseMoved(x, y);
-        if(!ctx.isInCameras()) ctx.blink.mouseMoved(x, y);
+        if(!ctx.isInCameras() && !ctx.office.isTransitioning()) ctx.blink.mouseMoved(x, y);
     }
 
     @Override public void mouseClicked(int x, int y)
     {
         ctx.cameras.mouseClicked(x, y);
     }
+    @Override public void mouseReleased(int x, int y) { ctx.cameras.mouseReleased(x, y); }
 
     @Override public void keyReleased(int key) {}
 }

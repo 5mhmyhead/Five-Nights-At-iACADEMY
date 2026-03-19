@@ -111,14 +111,13 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
     {
         stateManager.mouseClicked(e.getX(), e.getY());
     }
-
     @Override public void mouseMoved(MouseEvent e)
     {
         stateManager.mouseMoved(e.getX(), e.getY());
     }
+    @Override public void mouseReleased(MouseEvent e) { stateManager.mouseReleased(e.getX(), e.getY()); }
 
     @Override public void mouseClicked(MouseEvent e) {}
-    @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
     @Override public void mouseDragged(MouseEvent e) {}

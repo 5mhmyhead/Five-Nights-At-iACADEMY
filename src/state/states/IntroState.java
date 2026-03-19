@@ -59,6 +59,8 @@ public class IntroState extends State
 
     @Override public void keyPressed(int key) {}
     @Override public void keyReleased(int key) {}
+
     @Override public void mouseMoved(int x, int y) {}
     @Override public void mouseClicked(int x, int y) {}
+    @Override public void mouseReleased(int x, int y) {}
 }

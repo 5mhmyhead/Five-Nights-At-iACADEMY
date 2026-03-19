@@ -6,11 +6,12 @@ import utilities.FontManager;
 
 import java.awt.*;
 
-// FNAF 2 PUPPET, HAS A PATIENCE METER THAT SLOWLY DECREASES OVER TIME
-public class Lanze extends Animatronic
+// OFFICE ANIMATRONIC, PATIENCE WILL GO DOWN WHEN LOOKING AT CAMERAS OR MAIN VIEW
+// WILL ONLY REGAIN PATIENCE WHEN LOOKING AWAY AT THE DOOR
+public class Cristian extends Animatronic
 {
-    private enum LanzeState { IDLE, IMPATIENT, AGGRESSIVE, CRITICAL }
-    private LanzeState state = LanzeState.IDLE;
+    private enum CristianState { IDLE, IMPATIENT, AGGRESSIVE, CRITICAL }
+    private CristianState state = CristianState.IDLE;
 
     // PATIENCE GOES DOWN BY 1 EVERY SUCCESSFUL MOVEMENT OPPORTUNITY
     // WHEN PATIENCE REACHES 0, THE PLAYER HAS 3 SECONDS OF BUFFER TIME TO REACT
@@ -23,58 +24,57 @@ public class Lanze extends Animatronic
     private static final int MOVE_INTERVAL = 7;
     private int moveTimer = 0;
 
-    public Lanze()
+    public Cristian()
     {
-        currentCamera = 0;
-        location = Location.CAMERA;
+        location = Location.MAIN;
     }
 
     @Override
     public void update(GameContext ctx)
     {
-        handleMovement();
+        handleMovement(ctx);
         handlePatience(ctx);
     }
 
-    private void handleMovement()
+    private void handleMovement(GameContext ctx)
     {
         moveTimer++;
-        if(moveTimer >= MOVE_INTERVAL)
+        if (moveTimer >= MOVE_INTERVAL)
         {
             moveTimer = 0;
-            if(shouldMove()) patience--;
+            if (shouldMove()) patience--;
         }
 
-        if(patience <= 0 && state != LanzeState.CRITICAL)
+        if (patience <= 0 && state != CristianState.CRITICAL)
         {
             // TURNS CRITICAL WHEN REACHING 0 PATIENCE
-            state = LanzeState.CRITICAL;
+            state = CristianState.CRITICAL;
             criticalTimer = CRITICAL_COUNTDOWN;
         }
-        else if(state != LanzeState.CRITICAL)
+        else if (state != CristianState.CRITICAL)
         {
-            // UPDATE STATE OF LANZE
-            if(patience <= 33)
-                state = LanzeState.AGGRESSIVE;
-            else if(patience <= 66)
-                state = LanzeState.IMPATIENT;
+            // UPDATE STATE OF CRISTIAN
+            if (patience <= 33)
+                state = CristianState.AGGRESSIVE;
+            else if (patience <= 66)
+                state = CristianState.IMPATIENT;
             else
-                state = LanzeState.IDLE;
+                state = CristianState.IDLE;
         }
     }
 
     private void handlePatience(GameContext ctx)
     {
-        if(ctx.isMusicBoxHeld())
+        if(ctx.office.isPlayerAtDoor())
         {
-            // INCREASE PATIENCE IF MUSIC BOX HELD
+            // PATIENCE RECOVERS WHILE LOOKING AT DOOR
             patience++;
             if(patience >= MAX_PATIENCE)
                 patience = MAX_PATIENCE;
         }
         else
         {
-            if(state == LanzeState.CRITICAL)
+            if(state == CristianState.CRITICAL)
             {
                 criticalTimer--;
                 if(criticalTimer <= 0)
@@ -84,21 +84,21 @@ public class Lanze extends Animatronic
     }
 
     @Override
-    public void drawOnCamera(Graphics2D g2, int swayX)
+    public void drawOnOffice(Graphics2D g2)
     {
-        g2.setColor(new Color(129, 100, 180));
+        g2.setColor(new Color(255, 56, 56));
         g2.fillRect(30, 30, 30, 30);
 
         g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("LANZE [state: " + state + "]", 75, 50);
+        g2.drawString("CRISTIAN[state: " + state + "]", 75, 50);
 
         drawPatienceBar(g2);
     }
 
     private void drawPatienceBar(Graphics2D g2)
     {
-        int barX = 830;
-        int barY = 630;
+        int barX = 30;
+        int barY = 75;
         int barW = 200;
         int barH = 10;
 
@@ -108,17 +108,17 @@ public class Lanze extends Animatronic
 
         // FILL — SCALES WITH PATIENCE (0-100)
         int fillW = (int)(barW * (patience / 100.0));
-        g2.setColor(new Color(100, 180, 255, 220));
+        g2.setColor(new Color(255, 100, 100, 220));
         g2.fillRoundRect(barX, barY, fillW, barH, 4, 4);
 
         // BORDER
-        g2.setColor(new Color(180, 220, 255));
+        g2.setColor(new Color(255, 180, 180));
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(barX, barY, barW, barH, 4, 4);
         g2.setStroke(new BasicStroke(1));
     }
 
     public int getPatience() { return patience; }
-    public boolean isCritical() { return state == LanzeState.CRITICAL; }
+    public boolean isCritical() { return state == CristianState.CRITICAL; }
     public int getCriticalTimer() { return criticalTimer; }
 }

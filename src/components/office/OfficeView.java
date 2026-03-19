@@ -12,7 +12,7 @@ public class OfficeView
     private final MainView mainView;
     private final DoorView doorView;
 
-    // IF PLAYER IS AT DOOR VIEW
+    // IF PLAYER IS AT MAIN VIEW
     private boolean playerAtDoor = false;
     private boolean wasInHoverZone = false;
 
@@ -26,7 +26,7 @@ public class OfficeView
     private static final int HOVER_ZONE_Y_MIN = (int)(GamePanel.HEIGHT * 0.20);
     private static final int HOVER_ZONE_Y_MAX = (int)(GamePanel.HEIGHT * 0.80);
 
-    // TRANSITION BETWEEN THE MAIN AND DOOR VIEWS
+    // TRANSITION BETWEEN THE MAIN AND MAIN VIEWS
     private static final int TRANSITION_LENGTH = 6;
     private final BufferedImage[] transitionFrames;
 
@@ -82,7 +82,7 @@ public class OfficeView
     {
         if(transitioning) return;
 
-        // HOVER ZONE CHANGES DEPENDING ON IF THE PLAYER IS AT THE DOOR OR NOT
+        // HOVER ZONE CHANGES DEPENDING ON IF THE PLAYER IS AT THE MAIN OR NOT
         int zoneXMin = playerAtDoor ? DOOR_HOVER_X_MIN : MAIN_HOVER_X_MIN;
         int zoneXMax = playerAtDoor ? DOOR_HOVER_X_MAX : MAIN_HOVER_X_MAX;
 

@@ -52,9 +52,9 @@ public class BlinkSystem
         }
     }
 
-    public void draw(Graphics2D g2, boolean showHints)
+    public void draw(Graphics2D g2, boolean showHints, boolean isTransitioning)
     {
-        if(showHints) drawHoverZone(g2);
+        if(showHints && !isTransitioning) drawHoverZone(g2);
         if(eyesClosed || closeTimer > 0) drawBlink(g2);
     }
 
@@ -96,22 +96,22 @@ public class BlinkSystem
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(HOVER_ZONE_X_MIN, HOVER_ZONE_Y, zoneW, zoneH, 10, 10);
 
-        // DRAWING THE EYE
+        // CLOSED EYE
         int eyeW = (int)(zoneW * 0.10);
-        int eyeH = (int)(zoneH * 0.30);
+        int eyeH = (int)(zoneH * 0.50);
+        int iconOffsetY = 7;
 
-        g2.drawArc(centerX - eyeW / 2, centerY - eyeH, eyeW, eyeH * 2, 0, 180);
-        g2.drawArc(centerX - eyeW / 2, centerY - eyeH, eyeW, eyeH * 2, 0, -180);
+        g2.setStroke(new BasicStroke(2));
+        g2.drawArc(centerX - eyeW / 2, centerY - eyeH / 2 - iconOffsetY, eyeW, eyeH, 180, 180);
 
-        // LASHES AND PUPIL
-        g2.drawLine(centerX - 16, centerY - eyeH / 2 - 3, centerX - 18, centerY - eyeH / 2 - 6);
-        g2.drawLine(centerX - 8, centerY - eyeH / 2 - 5, centerX - 9, centerY - eyeH / 2 - 8);
-        g2.drawLine(centerX, centerY - eyeH / 2 - 5, centerX, centerY - eyeH / 2 - 10);
-        g2.drawLine(centerX + 8, centerY - eyeH / 2 - 5, centerX + 9, centerY - eyeH / 2 - 8);
-        g2.drawLine(centerX + 16, centerY - eyeH / 2 - 3, centerX + 18, centerY - eyeH / 2 - 6);
+        // EYELASHES
+        int lashLength = 7;
 
-        int pupilR = eyeH / 2;
-        g2.fillOval(centerX - pupilR, centerY - pupilR, pupilR * 2, pupilR * 2);
+        g2.drawLine(centerX - eyeW / 2 + 5, centerY + eyeH / 4 - iconOffsetY, centerX - eyeW / 2, centerY + eyeH / 4 + lashLength - iconOffsetY);
+        g2.drawLine(centerX - eyeW / 4, centerY + eyeH / 2 - iconOffsetY, centerX - eyeW / 4 - 2, centerY + eyeH / 2 + lashLength - iconOffsetY);
+        g2.drawLine(centerX, centerY + eyeH / 2 - iconOffsetY, centerX, centerY + eyeH / 2 + lashLength + 2 - iconOffsetY);
+        g2.drawLine(centerX + eyeW / 4, centerY + eyeH / 2 - iconOffsetY, centerX + eyeW / 4 + 2, centerY + eyeH / 2 + lashLength - iconOffsetY);
+        g2.drawLine(centerX + eyeW / 2 - 5, centerY + eyeH / 4 - iconOffsetY, centerX + eyeW / 2, centerY + eyeH / 4 + lashLength - iconOffsetY);
 
         g2.setStroke(new BasicStroke(1));
     }

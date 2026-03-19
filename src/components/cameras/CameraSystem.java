@@ -45,10 +45,9 @@ public class CameraSystem
     private static final int REBOOT_W = 200;
     private static final int REBOOT_H = 40;
 
-    // COLORS
-    private static final Color BUTTON_TEXT = new Color(180, 255, 180);
-    private static final Color BUTTON_IDLE = new Color(0, 80, 0);
-    private static final Color BUTTON_SELECTED = new Color(0, 180, 0);
+    // MUSIC BOX IN CAMERA 1
+    private final MusicBox musicBox = new MusicBox();
+    private final ControlledShock shockButton = new ControlledShock();
 
     public CameraSystem()
     {
@@ -75,8 +74,12 @@ public class CameraSystem
             {
                 rebooting = false;
                 brokenCameras = new boolean[cameras.length];
+                shockButton.addCharge();
             }
         }
+
+        // UPDATE THE SHOCK BUTTON
+        shockButton.update();
 
         // UPDATE CAMERA SWAY ANIMATION
         cameras[currentCamera].update();
@@ -126,6 +129,15 @@ public class CameraSystem
             rebooting = true;
             rebootTimer = REBOOT_DURATION;
         }
+
+        // FORWARDS MOUSE CLICKS TO MUSIC BOX
+        if(currentCamera == 0) musicBox.mousePressed(mouseX, mouseY);
+        shockButton.mouseClicked(mouseX, mouseY);
+    }
+
+    public void mouseReleased(int mouseX, int mouseY)
+    {
+        musicBox.mouseReleased();
     }
 
     public void keyPressed(int key)
@@ -152,6 +164,10 @@ public class CameraSystem
             drawCameraMap(g2);
             drawCameraButtons(g2);
             drawRebootButton(g2);
+
+            if(currentCamera == 0) musicBox.draw(g2);
+            shockButton.draw(g2);
+
             drawCameraLabel(g2);
             drawStatic(g2);
         }
@@ -174,7 +190,8 @@ public class CameraSystem
         int swayX = cameras[currentCamera].getSwayX();
 
         for(Animatronic a : animatronics)
-            if(a.getLocation() == Animatronic.Location.CAMERA
+            if(a.getAiLevel() > 0
+                    && a.getLocation() == Animatronic.Location.CAMERA
                     && a.getCurrentCamera() == currentCamera)
                 a.drawOnCamera(g2, swayX);
     }
@@ -199,9 +216,13 @@ public class CameraSystem
         g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
 
         g2.setColor(new Color(150, 0, 0));
-        g2.setFont(FontManager.LCD_SMALL);
-        Utility.drawCentered(g2, "[ CAMERA BROKEN ]", GamePanel.HEIGHT / 2);
+        g2.setFont(FontManager.LCD_MEDIUM);
+        Utility.drawCentered(g2, "[ NO SIGNAL ]", GamePanel.HEIGHT / 2);
 
+        g2.setFont(FontManager.LCD_SMALL);
+        Utility.drawCentered(g2, "Waiting for something to happen?", GamePanel.HEIGHT / 2 + 30);
+
+        Utility.drawStatic(g2, 1, 1, new Color(180, 0, 0));
         drawCameraBorder(g2);
     }
 
@@ -212,13 +233,13 @@ public class CameraSystem
 
     private void drawCameraBorder(Graphics2D g2)
     {
-        g2.setColor(BUTTON_TEXT);
+        g2.setColor(getTextColor());
         g2.drawRect(15, 15, GamePanel.WIDTH - 30, GamePanel.HEIGHT - 30);
     }
 
     private void drawCameraMap(Graphics2D g2)
     {
-        g2.setColor(BUTTON_TEXT);
+        g2.setColor(getTextColor());
 
         // HALLWAY ROOMS
         g2.drawRect(65,  330, 100, 75);
@@ -253,10 +274,10 @@ public class CameraSystem
         {
             boolean selected = (i == currentCamera);
 
-            g2.setColor(selected ? BUTTON_SELECTED : BUTTON_IDLE);
+            g2.setColor(selected ? getSelectedColor() : getIdleColor());
             g2.fillRect(BUTTON_X[i], BUTTON_Y[i], BUTTON_W, BUTTON_H);
 
-            g2.setColor(BUTTON_TEXT);
+            g2.setColor(getTextColor());
             g2.setStroke(new BasicStroke(2));
             g2.drawRect(BUTTON_X[i], BUTTON_Y[i], BUTTON_W, BUTTON_H);
             g2.setStroke(new BasicStroke(1));
@@ -265,7 +286,7 @@ public class CameraSystem
             String label  = "CAM " + (i + 1);
             int labelX = BUTTON_X[i] + (BUTTON_W - g2.getFontMetrics().stringWidth(label)) / 2;
             int labelY = BUTTON_Y[i] + BUTTON_H / 2 + 4;
-            g2.setColor(BUTTON_TEXT);
+            g2.setColor(getTextColor());
             g2.drawString(label, labelX, labelY);
         }
     }
@@ -293,7 +314,7 @@ public class CameraSystem
     // DRAWS NAME OF CAMERA ON TOP OF CAMERA MAP
     private void drawCameraLabel(Graphics2D g2)
     {
-        g2.setColor(BUTTON_TEXT);
+        g2.setColor(getTextColor());
         g2.setFont(FontManager.LCD_MEDIUM);
         g2.drawString(cameras[currentCamera].getName(), 65, 290);
     }
@@ -340,37 +361,37 @@ public class CameraSystem
                 && !rebooting;
     }
 
-    public void triggerStatic()
-    {
-        staticTimer = STATIC_DURATION;
+    private void drawStatic(Graphics2D g2) {
+        Utility.drawStatic(g2, staticTimer, STATIC_DURATION, new Color(255, 255, 255));
     }
 
-    private void drawStatic(Graphics2D g2)
+    // THE CAMERA UI CHANGES DEPENDING ON THE STATE OF THE CAMERA
+    public Color getTextColor()
     {
-        float minAlpha  = 0.10f;
-        float maxAlpha  = 0.80f;
-        float fadeRange = maxAlpha - minAlpha;
-        float alpha = minAlpha;
+        if(rebooting) return new Color(225, 255, 180);
+        if(brokenCameras[currentCamera]) return new Color(255, 180, 180);
 
-        // ALPHA FADES FROM 80% TO 10% OPACITY AS TIMER COUNTS DOWN
-        if(staticTimer > 0)
-            alpha = minAlpha + ((float) staticTimer / STATIC_DURATION) * fadeRange;
-
-        // DRAW RANDOM NOISE PIXELS OVER THE FEED
-        for(int y = 0; y < GamePanel.HEIGHT; y += 2)
-        {
-            for(int x = 0; x < GamePanel.WIDTH; x += 2)
-            {
-                if(Math.random() > 0.5) // HALF OF THE PIXELS GET NOISE
-                {
-                    int brightness = (int)(Math.random() * 255); // RANDOM BRIGHTNESS FOR EACH PIXEL
-                    g2.setColor(new Color(brightness, brightness, brightness,
-                            (int)(alpha * 150)));
-                    g2.fillRect(x, y, 2, 2);
-                }
-            }
-        }
+        return new Color(180, 255, 180);
     }
+
+    public Color getIdleColor()
+    {
+        if(rebooting) return new Color(80, 80, 0);
+        if(brokenCameras[currentCamera]) return new Color(80, 0, 0);
+
+        return new Color(0, 80, 0);
+    }
+
+    public Color getSelectedColor()
+    {
+        if(rebooting) return new Color(180, 180, 0);
+        if(brokenCameras[currentCamera]) return new Color(180, 0, 0);
+
+        return new Color(0, 180, 0);
+    }
+
+    public MusicBox getMusicBox() { return musicBox; }
+    public ControlledShock getShockButton() { return shockButton; }
 
     public boolean isMonitorUp() { return monitorUp; }
     public int getCurrentCamera() { return currentCamera; }

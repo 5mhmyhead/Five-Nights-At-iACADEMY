@@ -84,6 +84,7 @@ public class StateManager
     // PASSES MOUSE ACTIONS TO ACTIVE STATE
     public void mouseMoved(int x, int y) { if(states[currentState] != null) states[currentState].mouseMoved(x, y); }
     public void mouseClicked(int x, int y) { if(states[currentState] != null) states[currentState].mouseClicked(x, y); }
+    public void mouseReleased(int x, int y) { if(states[currentState] != null) states[currentState].mouseReleased(x, y); }
 
     public NightManager getNightManager() { return nightManager; }
 }

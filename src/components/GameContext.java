@@ -31,7 +31,7 @@ public class GameContext
     public Color getClockColor()
     {
         // CLOCK CHANGES COLOR DEPENDING ON STATE
-        return isInCameras() ? new Color(180, 255, 180) : Color.WHITE;
+        return isInCameras() ? cameras.getTextColor() : Color.WHITE;
     }
 
     // FUNCTIONS THAT RETURN SPECIFIC STATES OF THE PLAYER
@@ -54,6 +54,16 @@ public class GameContext
         return cameras.isMonitorUp()
             && !office.isTransitioning()
             && !blink.areEyesClosed();
+    }
+
+    public boolean isMusicBoxHeld()
+    {
+        return cameras.getMusicBox().isHeld();
+    }
+
+    public boolean wasShockPressed()
+    {
+        return cameras.getShockButton().wasShockPressed();
     }
 
     public int getNightNumber()

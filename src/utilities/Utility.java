@@ -67,4 +67,35 @@ public class Utility
         ConvolveOp op = new ConvolveOp(k, ConvolveOp.EDGE_NO_OP, null);
         return op.filter(image, null);
     }
+
+    // FUNCTION THAT DRAWS STATIC ON THE SCREEN
+    public static void drawStatic(Graphics2D g2, int staticTimer, int staticDuration, Color baseColor)
+    {
+        float minAlpha = 0.10f;
+        float maxAlpha = 0.80f;
+
+        float fadeRange = maxAlpha - minAlpha;
+        float alpha = minAlpha;
+
+        if(staticTimer > 0)
+            alpha = minAlpha + ((float) staticTimer / staticDuration) * fadeRange;
+
+        for(int y = 0; y < GamePanel.HEIGHT; y += 2)
+        {
+            for(int x = 0; x < GamePanel.WIDTH; x += 2)
+            {
+                if(Math.random() > 0.5)
+                {
+                    int brightness = (int)(Math.random() * 255);
+                    g2.setColor(new Color(
+                        (int)(baseColor.getRed() * brightness / 255.0),
+                        (int)(baseColor.getGreen() * brightness / 255.0),
+                        (int)(baseColor.getBlue() * brightness / 255.0),
+                        (int)(alpha * 150)));
+
+                    g2.fillRect(x, y, 2, 2);
+                }
+            }
+        }
+    }
 }
