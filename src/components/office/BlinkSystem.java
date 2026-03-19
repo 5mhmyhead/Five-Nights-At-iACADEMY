@@ -60,7 +60,6 @@ public class BlinkSystem
 
     private void drawBlink(Graphics2D g2)
     {
-        // TEMPORARY BLINK ANIMATION
         float progress;
 
         if(eyesClosed)
@@ -68,16 +67,33 @@ public class BlinkSystem
         else
             progress = (float) closeTimer / BLINK_DURATION;
 
-        int eyelidHeight = (int)(progress * GamePanel.HEIGHT / 2);
+        int eyelidHeight = (int)(progress * GamePanel.HEIGHT / 2 + 100);
+        int featherSize  = Math.min(60, eyelidHeight); // CANT FEATHER MORE THAN EYELID HEIGHT
 
+        // TOP EYELID
         g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, GamePanel.WIDTH, eyelidHeight);
+        g2.fillRect(0, 0, GamePanel.WIDTH, Math.max(0, eyelidHeight - featherSize));
 
-        g2.setPaint(null);
+        // TOP FEATHER
+        for(int i = 0; i < featherSize; i++)
+        {
+            float alpha = (float)(featherSize - i) / featherSize;
+            g2.setColor(new Color(0, 0, 0, (int)(alpha * 255)));
+            g2.fillRect(0, eyelidHeight - featherSize + i, GamePanel.WIDTH, 1);
+        }
+
+        // BOTTOM EYELID
         g2.setColor(Color.BLACK);
-        g2.fillRect(0, GamePanel.HEIGHT - eyelidHeight, GamePanel.WIDTH, eyelidHeight);
+        g2.fillRect(0, GamePanel.HEIGHT - Math.max(0, eyelidHeight - featherSize),
+                GamePanel.WIDTH, Math.max(0, eyelidHeight - featherSize));
 
-        g2.setPaint(null);
+        // BOTTOM FEATHER
+        for(int i = 0; i < featherSize; i++)
+        {
+            float alpha = (float) i / featherSize;
+            g2.setColor(new Color(0, 0, 0, (int)(alpha * 255)));
+            g2.fillRect(0, GamePanel.HEIGHT - eyelidHeight + i, GamePanel.WIDTH, 1);
+        }
     }
 
     private void drawHoverZone(Graphics2D g2)
