@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Five-Nights-At-iACADEMY:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Five_Nights_At_iACADEMY_jar</output-path>
+    <root id="archive" name="Five-Nights-At-iACADEMY.jar">
+      <element id="module-output" name="Five-Nights-At-iACADEMY" />
+    </root>
+  </artifact>
+</component>
