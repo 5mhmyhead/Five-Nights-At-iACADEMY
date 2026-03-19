@@ -1,6 +1,7 @@
 package components;
 
 import components.cameras.CameraSystem;
+import components.office.BlinkSystem;
 import components.office.OfficeView;
 import state.StateManager;
 
@@ -15,25 +16,44 @@ public class GameContext
     // GAME UI ELEMENTS
     public final CameraSystem cameras;
     public final OfficeView office;
+    public final BlinkSystem blink;
     public final Clock clock;
 
-    public GameContext(StateManager stateManager, CameraSystem cameras, OfficeView office, Clock clock)
+    public GameContext(StateManager stateManager, CameraSystem cameras, OfficeView office, BlinkSystem blink, Clock clock)
     {
         this.stateManager = stateManager;
         this.cameras = cameras;
         this.office = office;
+        this.blink = blink;
         this.clock = clock;
     }
 
     public Color getClockColor()
     {
         // CLOCK CHANGES COLOR DEPENDING ON STATE
-        return cameras.isMonitorUp() ? new Color(180, 255, 180) : Color.WHITE;
+        return isInCameras() ? new Color(180, 255, 180) : Color.WHITE;
     }
 
-    public boolean getHoverState()
+    // FUNCTIONS THAT RETURN SPECIFIC STATES OF THE PLAYER
+    public boolean isInMainView()
     {
-        return !office.isPlayerAtDoor() && !office.isTransitioning();
+        return !office.isPlayerAtDoor()
+            && !office.isTransitioning()
+            && !blink.isTransitioning();
+    }
+
+    public boolean isInDoorView()
+    {
+        return office.isPlayerAtDoor()
+            && !office.isTransitioning()
+            && !blink.isTransitioning();
+    }
+
+    public boolean isInCameras()
+    {
+        return cameras.isMonitorUp()
+            && !office.isTransitioning()
+            && !blink.isTransitioning();
     }
 
     public int getNightNumber()

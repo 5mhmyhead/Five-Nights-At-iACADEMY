@@ -33,22 +33,21 @@ public class CameraSystem
     private int staticTimer = 0;
     private static final int STATIC_DURATION = 20;
 
-    // TODO: REFACTOR
-    // --- CAMERA BUTTON LAYOUT ---
+    // X AND Y COORDINATES OF EACH BUTTON STORED IN AN ARRAY
     private static final int[] BUTTON_X = { 285, 160, 245, 160, 285, 185, 85 };
     private static final int[] BUTTON_Y = { 570, 520, 490, 470, 420, 320, 340 };
-    private static final int   BUTTON_W = 60;
-    private static final int   BUTTON_H = 30;
+    private static final int BUTTON_W = 60;
+    private static final int BUTTON_H = 30;
 
-    // --- REBOOT BUTTON LAYOUT ---
+    // REBOOT BUTTON LAYOUT
     private static final int REBOOT_X = 1045;
     private static final int REBOOT_Y = 650;
     private static final int REBOOT_W = 200;
     private static final int REBOOT_H = 35;
 
-    // --- SHARED COLORS ---
-    private static final Color BUTTON_TEXT     = new Color(180, 255, 180);
-    private static final Color BUTTON_IDLE     = new Color(0, 80, 0);
+    // COLORS
+    private static final Color BUTTON_TEXT = new Color(180, 255, 180);
+    private static final Color BUTTON_IDLE = new Color(0, 80, 0);
     private static final Color BUTTON_SELECTED = new Color(0, 180, 0);
 
     public CameraSystem()
@@ -292,14 +291,14 @@ public class CameraSystem
     }
 
     // DRAWS NAME OF CAMERA ON TOP OF CAMERA MAP
-    private void drawCameraLabel(Graphics2D g)
+    private void drawCameraLabel(Graphics2D g2)
     {
-        g.setColor(BUTTON_TEXT);
-        g.setFont(FontManager.LCD_MEDIUM);
-        g.drawString(cameras[currentCamera].getName(), 65, 290);
+        g2.setColor(BUTTON_TEXT);
+        g2.setFont(FontManager.LCD_MEDIUM);
+        g2.drawString(cameras[currentCamera].getName(), 65, 290);
     }
 
-    private void drawHoverZone(Graphics2D g)
+    private void drawHoverZone(Graphics2D g2)
     {
         int zoneW = HOVER_ZONE_X_MAX - HOVER_ZONE_X_MIN;
         int zoneH = GamePanel.HEIGHT - HOVER_ZONE_Y - 35;
@@ -310,21 +309,21 @@ public class CameraSystem
         int endX = startX + arrowW;
 
         // FILL
-        g.setColor(new Color(255, 255, 255, 30));
-        g.fillRoundRect(HOVER_ZONE_X_MIN, HOVER_ZONE_Y, zoneW, zoneH, 10, 10);
+        g2.setColor(new Color(255, 255, 255, 30));
+        g2.fillRoundRect(HOVER_ZONE_X_MIN, HOVER_ZONE_Y, zoneW, zoneH, 10, 10);
 
         // BORDER AND ARROWS
-        g.setColor(new Color(255, 255, 255, 140));
-        g.setStroke(new BasicStroke(2));
-        g.drawRoundRect(HOVER_ZONE_X_MIN, HOVER_ZONE_Y, zoneW, zoneH, 10, 10);
+        g2.setColor(new Color(255, 255, 255, 140));
+        g2.setStroke(new BasicStroke(2));
+        g2.drawRoundRect(HOVER_ZONE_X_MIN, HOVER_ZONE_Y, zoneW, zoneH, 10, 10);
 
         int topY = HOVER_ZONE_Y + 10;
         int botY = topY + arrowH + 2;
 
-        g.drawPolyline(new int[]{ startX, midX, endX }, new int[]{ topY, topY + arrowH, topY }, 3);
-        g.drawPolyline(new int[]{ startX, midX, endX }, new int[]{ botY, botY + arrowH, botY }, 3);
+        g2.drawPolyline(new int[]{ startX, midX, endX }, new int[]{ topY, topY + arrowH, topY }, 3);
+        g2.drawPolyline(new int[]{ startX, midX, endX }, new int[]{ botY, botY + arrowH, botY }, 3);
 
-        g.setStroke(new BasicStroke(1));
+        g2.setStroke(new BasicStroke(1));
     }
 
     // CAMERA FUNCTIONS FOR JIRSTEN
@@ -365,14 +364,13 @@ public class CameraSystem
                 if(Math.random() > 0.5) // HALF OF THE PIXELS GET NOISE
                 {
                     int brightness = (int)(Math.random() * 255); // RANDOM BRIGHTNESS FOR EACH PIXEL
-                    g2.setColor(new Color(brightness / 2, brightness, brightness / 2,
-                            (int)(alpha * 180)));
+                    g2.setColor(new Color(brightness, brightness, brightness,
+                            (int)(alpha * 150)));
                     g2.fillRect(x, y, 2, 2);
                 }
             }
         }
     }
-
 
     public boolean isMonitorUp() { return monitorUp; }
     public int getCurrentCamera() { return currentCamera; }

@@ -17,14 +17,14 @@ public class OfficeView
     private boolean wasInHoverZone = false;
 
     // LEFT AND RIGHT HOVER ZONES THAT SWITCHES OFFICE VIEWS
-    private static final int MAIN_HOVER_X_MIN  = 0;
-    private static final int MAIN_HOVER_X_MAX  = 60;
+    private static final int MAIN_HOVER_X_MIN = 0;
+    private static final int MAIN_HOVER_X_MAX = 60;
 
-    private static final int DOOR_HOVER_X_MIN  = GamePanel.WIDTH - 60;
-    private static final int DOOR_HOVER_X_MAX  = GamePanel.WIDTH;
+    private static final int DOOR_HOVER_X_MIN = GamePanel.WIDTH - 60;
+    private static final int DOOR_HOVER_X_MAX = GamePanel.WIDTH;
 
-    private static final int HOVER_ZONE_Y_MIN  = (int)(GamePanel.HEIGHT * 0.20);
-    private static final int HOVER_ZONE_Y_MAX  = (int)(GamePanel.HEIGHT * 0.80);
+    private static final int HOVER_ZONE_Y_MIN = (int)(GamePanel.HEIGHT * 0.20);
+    private static final int HOVER_ZONE_Y_MAX = (int)(GamePanel.HEIGHT * 0.80);
 
     // TRANSITION BETWEEN THE MAIN AND DOOR VIEWS
     private static final int TRANSITION_LENGTH = 6;

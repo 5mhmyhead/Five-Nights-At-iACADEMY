@@ -6,6 +6,7 @@ import components.animatronics.Animatronic;
 import components.animatronics.Lanze;
 import components.cameras.CameraSystem;
 import components.nights.NightConfig;
+import components.office.BlinkSystem;
 import components.office.OfficeView;
 import state.State;
 import state.StateManager;
@@ -30,6 +31,7 @@ public class GameState extends State
             stateManager,
             new CameraSystem(),
             new OfficeView(),
+            new BlinkSystem(),
             new Clock()
         );
 
@@ -53,6 +55,7 @@ public class GameState extends State
         // DRAW THE GAME UI
         ctx.cameras.update();
         ctx.office.update();
+        ctx.blink.update();
         ctx.clock.update();
 
         // UPDATE ANIMATRONICS
@@ -64,8 +67,9 @@ public class GameState extends State
     public void draw(Graphics2D g2)
     {
         ctx.office.draw(g2);
-        ctx.cameras.draw(g2, ctx.getHoverState(), animatronics);
+        ctx.cameras.draw(g2, ctx.isInMainView(), animatronics);
         ctx.clock.draw(g2, ctx.getClockColor(), ctx.getNightNumber());
+        ctx.blink.draw(g2, !ctx.isInCameras());
     }
 
     @Override public void keyPressed(int key)
@@ -77,8 +81,9 @@ public class GameState extends State
     public void mouseMoved(int x, int y)
     {
         // LET THE PLAYER ACCESS THE CAMERAS ONLY WHEN THEY ARE IN MAIN VIEW
-        if(!ctx.office.isPlayerAtDoor()) ctx.cameras.mouseMoved(x, y);
-        if(!ctx.cameras.isMonitorUp()) ctx.office.mouseMoved(x, y);
+        if(ctx.isInMainView()) ctx.cameras.mouseMoved(x, y);
+        if(!ctx.isInCameras()) ctx.office.mouseMoved(x, y);
+        if(!ctx.isInCameras()) ctx.blink.mouseMoved(x, y);
     }
 
     @Override public void mouseClicked(int x, int y)
