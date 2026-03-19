@@ -81,8 +81,8 @@ public class GameState extends State
     public void mouseMoved(int x, int y)
     {
         // LET THE PLAYER ACCESS THE CAMERAS ONLY WHEN THEY ARE IN MAIN VIEW
-        if(ctx.isInMainView()) ctx.cameras.mouseMoved(x, y);
-        if(!ctx.isInCameras()) ctx.office.mouseMoved(x, y);
+        if(ctx.isInMainView() && ctx.blink.getCloseTimer() == 0) ctx.cameras.mouseMoved(x, y);
+        if(!ctx.isInCameras() && ctx.blink.getCloseTimer() == 0) ctx.office.mouseMoved(x, y);
         if(!ctx.isInCameras()) ctx.blink.mouseMoved(x, y);
     }
 

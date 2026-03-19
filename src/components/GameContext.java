@@ -39,21 +39,21 @@ public class GameContext
     {
         return !office.isPlayerAtDoor()
             && !office.isTransitioning()
-            && !blink.isTransitioning();
+            && !blink.areEyesClosed();
     }
 
     public boolean isInDoorView()
     {
         return office.isPlayerAtDoor()
             && !office.isTransitioning()
-            && !blink.isTransitioning();
+            && !blink.areEyesClosed();
     }
 
     public boolean isInCameras()
     {
         return cameras.isMonitorUp()
             && !office.isTransitioning()
-            && !blink.isTransitioning();
+            && !blink.areEyesClosed();
     }
 
     public int getNightNumber()

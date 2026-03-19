@@ -40,10 +40,10 @@ public class CameraSystem
     private static final int BUTTON_H = 30;
 
     // REBOOT BUTTON LAYOUT
-    private static final int REBOOT_X = 1045;
-    private static final int REBOOT_Y = 650;
+    private static final int REBOOT_X = 1040;
+    private static final int REBOOT_Y = 645;
     private static final int REBOOT_W = 200;
-    private static final int REBOOT_H = 35;
+    private static final int REBOOT_H = 40;
 
     // COLORS
     private static final Color BUTTON_TEXT = new Color(180, 255, 180);

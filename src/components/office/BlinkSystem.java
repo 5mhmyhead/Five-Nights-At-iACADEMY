@@ -9,11 +9,9 @@ import java.awt.*;
 public class BlinkSystem
 {
     private boolean eyesClosed = false;
-    private boolean wasInHoverZone = false;
 
     // BLINK ANIMATION
-    private static final int BLINK_DURATION = 16;
-    private boolean transitioning = false;
+    private static final int BLINK_DURATION = 3;
     private int closeTimer = 0;
 
     // HOVER ZONE DIMENSIONS
@@ -34,7 +32,6 @@ public class BlinkSystem
     public void update()
     {
         if(closeTimer > 0) closeTimer--;
-        if(closeTimer == 0) transitioning = false;
     }
 
     public void mouseMoved(int mouseX, int mouseY)
@@ -43,20 +40,22 @@ public class BlinkSystem
                 && mouseX <= HOVER_ZONE_X_MAX
                 && mouseY >= HOVER_ZONE_Y;
 
-        if(inHoverZone && !wasInHoverZone && !transitioning)
+        if(inHoverZone && !eyesClosed)
         {
-            eyesClosed = !eyesClosed;
+            eyesClosed = true;
             closeTimer = BLINK_DURATION;
-            transitioning = true;
         }
-
-        wasInHoverZone = inHoverZone;
+        else if(!inHoverZone && eyesClosed)
+        {
+            eyesClosed = false;
+            closeTimer = BLINK_DURATION;
+        }
     }
 
     public void draw(Graphics2D g2, boolean showHints)
     {
-        if(eyesClosed || closeTimer > 0) drawBlink(g2);
         if(showHints) drawHoverZone(g2);
+        if(eyesClosed || closeTimer > 0) drawBlink(g2);
     }
 
     private void drawBlink(Graphics2D g2)
@@ -85,26 +84,34 @@ public class BlinkSystem
     {
         int zoneW = HOVER_ZONE_X_MAX - HOVER_ZONE_X_MIN;
         int zoneH = GamePanel.HEIGHT - HOVER_ZONE_Y - 35;
-        int arrowW = (int)(zoneW * 0.20);
-        int arrowH = 10;
-        int startX = HOVER_ZONE_X_MIN + (zoneW - arrowW) / 2;
-        int midX = HOVER_ZONE_X_MIN + zoneW / 2;
-        int endX = startX + arrowW;
+        int centerX = HOVER_ZONE_X_MIN + zoneW / 2;
+        int centerY = HOVER_ZONE_Y + zoneH / 2;
 
         // FILL
-        g2.setColor(new Color(255, 255, 255, 30));
+        g2.setColor(new Color(255, 225, 225, 31));
         g2.fillRoundRect(HOVER_ZONE_X_MIN, HOVER_ZONE_Y, zoneW, zoneH, 10, 10);
 
-        // BORDER AND ARROWS
-        g2.setColor(new Color(255, 255, 255, 140));
+        // BORDER
+        g2.setColor(new Color(255, 225, 225, 140));
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(HOVER_ZONE_X_MIN, HOVER_ZONE_Y, zoneW, zoneH, 10, 10);
 
-        int topY = HOVER_ZONE_Y + 10;
-        int botY = topY + arrowH + 2;
+        // DRAWING THE EYE
+        int eyeW = (int)(zoneW * 0.10);
+        int eyeH = (int)(zoneH * 0.30);
 
-        g2.drawPolyline(new int[]{ startX, midX, endX }, new int[]{ topY, topY + arrowH, topY }, 3);
-        g2.drawPolyline(new int[]{ startX, midX, endX }, new int[]{ botY, botY + arrowH, botY }, 3);
+        g2.drawArc(centerX - eyeW / 2, centerY - eyeH, eyeW, eyeH * 2, 0, 180);
+        g2.drawArc(centerX - eyeW / 2, centerY - eyeH, eyeW, eyeH * 2, 0, -180);
+
+        // LASHES AND PUPIL
+        g2.drawLine(centerX - 16, centerY - eyeH / 2 - 3, centerX - 18, centerY - eyeH / 2 - 6);
+        g2.drawLine(centerX - 8, centerY - eyeH / 2 - 5, centerX - 9, centerY - eyeH / 2 - 8);
+        g2.drawLine(centerX, centerY - eyeH / 2 - 5, centerX, centerY - eyeH / 2 - 10);
+        g2.drawLine(centerX + 8, centerY - eyeH / 2 - 5, centerX + 9, centerY - eyeH / 2 - 8);
+        g2.drawLine(centerX + 16, centerY - eyeH / 2 - 3, centerX + 18, centerY - eyeH / 2 - 6);
+
+        int pupilR = eyeH / 2;
+        g2.fillOval(centerX - pupilR, centerY - pupilR, pupilR * 2, pupilR * 2);
 
         g2.setStroke(new BasicStroke(1));
     }
@@ -113,9 +120,8 @@ public class BlinkSystem
     public void forceDown()
     {
         eyesClosed = false;
-        wasInHoverZone = false;
     }
 
+    public int getCloseTimer() { return closeTimer; }
     public boolean areEyesClosed() { return eyesClosed; }
-    public boolean isTransitioning() { return transitioning; }
 }
