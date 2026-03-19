@@ -8,13 +8,13 @@ import java.awt.image.BufferedImage;
 
 public class JumpscarePlayer
 {
-    private BufferedImage[] frames;
+    private final BufferedImage[] frames;
     private int currentFrame = 0;
     private boolean playing = false;
     private boolean finished = false;
 
     // FRAMES PER IMAGE
-    private static final int FRAMES_PER_IMAGE = 2;
+    private static final int FRAMES_PER_IMAGE = 3;
     private int frameHoldTimer = 0;
 
     public JumpscarePlayer(String folderPath, int frameCount)

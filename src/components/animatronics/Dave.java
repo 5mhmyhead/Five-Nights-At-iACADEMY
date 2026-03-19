@@ -1,6 +1,7 @@
 package components.animatronics;
 
 import components.GameContext;
+import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
@@ -12,29 +13,63 @@ import java.awt.*;
 // CAN ONLY BE SHOCKED 3 TIMES TO MAKE HIM GO BACK TO HIS STARTING CAMERA
 public class Dave extends Animatronic
 {
-    private enum DaveState { GRACE, MOVING, DOOR, JUMPSCARE }
+    private enum DaveState { GRACE, MOVING, DOOR }
     private DaveState state = DaveState.GRACE;
 
     private static final int[] PATH = { 6, 0, 5, 1, 4, 2, 3 };
     private int pathIndex = 0;
 
     private static final int GRACE_DURATION = 300;
-    private static final int MOVE_INTERVAL = 250;
+    private static final int MOVE_INTERVAL = 175;
     private static final int DOOR_COUNTDOWN = 120;
 
     private int graceTimer = 0;
     private int moveTimer = 0;
     private int doorTimer = 0;
 
+    // DAVE TAKES HIS TIME PLAYING HIS JUMPSCARE ANIMATION
+    private final JumpscarePlayer jumpscare;
+    private int jumpscareDelay;
+    private boolean delayStarted = false;
+
     public Dave()
     {
         currentCamera = 6;
         location = Location.CAMERA;
+
+        // ROLLS A RANDOM NUMBER TO MATCH JUMPSCARE DELAY
+        jumpscareDelay = (int)(Math.random() * 10 + 1) * GamePanel.FPS;
+
+        // LOAD JUMPSCARE
+        jumpscare = new JumpscarePlayer("/jumpscares/dave", 7);
     }
 
     @Override
     public void update(GameContext ctx)
     {
+        // IF JUMPSCARE IS PLAYING, ONLY UPDATE IT
+        if(jumpscare.isPlaying())
+        {
+            jumpscare.update();
+            if(jumpscare.isFinished())
+                ctx.stateManager.setState(StateManager.LOSE_STATE);
+            return;
+        }
+
+        // IF DAVE REACHES THE DOOR
+        // JUMPSCARE WITH A DELAY
+        if(delayStarted)
+        {
+            jumpscareDelay--;
+            if(jumpscareDelay <= 0)
+            {
+                ctx.cameras.forceMonitorDown();
+                jumpscare.play();
+            }
+
+            return;
+        }
+
         handleShock(ctx);
 
         switch(state)
@@ -42,7 +77,6 @@ public class Dave extends Animatronic
             case GRACE -> handleGrace();
             case MOVING -> handleMoving(ctx);
             case DOOR -> handleDoor();
-            case JUMPSCARE -> ctx.stateManager.setState(StateManager.LOSE_STATE);
         }
     }
 
@@ -57,7 +91,7 @@ public class Dave extends Animatronic
     {
         doorTimer--;
         if(doorTimer <= 0)
-            state = DaveState.JUMPSCARE;
+            delayStarted = true;
     }
 
     private void handleShock(GameContext ctx)
@@ -108,8 +142,6 @@ public class Dave extends Animatronic
         pathIndex = 0;
         moveTimer = 0;
         doorTimer = 0;
-
-        System.out.println("DAVE GOT SHOCKED!!!");
     }
 
     @Override
@@ -136,6 +168,15 @@ public class Dave extends Animatronic
         Utility.drawCentered(g2, "SHOCK HIM! " + (doorTimer / 30 + 1) + "s", GamePanel.HEIGHT / 2 + 20);
     }
 
-    public boolean isAtDoor() { return state == DaveState.DOOR; }
-    public int getDoorTimer() { return doorTimer; }
+    @Override
+    public void drawJumpscare(Graphics2D g2)
+    {
+        jumpscare.draw(g2);
+    }
+
+    @Override
+    public boolean jumpscareIsPlaying()
+    {
+        return jumpscare.isPlaying();
+    }
 }

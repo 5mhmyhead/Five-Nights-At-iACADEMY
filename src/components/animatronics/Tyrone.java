@@ -1,6 +1,7 @@
 package components.animatronics;
 
 import components.GameContext;
+import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
@@ -14,7 +15,7 @@ import java.awt.*;
 // PATH: CAMERA 4 -> 2 -> 3 -> 5
 public class Tyrone extends Animatronic
 {
-    public enum TyroneState { MOVING, MAIN, JUMPSCARE }
+    public enum TyroneState { MOVING, MAIN }
     private TyroneState state = TyroneState.MOVING;
 
     private static final int[] PATH = { 3, 1, 2, 4 };
@@ -26,20 +27,33 @@ public class Tyrone extends Animatronic
     private static final int MOVE_INTERVAL = 200; // 10 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
 
+    private final JumpscarePlayer jumpscare;
+
     public Tyrone()
     {
         currentCamera = 3;
         location = Location.CAMERA;
+
+        // LOAD JUMPSCARE
+        jumpscare = new JumpscarePlayer("/jumpscares/tyrone", 7);
     }
 
     @Override
     public void update(GameContext ctx)
     {
+        // IF JUMPSCARE IS PLAYING, ONLY UPDATE IT
+        if(jumpscare.isPlaying())
+        {
+            jumpscare.update();
+            if(jumpscare.isFinished())
+                ctx.stateManager.setState(StateManager.LOSE_STATE);
+            return;
+        }
+
         switch(state)
         {
             case MOVING -> handleMoving(ctx);
             case MAIN -> handleDoor(ctx);
-            case JUMPSCARE -> ctx.stateManager.setState(StateManager.LOSE_STATE);
         }
     }
 
@@ -88,7 +102,10 @@ public class Tyrone extends Animatronic
         {
             doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
-                ctx.stateManager.setState(StateManager.LOSE_STATE);
+            {
+                ctx.cameras.forceMonitorDown();
+                jumpscare.play();
+            }
         }
     }
 
@@ -124,5 +141,17 @@ public class Tyrone extends Animatronic
 
         g2.setFont(FontManager.LCD_SMALL);
         Utility.drawCentered(g2, "BLINK! " + (doorTimer / 30 + 1) + "s", GamePanel.HEIGHT / 2 + 20);
+    }
+
+    @Override
+    public void drawJumpscare(Graphics2D g2)
+    {
+        jumpscare.draw(g2);
+    }
+
+    @Override
+    public boolean jumpscareIsPlaying()
+    {
+        return jumpscare.isPlaying();
     }
 }

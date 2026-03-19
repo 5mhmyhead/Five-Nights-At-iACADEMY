@@ -149,9 +149,6 @@ public class Lanze extends Animatronic
         }
 
         drawPatienceBar(g2);
-
-        // JUMPSCARE
-        jumpscare.draw(g2);
     }
 
     @Override
@@ -207,8 +204,4 @@ public class Lanze extends Animatronic
 
         if(!playerWatching) displayedImage = getCurrentImage();
     }
-
-    public int getPatience() { return patience; }
-    public boolean isCritical() { return state == LanzeState.CRITICAL; }
-    public int getCriticalTimer() { return criticalTimer; }
 }

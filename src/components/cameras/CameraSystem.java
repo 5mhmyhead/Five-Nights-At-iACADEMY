@@ -390,6 +390,11 @@ public class CameraSystem
         return new Color(0, 180, 0);
     }
 
+    public void forceMonitorDown()
+    {
+        monitorUp = false;
+    }
+
     public MusicBox getMusicBox() { return musicBox; }
     public ControlledShock getShockButton() { return shockButton; }
 

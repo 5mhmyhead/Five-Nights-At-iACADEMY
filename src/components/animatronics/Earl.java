@@ -14,7 +14,7 @@ import java.awt.*;
 // PATH: CAMERA 7 -> 6 -> 5 -> 4
 public class Earl extends Animatronic
 {
-    public enum EarlState { MOVING, DOOR, JUMPSCARE }
+    public enum EarlState { MOVING, DOOR }
     private EarlState state = EarlState.MOVING;
 
     private static final int[] PATH = { 6, 5, 4, 3 };
@@ -39,7 +39,6 @@ public class Earl extends Animatronic
         {
             case MOVING -> handleMoving(ctx);
             case DOOR -> handleDoor(ctx);
-            case JUMPSCARE -> ctx.stateManager.setState(StateManager.LOSE_STATE);
         }
     }
 

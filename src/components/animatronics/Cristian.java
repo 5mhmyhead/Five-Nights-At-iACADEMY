@@ -121,8 +121,4 @@ public class Cristian extends Animatronic
         g2.drawRoundRect(barX, barY, barW, barH, 4, 4);
         g2.setStroke(new BasicStroke(1));
     }
-
-    public int getPatience() { return patience; }
-    public boolean isCritical() { return state == CristianState.CRITICAL; }
-    public int getCriticalTimer() { return criticalTimer; }
 }
