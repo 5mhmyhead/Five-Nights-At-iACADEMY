@@ -71,7 +71,7 @@ public class Utility
     // FUNCTION THAT DRAWS STATIC ON THE SCREEN
     public static void drawStatic(Graphics2D g2, int staticTimer, int staticDuration, Color baseColor)
     {
-        float minAlpha = 0.10f;
+        float minAlpha = 0.20f;
         float maxAlpha = 0.80f;
 
         float fadeRange = maxAlpha - minAlpha;
@@ -80,9 +80,9 @@ public class Utility
         if(staticTimer > 0)
             alpha = minAlpha + ((float) staticTimer / staticDuration) * fadeRange;
 
-        for(int y = 0; y < GamePanel.HEIGHT; y += 2)
+        for(int y = 0; y < GamePanel.HEIGHT; y += 3)
         {
-            for(int x = 0; x < GamePanel.WIDTH; x += 2)
+            for(int x = 0; x < GamePanel.WIDTH; x += 3)
             {
                 if(Math.random() > 0.5)
                 {

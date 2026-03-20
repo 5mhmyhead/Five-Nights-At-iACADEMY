@@ -29,6 +29,12 @@ public class GameState extends State
     {
         SoundManager.AMBIENCE.loop();
 
+        SoundManager.MUSIC_BOX.loop();
+        SoundManager.MUSIC_BOX.mute();
+
+        SoundManager.MUSIC_BOX_SPED_UP.loop();
+        SoundManager.MUSIC_BOX_SPED_UP.mute();
+
         animatronics = new Animatronic[]
         {
             new Dave(),

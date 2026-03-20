@@ -1,6 +1,7 @@
 package components.cameras;
 
 import utilities.FontManager;
+import utilities.SoundManager;
 
 import java.awt.*;
 
@@ -33,6 +34,8 @@ public class ControlledShock
 
         if(mouseX >= X && mouseX <= X + W && mouseY >= Y && mouseY <= Y + H)
         {
+            SoundManager.SHOCK.setVolume(0.5);
+            SoundManager.SHOCK.play();
             shockPressed = true;
             charges--;
         }

@@ -5,6 +5,7 @@ import components.JumpscarePlayer;
 import components.cameras.MusicBox;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -133,7 +134,9 @@ public class Lanze extends Animatronic
                 // EARL AND TYRONE MOVE FASTER WHEN THE MUSIC BOX IS WOUND
                 // MUSIC BOX BOOST IS LANZE PATIENCE MULTIPLIED BY THREE
                 // THE LOWER LANZE PATIENCE IS, THE LOWER THE BOOST
+                ctx.cameras.getMusicBox().applyBoost(patience);
                 int boostFrames = patience * BOOST_MULTIPLIER;
+
                 for(Animatronic a : ctx.animatronics)
                 {
                     if(a instanceof Earl earl) earl.applyMusicBoxBoost(boostFrames);

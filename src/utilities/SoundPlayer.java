@@ -1,25 +1,24 @@
 package utilities;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 import java.util.Objects;
 
 public class SoundPlayer
 {
-    private final Object synchronizationLock = new Object();
-    private Clip clip;
+    private MediaPlayer mediaPlayer;
     private boolean isLooping;
 
     public SoundPlayer(String path)
     {
         try
         {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(
-                    Objects.requireNonNull(SoundPlayer.class.getResource(path)));
-            clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
+            String uri = Objects.requireNonNull(
+                    SoundPlayer.class.getResource(path)).toExternalForm();
+            Media media = new Media(uri);
+            mediaPlayer = new MediaPlayer(media);
+            System.out.println("Sound loaded: " + path);
         }
         catch(Exception e)
         {
@@ -29,65 +28,70 @@ public class SoundPlayer
 
     public void play()
     {
-        try
-        {
-            if(clip != null)
-            {
-                new Thread(() ->
-                {
-                    synchronized(synchronizationLock)
-                    {
-                        clip.stop();
-                        clip.setFramePosition(0);
-                        clip.start();
-                    }
-                }).start();
-                isLooping = false;
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public void stop()
-    {
-        if(clip == null) return;
-        clip.stop();
+        if(mediaPlayer == null) return;
+        mediaPlayer.stop();
+        mediaPlayer.seek(Duration.ZERO);
+        mediaPlayer.setCycleCount(1);
+        mediaPlayer.play();
+        isLooping = false;
     }
 
     public void loop()
     {
-        try
-        {
-            if(clip != null)
-            {
-                new Thread(() ->
-                {
-                    synchronized(synchronizationLock)
-                    {
-                        clip.stop();
-                        clip.setFramePosition(0);
-                        clip.loop(Clip.LOOP_CONTINUOUSLY);
-                    }
-                }).start();
-                isLooping = true;
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
+        if(mediaPlayer == null) return;
+        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        mediaPlayer.play();
+        isLooping = true;
     }
 
-    public void setVolume(int relativeVolume)
+    public void stop()
     {
-        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(relativeVolume);
+        if(mediaPlayer == null) return;
+        mediaPlayer.stop();
     }
 
-    public boolean isPlaying()  { return clip != null && clip.isActive(); }
-    public boolean isFinished() { return clip != null && clip.getMicrosecondPosition() == clip.getMicrosecondLength(); }
-    public boolean isLooping()  { return isLooping; }
+    public void pause()
+    {
+        if(mediaPlayer == null) return;
+        mediaPlayer.pause();
+    }
+
+    public void resume()
+    {
+        if(mediaPlayer == null) return;
+        mediaPlayer.play();
+    }
+
+    public void setVolume(double volume)
+    {
+        // VOLUME IS 0.0 TO 1.0 IN JAVAFX
+        if(mediaPlayer == null) return;
+        mediaPlayer.setVolume(volume);
+    }
+
+    public void mute()
+    {
+        if(mediaPlayer == null) return;
+        mediaPlayer.setMute(true);
+    }
+
+    public void unmute()
+    {
+        if(mediaPlayer == null) return;
+        mediaPlayer.setMute(false);
+    }
+
+    public boolean isPlaying()
+    {
+        return mediaPlayer != null &&
+                mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
+    }
+
+    public boolean isFinished()
+    {
+        return mediaPlayer != null &&
+                mediaPlayer.getCurrentTime().equals(mediaPlayer.getTotalDuration());
+    }
+
+    public boolean isLooping() { return isLooping; }
 }

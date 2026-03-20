@@ -13,13 +13,13 @@ public class SoundManager
     // UI SOUNDS
     public static final SoundPlayer CAMERA_SWITCH = new SoundPlayer("/sounds/cameraSwitch.wav");
     public static final SoundPlayer CAMERA_STATIC = new SoundPlayer("/sounds/cameraStatic.wav");
-    public static final SoundPlayer MONITOR_UP = new SoundPlayer("/sounds/monitorUp.wav");
-    public static final SoundPlayer MONITOR_DOWN = new SoundPlayer("/sounds/monitorDown.wav");
+    public static final SoundPlayer MONITOR = new SoundPlayer("/sounds/monitor.wav");
 
-    // GAMEPLAY SOUNDS
+    // SHOCK BUTTON
     public static final SoundPlayer SHOCK = new SoundPlayer("/sounds/shock.wav");
-    public static final SoundPlayer CAMERA_REBOOT = new SoundPlayer("/sounds/cameraReboot.wav");
-    public static final SoundPlayer CAMERA_BREAK = new SoundPlayer("/sounds/cameraBreak.wav");
+    // CAMERAS
+    public static final SoundPlayer CAMERA_REBOOTING = new SoundPlayer("/sounds/cameraRebooting.wav");
+    public static final SoundPlayer CAMERA_BROKEN = new SoundPlayer("/sounds/cameraBroken.wav");
 
     public static final SoundPlayer SIX_AM = new SoundPlayer("/sounds/sixAm.wav");
     public static final SoundPlayer JUMPSCARE = new SoundPlayer("/sounds/jumpscare.wav");
@@ -27,8 +27,8 @@ public class SoundManager
     // ARRAY FOR BULK OPERATIONS
     private static final SoundPlayer[] soundPlayers = new SoundPlayer[]
     {
-        AMBIENCE, CAMERA_SWITCH, CAMERA_STATIC, MONITOR_UP, MONITOR_DOWN,
-        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOT, CAMERA_BREAK, SIX_AM, JUMPSCARE
+        AMBIENCE, CAMERA_SWITCH, CAMERA_STATIC, MONITOR,
+        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOTING, CAMERA_BROKEN, SIX_AM
     };
 
     public static void stopAll()

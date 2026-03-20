@@ -1,6 +1,7 @@
 package components;
 
 import main.GamePanel;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -26,6 +27,10 @@ public class JumpscarePlayer
 
     public void play()
     {
+        // PLAYS THE JUMPSCARE SOUND
+        SoundManager.JUMPSCARE.setVolume(0.3);
+        SoundManager.JUMPSCARE.play();
+
         currentFrame = 0;
         frameHoldTimer = 0;
         playing = true;

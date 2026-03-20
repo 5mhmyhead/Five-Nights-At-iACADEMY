@@ -50,6 +50,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
     private void init()
     {
         FontManager.loadFonts();
+        new javafx.embed.swing.JFXPanel();
         stateManager = new StateManager();
         running = true;
     }

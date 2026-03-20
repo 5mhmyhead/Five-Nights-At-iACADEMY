@@ -51,6 +51,9 @@ public class CameraSystem
     private final MusicBox musicBox = new MusicBox();
     private final ControlledShock shockButton = new ControlledShock();
 
+    private int flickerTimer = 0;
+    private static final int FLICKER_DURATION = 120;
+
     public CameraSystem()
     {
         cameras = new Camera[]
@@ -69,31 +72,31 @@ public class CameraSystem
 
     public void update()
     {
-        // HANDLE MUSIC BOX SOUND BASED ON CURRENT CAMERA
-        if(currentCamera == 0 && monitorUp)
+        updateAudio();
+
+        // FLICKER CAMERAS WHEN SHOCK IS PRESSED
+        if(shockButton.wasShockPressed())
         {
-            if(!SoundManager.MUSIC_BOX.isPlaying() && !SoundManager.MUSIC_BOX_SPED_UP.isPlaying())
-                SoundManager.MUSIC_BOX.loop();
-        }
-        else
-        {
-            SoundManager.MUSIC_BOX.stop();
-            SoundManager.MUSIC_BOX_SPED_UP.stop();
+            flickerTimer = FLICKER_DURATION;
+            SoundManager.SHOCK.play();
         }
 
+        if(flickerTimer > 0) flickerTimer--;
 
         if(rebooting)
         {
             rebootTimer--;
             if(rebootTimer <= 0)
             {
+                SoundManager.CAMERA_REBOOTING.stop();
                 rebooting = false;
                 brokenCameras = new boolean[cameras.length];
                 shockButton.addCharge();
             }
         }
 
-        // UPDATE THE SHOCK BUTTON
+        // UPDATE THE SHOCK BUTTON AND MUSIC BOX
+        musicBox.update();
         shockButton.update();
 
         // UPDATE CAMERA SWAY ANIMATION
@@ -115,6 +118,8 @@ public class CameraSystem
 
         if(inHoverZone && !wasInHoverZone)
         {
+            SoundManager.MONITOR.setVolume(0.5);
+            SoundManager.MONITOR.play();
             monitorUp = !monitorUp;
             if(monitorUp) staticTimer = STATIC_DURATION;
         }
@@ -133,6 +138,9 @@ public class CameraSystem
             if(mouseX >= BUTTON_X[i] && mouseX <= BUTTON_X[i] + BUTTON_W
             && mouseY >= BUTTON_Y[i] && mouseY <= BUTTON_Y[i] + BUTTON_H)
             {
+                SoundManager.CAMERA_SWITCH.setVolume(0.3);
+                SoundManager.CAMERA_SWITCH.play();
+
                 currentCamera = i;
                 if(!rebooting) staticTimer = STATIC_DURATION; // ADD STATIC EFFECT
                 cameraSwitched = true;
@@ -147,6 +155,8 @@ public class CameraSystem
         {
             rebooting = true;
             rebootTimer = REBOOT_DURATION;
+            SoundManager.CAMERA_REBOOTING.setVolume(0.7);
+            SoundManager.CAMERA_REBOOTING.loop();
         }
 
         // FORWARDS MOUSE CLICKS TO MUSIC BOX
@@ -198,6 +208,7 @@ public class CameraSystem
 
         drawCameraImage(g2);
         drawAnimatronics(g2, animatronics);
+        drawShockEffect(g2);
         drawCameraBorder(g2);
     }
 
@@ -210,6 +221,43 @@ public class CameraSystem
                     && a.getLocation() == Animatronic.Location.CAMERA
                     && a.getCurrentCamera() == currentCamera)
                 a.drawOnCamera(g2, swayX);
+    }
+
+    private void drawShockEffect(Graphics2D g2)
+    {
+        // FLICKER EFFECT WHEN SHOCK IS PRESSED
+        if(flickerTimer > 0)
+        {
+            float progress = (float) flickerTimer / FLICKER_DURATION;
+
+            int alpha;
+            Color color;
+
+            if(progress > 0.70f)
+            {
+                // EPILEPTIC FLICKER
+                float flickerProgress = (progress - 0.70f) / 0.30f;
+                alpha = (int)(flickerProgress * 180);
+                color = (flickerTimer % 2 == 0)
+                        ? new Color(139, 172, 15, alpha)
+                        : new Color(15, 56, 15, alpha);
+
+
+            }
+            else if(progress > 0.50f)
+            {
+                alpha = 255;
+                color = new Color(15, 56, 15, alpha);
+            }
+            else
+            {
+                alpha = (int)(progress / 0.55f * 255);
+                color = new Color(15, 56, 15, alpha);
+            }
+
+            g2.setColor(color);
+            g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
+        }
     }
 
     // TODO: THESE ARE PLACEHOLDERS, MAKE TRUE BROKEN AND REBOOT SCREEN
@@ -377,8 +425,10 @@ public class CameraSystem
                 && !rebooting;
     }
 
-    private void drawStatic(Graphics2D g2) {
-        Utility.drawStatic(g2, staticTimer, STATIC_DURATION, new Color(255, 255, 255));
+    private void drawStatic(Graphics2D g2)
+    {
+        if(flickerTimer > 0) Utility.drawStatic(g2, flickerTimer, FLICKER_DURATION, new Color(255, 255, 255));
+        else Utility.drawStatic(g2, staticTimer, STATIC_DURATION, new Color(255, 255, 255));
     }
 
     // THE CAMERA UI CHANGES DEPENDING ON THE STATE OF THE CAMERA
@@ -409,6 +459,35 @@ public class CameraSystem
     public void forceMonitorDown()
     {
         monitorUp = false;
+    }
+
+    public void updateAudio()
+    {
+        // HANDLE MUSIC BOX SOUND BASED ON CURRENT CAMERA
+        if(currentCamera == 0 && monitorUp)
+        {
+            if(musicBox.isBoostActive())
+                SoundManager.MUSIC_BOX_SPED_UP.unmute();
+            else
+                SoundManager.MUSIC_BOX.unmute();
+        }
+        else
+        {
+            SoundManager.MUSIC_BOX.mute();
+            SoundManager.MUSIC_BOX_SPED_UP.mute();
+        }
+
+        // PLAY BROKEN CAMERA
+        if(brokenCameras[currentCamera] && isMonitorUp())
+            SoundManager.CAMERA_BROKEN.loop();
+        else
+            SoundManager.CAMERA_BROKEN.stop();
+
+        // HANDLE REBOOTING NOISE
+        if(rebooting && isMonitorUp())
+            SoundManager.CAMERA_REBOOTING.unmute();
+        else
+            SoundManager.CAMERA_REBOOTING.mute();
     }
 
     public MusicBox getMusicBox() { return musicBox; }
