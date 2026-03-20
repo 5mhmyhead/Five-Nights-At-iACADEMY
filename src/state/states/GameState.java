@@ -103,6 +103,13 @@ public class GameState extends State
         }
 
         ctx.cameras.draw(g2, ctx.isInMainView(), animatronics);
+
+        // CRISTIAN CAMERA WARNING
+        if(ctx.cameras.isMonitorUp())
+            for(Animatronic a : animatronics)
+                if(a instanceof Cristian cristian && cristian.getAiLevel() > 0)
+                    cristian.drawOnCamera(g2, 0);
+
         ctx.clock.draw(g2, ctx.getClockColor(), ctx.getNightNumber());
         ctx.blink.draw(g2, !ctx.isInCameras(), ctx.office.isTransitioning());
 

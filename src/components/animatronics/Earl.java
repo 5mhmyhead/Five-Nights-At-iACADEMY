@@ -30,8 +30,8 @@ public class Earl extends Animatronic
     private static final int BLINK_HOLD_REQUIRED = 30;
     private int blinkHoldTimer = 0;
 
-    // PLAYER CAN STARE FOR AT LEAST 1 SECOND TO REMOVE MUSIC BOX BOOST
-    private static final int STARE_CANCEL_REQUIRED = 30;
+    // PLAYER CAN STARE FOR AT LEAST 2 SECONDS TO REMOVE MUSIC BOX BOOST
+    private static final int STARE_CANCEL_REQUIRED = 60;
     private int stareCancelTimer = 0;
     private int boostFrames = 0;
 
@@ -66,15 +66,13 @@ public class Earl extends Animatronic
                 && ctx.cameras.getCurrentCamera() == currentCamera
                 && ctx.cameras.isCameraViewable(currentCamera);
 
-        // IF THE PLAYER IS WATCHING FOR AT LEAST 1 SECOND
+        // IF THE PLAYER IS WATCHING FOR AT LEAST 2 SECONDS
         if(playerWatching && state == EarlState.BOOST)
         {
             stareCancelTimer++;
             // THE MUSIC BOX BOOST IS CANCELLED
             if(stareCancelTimer >= STARE_CANCEL_REQUIRED)
             {
-
-                System.out.println("EARL BOOST CANCELLED!");
                 stareCancelTimer = 0;
                 state = EarlState.MOVING;
                 boostFrames = 0;
@@ -96,12 +94,19 @@ public class Earl extends Animatronic
         // ADD MOVE TICK IF MUSIC BOX WAS WOUND
         // ADD ANOTHER MOVE TICK IF CAMERA IS BROKEN, REBOOTING, OR UNRESPONSIVE
         moveTimer++;
-        if(state == EarlState.BOOST){
-            moveTimer++;
-            System.out.println("EARL BOOST ACTIVE");
-        }
-
+        if(state == EarlState.BOOST)moveTimer++;
         if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
+
+        String speedMode = "NORMAL";
+        if(state == EarlState.BOOST && !ctx.cameras.isCameraViewable(currentCamera))
+            speedMode = "BOOSTED + BROKEN";
+        else if(state == EarlState.BOOST)
+            speedMode = "BOOSTED";
+        else if(!ctx.cameras.isCameraViewable(currentCamera))
+            speedMode = "BROKEN";
+
+        System.out.println(getClass().getSimpleName() + " speed: " + speedMode +
+                " | moveTimer: " + moveTimer + "/" + MOVE_INTERVAL);
 
         if(moveTimer >= MOVE_INTERVAL)
         {

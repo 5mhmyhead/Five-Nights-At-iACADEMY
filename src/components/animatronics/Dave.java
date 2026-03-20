@@ -16,11 +16,11 @@ public class Dave extends Animatronic
     private enum DaveState { GRACE, MOVING, DOOR }
     private DaveState state = DaveState.GRACE;
 
-    private static final int MAX_JUMPS = 7; // MOVES 7 STEPS BEFORE GOING TO THE DOOR
+    private static final int MAX_JUMPS = 5; // MOVES 5 CAMERAS BEFORE GOING TO THE DOOR
     private int moveCount = 0;
 
     private static final int GRACE_DURATION = 300;
-    private static final int MOVE_INTERVAL = 175;
+    private static final int MOVE_INTERVAL = 250;
     private static final int DOOR_COUNTDOWN = 120;
 
     private int graceTimer = 0;
@@ -105,12 +105,21 @@ public class Dave extends Animatronic
         boolean playerWatching = ctx.cameras.isMonitorUp() && (watchedCamera == currentCamera);
         boolean cameraViewable = ctx.cameras.isCameraViewable(currentCamera);
 
-        if(playerWatching && cameraViewable) return;
+        if(playerWatching && cameraViewable){
+            System.out.println("DAVE CANNOT MOVE");
+            return;
+        }
 
-        int interval = cameraViewable ? MOVE_INTERVAL : MOVE_INTERVAL / 2;
-
+        if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
         moveTimer++;
-        if(moveTimer >= interval)
+
+        String speedMode = "NORMAL";
+        if(!ctx.cameras.isCameraViewable(currentCamera)) speedMode = "BROKEN";
+
+        System.out.println(getClass().getSimpleName() + " speed: " + speedMode +
+                " | moveTimer: " + moveTimer + "/" + MOVE_INTERVAL);
+
+        if(moveTimer >= MOVE_INTERVAL)
         {
             moveTimer = 0;
             if(shouldMove()) advancePath(ctx);

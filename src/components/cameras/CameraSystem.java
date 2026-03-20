@@ -18,6 +18,7 @@ public class CameraSystem
     private int currentCamera = 0;
     private boolean monitorUp = false;
     private boolean wasInHoverZone = false;
+    private boolean cameraSwitched = false;
 
     // REBOOTING SYSTEM
     private static final int REBOOT_DURATION = 450;
@@ -45,7 +46,7 @@ public class CameraSystem
     private static final int REBOOT_W = 200;
     private static final int REBOOT_H = 40;
 
-    // MUSIC BOX IN CAMERA 1
+    // MUSIC BOX IN CAMERA 1 AND CONTROLLED SHOCK
     private final MusicBox musicBox = new MusicBox();
     private final ControlledShock shockButton = new ControlledShock();
 
@@ -86,6 +87,9 @@ public class CameraSystem
 
         // UPDATE THE TIMER STATIC
         if(staticTimer > 0) staticTimer--;
+
+        // CAMERA SWITCHED IS FALSE EVERY OTHER FRAME
+        cameraSwitched = false;
     }
 
     public void mouseMoved(int mouseX, int mouseY)
@@ -117,6 +121,7 @@ public class CameraSystem
             {
                 currentCamera = i;
                 if(!rebooting) staticTimer = STATIC_DURATION; // ADD STATIC EFFECT
+                cameraSwitched = true;
                 return;
             }
         }
@@ -143,11 +148,13 @@ public class CameraSystem
         {
             currentCamera = (currentCamera - 1 + cameras.length) % cameras.length;
             if(!rebooting) staticTimer = STATIC_DURATION;
+            cameraSwitched = true;
         }
         if(key == KeyEvent.VK_D)
         {
             currentCamera = (currentCamera + 1) % cameras.length;
             if(!rebooting) staticTimer = STATIC_DURATION;
+            cameraSwitched = true;
         }
     }
 
@@ -395,4 +402,5 @@ public class CameraSystem
 
     public boolean isMonitorUp() { return monitorUp; }
     public int getCurrentCamera() { return currentCamera; }
+    public boolean wasCameraSwitched() { return cameraSwitched; }
 }

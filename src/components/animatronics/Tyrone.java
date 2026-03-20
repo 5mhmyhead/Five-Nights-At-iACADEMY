@@ -24,15 +24,15 @@ public class Tyrone extends Animatronic
     private int moveTimer = 0;
     private int doorTimer = 0;
 
-    private static final int MOVE_INTERVAL = 200; // 10 SECONDS
+    private static final int MOVE_INTERVAL = 210; // 7 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
 
     // PLAYER HAS TO HOLD FOR AT LEAST 1 SECOND BEFORE TYRONE GOES AWAY
     private static final int BLINK_HOLD_REQUIRED = 30;
     private int blinkHoldTimer = 0;
 
-    // PLAYER CAN STARE FOR AT LEAST 1 SECOND TO REMOVE MUSIC BOX BOOST
-    private static final int STARE_CANCEL_REQUIRED = 30;
+    // PLAYER CAN STARE FOR AT LEAST 2 SECONDS TO REMOVE MUSIC BOX BOOST
+    private static final int STARE_CANCEL_REQUIRED = 60;
     private int stareCancelTimer = 0;
     private int boostFrames = 0;
 
@@ -81,15 +81,13 @@ public class Tyrone extends Animatronic
                 && ctx.cameras.getCurrentCamera() == currentCamera
                 && ctx.cameras.isCameraViewable(currentCamera);
 
-        // IF THE PLAYER IS WATCHING FOR AT LEAST 1 SECOND
+        // IF THE PLAYER IS WATCHING FOR AT LEAST 2 SECONDS
         if(playerWatching && state == TyroneState.BOOST)
         {
             stareCancelTimer++;
             // THE MUSIC BOX BOOST IS CANCELLED
             if(stareCancelTimer >= STARE_CANCEL_REQUIRED)
             {
-
-                System.out.println("TYRONE BOOST CANCELLED!");
                 stareCancelTimer = 0;
                 state = TyroneState.MOVING;
                 boostFrames = 0;
@@ -111,11 +109,7 @@ public class Tyrone extends Animatronic
         // ADD MOVE TICK IF MUSIC BOX WAS WOUND
         // ADD ANOTHER MOVE TICK IF CAMERA IS BROKEN, REBOOTING, OR UNRESPONSIVE
         moveTimer++;
-        if(state == TyroneState.BOOST){
-            moveTimer++;
-            System.out.println("TYRONE BOOST ACTIVE");
-        }
-
+        if(state == TyroneState.BOOST)moveTimer++;
         if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
 
         if(moveTimer >= MOVE_INTERVAL)
