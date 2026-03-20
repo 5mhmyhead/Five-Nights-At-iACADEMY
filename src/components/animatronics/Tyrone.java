@@ -11,11 +11,11 @@ import java.awt.*;
 
 // LIKE CHIKA, MOVES IN THE CAMERAS ON THE RIGHT OF THE PLAYER
 // WHEN THEY ARE AT THE OFFICE, GO TO THE CORRESPONDING VIEW AND BLINK
-// TYRONE MOVES FASTER THAN EARL
+// TYRONE MOVES FASTER THAN EARL, BUT VISITS MORE CAMERAS
 // PATH: CAMERA 4 -> 2 -> 3 -> 5
 public class Tyrone extends Animatronic
 {
-    public enum TyroneState { MOVING, MAIN }
+    public enum TyroneState { MOVING, BOOST, MAIN }
     private TyroneState state = TyroneState.MOVING;
 
     private static final int[] PATH = { 3, 1, 2, 4 };
@@ -26,6 +26,15 @@ public class Tyrone extends Animatronic
 
     private static final int MOVE_INTERVAL = 200; // 10 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
+
+    // PLAYER HAS TO HOLD FOR AT LEAST 1 SECOND BEFORE TYRONE GOES AWAY
+    private static final int BLINK_HOLD_REQUIRED = 30;
+    private int blinkHoldTimer = 0;
+
+    // PLAYER CAN STARE FOR AT LEAST 1 SECOND TO REMOVE MUSIC BOX BOOST
+    private static final int STARE_CANCEL_REQUIRED = 30;
+    private int stareCancelTimer = 0;
+    private int boostFrames = 0;
 
     private final JumpscarePlayer jumpscare;
 
@@ -52,8 +61,17 @@ public class Tyrone extends Animatronic
 
         switch(state)
         {
-            case MOVING -> handleMoving(ctx);
-            case MAIN -> handleDoor(ctx);
+            case MOVING, BOOST -> handleMoving(ctx);
+            case MAIN -> handleMain(ctx);
+        }
+    }
+
+    public void applyMusicBoxBoost(int frames)
+    {
+        if(state == TyroneState.MOVING || state == TyroneState.BOOST)
+        {
+            state = TyroneState.BOOST;
+            boostFrames = frames;
         }
     }
 
@@ -63,15 +81,47 @@ public class Tyrone extends Animatronic
                 && ctx.cameras.getCurrentCamera() == currentCamera
                 && ctx.cameras.isCameraViewable(currentCamera);
 
-        // TYRONE MOVES TWICE AS FAST WHEN BEING WATCHED
-        // MOVES NORMALLY IN HIS STARTING CAM
-        if(playerWatching && !(currentCamera == 3)) moveTimer++;
+        // IF THE PLAYER IS WATCHING FOR AT LEAST 1 SECOND
+        if(playerWatching && state == TyroneState.BOOST)
+        {
+            stareCancelTimer++;
+            // THE MUSIC BOX BOOST IS CANCELLED
+            if(stareCancelTimer >= STARE_CANCEL_REQUIRED)
+            {
+
+                System.out.println("TYRONE BOOST CANCELLED!");
+                stareCancelTimer = 0;
+                state = TyroneState.MOVING;
+                boostFrames = 0;
+            }
+        }
+        else
+        {
+            stareCancelTimer = 0;
+        }
+
+        // TICK DOWN BOOST FRAMES
+        if(state == TyroneState.BOOST)
+        {
+            boostFrames--;
+            if(boostFrames <= 0)
+                state = TyroneState.MOVING;
+        }
+
+        // ADD MOVE TICK IF MUSIC BOX WAS WOUND
+        // ADD ANOTHER MOVE TICK IF CAMERA IS BROKEN, REBOOTING, OR UNRESPONSIVE
         moveTimer++;
+        if(state == TyroneState.BOOST){
+            moveTimer++;
+            System.out.println("TYRONE BOOST ACTIVE");
+        }
+
+        if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
 
         if(moveTimer >= MOVE_INTERVAL)
         {
             moveTimer = 0;
-            if(shouldMove()) advancePath();
+            if(shouldMove() && !playerWatching) advancePath();
         }
     }
 
@@ -92,20 +142,26 @@ public class Tyrone extends Animatronic
         }
     }
 
-    private void handleDoor(GameContext ctx)
+    private void handleMain(GameContext ctx)
     {
         boolean playerDefending = !ctx.office.isPlayerAtDoor()
                 && ctx.blink.areEyesClosed();
 
-        if(playerDefending) reset();
+        if(playerDefending)
+        {
+            blinkHoldTimer++;
+            if(blinkHoldTimer >= BLINK_HOLD_REQUIRED)
+            {
+                blinkHoldTimer = 0;
+                reset();
+            }
+        }
         else
         {
+            blinkHoldTimer = 0; // RESET IF PLAYER STOPS BLINKING
             doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
-            {
-                ctx.cameras.forceMonitorDown();
                 jumpscare.play();
-            }
         }
     }
 
@@ -114,6 +170,7 @@ public class Tyrone extends Animatronic
         currentCamera = 3;
         location = Location.CAMERA;
         state = TyroneState.MOVING;
+        boostFrames = 0;
         pathIndex = 0;
         moveTimer = 0;
         doorTimer = 0;

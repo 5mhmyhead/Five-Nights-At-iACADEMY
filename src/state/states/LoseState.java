@@ -65,5 +65,4 @@ public class LoseState extends State
 
     @Override public void mouseMoved(int x, int y) {}
     @Override public void mouseClicked(int x, int y) {}
-    @Override public void mouseReleased(int x, int y) {}
 }

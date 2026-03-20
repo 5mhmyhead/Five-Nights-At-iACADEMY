@@ -131,13 +131,8 @@ public class CameraSystem
         }
 
         // FORWARDS MOUSE CLICKS TO MUSIC BOX
-        if(currentCamera == 0) musicBox.mousePressed(mouseX, mouseY);
+        if(currentCamera == 0) musicBox.mouseClicked(mouseX, mouseY);
         shockButton.mouseClicked(mouseX, mouseY);
-    }
-
-    public void mouseReleased(int mouseX, int mouseY)
-    {
-        musicBox.mouseReleased();
     }
 
     public void keyPressed(int key)

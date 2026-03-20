@@ -10,14 +10,14 @@ import java.awt.*;
 
 // LIKE BONNIE, MOVES IN THE CAMERAS ON THE LEFT OF THE PLAYER
 // WHEN THEY ARE AT THE OFFICE, GO TO THE CORRESPONDING VIEW AND BLINK
-// EARL MOVES SLOWER THAN TYRONE
-// PATH: CAMERA 7 -> 6 -> 5 -> 4
+// EARL MOVES SLOWER THAN TYRONE, BUT VISITS LESS CAMERAS
+// PATH: CAMERA 7 -> 6 -> 5
 public class Earl extends Animatronic
 {
-    public enum EarlState { MOVING, DOOR }
+    public enum EarlState { MOVING, BOOST, DOOR }
     private EarlState state = EarlState.MOVING;
 
-    private static final int[] PATH = { 6, 5, 4, 3 };
+    private static final int[] PATH = { 6, 5, 4 };
     private int pathIndex = 0;
 
     private int moveTimer = 0;
@@ -25,6 +25,15 @@ public class Earl extends Animatronic
 
     private static final int MOVE_INTERVAL = 300; // 10 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
+
+    // PLAYER HAS TO HOLD FOR AT LEAST 1 SECOND BEFORE EARL GOES AWAY
+    private static final int BLINK_HOLD_REQUIRED = 30;
+    private int blinkHoldTimer = 0;
+
+    // PLAYER CAN STARE FOR AT LEAST 1 SECOND TO REMOVE MUSIC BOX BOOST
+    private static final int STARE_CANCEL_REQUIRED = 30;
+    private int stareCancelTimer = 0;
+    private int boostFrames = 0;
 
     public Earl()
     {
@@ -37,8 +46,17 @@ public class Earl extends Animatronic
     {
         switch(state)
         {
-            case MOVING -> handleMoving(ctx);
+            case MOVING, BOOST -> handleMoving(ctx);
             case DOOR -> handleDoor(ctx);
+        }
+    }
+
+    public void applyMusicBoxBoost(int frames)
+    {
+        if(state == EarlState.MOVING || state == EarlState.BOOST)
+        {
+            state = EarlState.BOOST;
+            boostFrames = frames;
         }
     }
 
@@ -48,15 +66,47 @@ public class Earl extends Animatronic
                 && ctx.cameras.getCurrentCamera() == currentCamera
                 && ctx.cameras.isCameraViewable(currentCamera);
 
-        // TYRONE MOVES TWICE AS FAST WHEN BEING WATCHED
-        // MOVES NORMALLY IN HIS STARTING CAM
-        if(playerWatching && !(currentCamera == 6)) moveTimer++;
+        // IF THE PLAYER IS WATCHING FOR AT LEAST 1 SECOND
+        if(playerWatching && state == EarlState.BOOST)
+        {
+            stareCancelTimer++;
+            // THE MUSIC BOX BOOST IS CANCELLED
+            if(stareCancelTimer >= STARE_CANCEL_REQUIRED)
+            {
+
+                System.out.println("EARL BOOST CANCELLED!");
+                stareCancelTimer = 0;
+                state = EarlState.MOVING;
+                boostFrames = 0;
+            }
+        }
+        else
+        {
+            stareCancelTimer = 0;
+        }
+
+        // TICK DOWN BOOST FRAMES
+        if(state == EarlState.BOOST)
+        {
+            boostFrames--;
+            if(boostFrames <= 0)
+                state = EarlState.MOVING;
+        }
+
+        // ADD MOVE TICK IF MUSIC BOX WAS WOUND
+        // ADD ANOTHER MOVE TICK IF CAMERA IS BROKEN, REBOOTING, OR UNRESPONSIVE
         moveTimer++;
+        if(state == EarlState.BOOST){
+            moveTimer++;
+            System.out.println("EARL BOOST ACTIVE");
+        }
+
+        if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
 
         if(moveTimer >= MOVE_INTERVAL)
         {
             moveTimer = 0;
-            if(shouldMove()) advancePath();
+            if(shouldMove() && !playerWatching) advancePath();
         }
     }
 
@@ -82,9 +132,18 @@ public class Earl extends Animatronic
         boolean playerDefending = ctx.office.isPlayerAtDoor()
                 && ctx.blink.areEyesClosed();
 
-        if(playerDefending) reset();
+        if(playerDefending)
+        {
+            blinkHoldTimer++;
+            if(blinkHoldTimer >= BLINK_HOLD_REQUIRED)
+            {
+                blinkHoldTimer = 0;
+                reset();
+            }
+        }
         else
         {
+            blinkHoldTimer = 0; // RESET IF PLAYER STOPS BLINKING
             doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
@@ -96,6 +155,7 @@ public class Earl extends Animatronic
         currentCamera = 6;
         location = Location.CAMERA;
         state = EarlState.MOVING;
+        boostFrames = 0;
         pathIndex = 0;
         moveTimer = 0;
         doorTimer = 0;

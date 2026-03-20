@@ -1,5 +1,6 @@
 package components;
 
+import components.animatronics.Animatronic;
 import components.cameras.CameraSystem;
 import components.office.BlinkSystem;
 import components.office.OfficeView;
@@ -12,6 +13,7 @@ import java.awt.*;
 public class GameContext
 {
     public final StateManager stateManager;
+    public Animatronic[] animatronics;
 
     // GAME UI ELEMENTS
     public final CameraSystem cameras;
@@ -19,9 +21,10 @@ public class GameContext
     public final BlinkSystem blink;
     public final Clock clock;
 
-    public GameContext(StateManager stateManager, CameraSystem cameras, OfficeView office, BlinkSystem blink, Clock clock)
+    public GameContext(StateManager stateManager, Animatronic[] animatronics, CameraSystem cameras, OfficeView office, BlinkSystem blink, Clock clock)
     {
         this.stateManager = stateManager;
+        this.animatronics = animatronics;
         this.cameras = cameras;
         this.office = office;
         this.blink = blink;
@@ -54,11 +57,6 @@ public class GameContext
         return cameras.isMonitorUp()
             && !office.isTransitioning()
             && !blink.areEyesClosed();
-    }
-
-    public boolean isMusicBoxHeld()
-    {
-        return cameras.getMusicBox().isHeld();
     }
 
     public boolean wasShockPressed()

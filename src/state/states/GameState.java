@@ -26,14 +26,6 @@ public class GameState extends State
     @Override
     public void init()
     {
-        ctx = new GameContext(
-            stateManager,
-            new CameraSystem(),
-            new OfficeView(),
-            new BlinkSystem(),
-            new Clock()
-        );
-
         animatronics = new Animatronic[]
         {
             new Dave(),
@@ -43,6 +35,17 @@ public class GameState extends State
             new Jirsten(),
             new Lanze(),
         };
+
+        ctx = new GameContext(
+            stateManager,
+            animatronics,
+            new CameraSystem(),
+            new OfficeView(),
+            new BlinkSystem(),
+            new Clock()
+        );
+
+
 
         // APPLY AI LEVELS DEPENDING ON THE NIGHT
         NightConfig config = stateManager.getNightManager().getConfig();
@@ -127,6 +130,5 @@ public class GameState extends State
         ctx.cameras.mouseClicked(x, y);
     }
 
-    @Override public void mouseReleased(int x, int y) { ctx.cameras.mouseReleased(x, y); }
     @Override public void keyReleased(int key) {}
 }

@@ -2,6 +2,7 @@ package components.animatronics;
 
 import components.GameContext;
 import components.JumpscarePlayer;
+import components.cameras.MusicBox;
 import state.StateManager;
 import utilities.FontManager;
 import utilities.Utility;
@@ -25,6 +26,9 @@ public class Lanze extends Animatronic
 
     private static final int MOVE_INTERVAL = 5;
     private int moveTimer = 0;
+
+    // MULTIPLIER FOR MUSIC BOX BOOST
+    private static final int BOOST_MULTIPLIER = 3;
 
     // SPRITES
     private final BufferedImage imageIdle;
@@ -109,25 +113,39 @@ public class Lanze extends Animatronic
 
     private void handlePatience(GameContext ctx)
     {
-        if(ctx.isMusicBoxHeld())
+        MusicBox musicBox = ctx.cameras.getMusicBox();
+
+        if(musicBox.isWinding())
         {
-            // INCREASE PATIENCE IF MUSIC BOX HELD
             patience++;
             if(patience >= MAX_PATIENCE)
+            {
                 patience = MAX_PATIENCE;
+                musicBox.stopWinding(); // DONE WINDING
+            }
 
-            // EXIT CRITICAL IF PATIENCE RECOVERED ABOVE 0
             if(state == LanzeState.CRITICAL && patience > 0)
                 state = LanzeState.AGGRESSIVE;
-        }
-        else
-        {
-            if(state == LanzeState.CRITICAL)
+
+            // NOTIFY SPEED BOOST ON THE FRAME WINDING STARTS
+            if(musicBox.wasClicked())
             {
-                criticalTimer--;
-                if(criticalTimer <= 0)
-                    jumpscareWaiting = true;
+                // EARL AND TYRONE MOVE FASTER WHEN THE MUSIC BOX IS WOUND
+                // MUSIC BOX BOOST IS LANZE PATIENCE MULTIPLIED BY THREE
+                // THE LOWER LANZE PATIENCE IS, THE LOWER THE BOOST
+                int boostFrames = patience * BOOST_MULTIPLIER;
+                for(Animatronic a : ctx.animatronics)
+                {
+                    if(a instanceof Earl earl) earl.applyMusicBoxBoost(boostFrames);
+                    if(a instanceof Tyrone tyrone) tyrone.applyMusicBoxBoost(boostFrames);
+                }
             }
+        }
+        else if(state == LanzeState.CRITICAL)
+        {
+            criticalTimer--;
+            if(criticalTimer <= 0)
+                jumpscareWaiting = true;
         }
     }
 
