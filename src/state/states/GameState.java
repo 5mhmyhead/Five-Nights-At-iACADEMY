@@ -9,6 +9,7 @@ import components.office.BlinkSystem;
 import components.office.OfficeView;
 import state.State;
 import state.StateManager;
+import utilities.SoundManager;
 
 import java.awt.*;
 
@@ -26,6 +27,8 @@ public class GameState extends State
     @Override
     public void init()
     {
+        SoundManager.AMBIENCE.loop();
+
         animatronics = new Animatronic[]
         {
             new Dave(),
@@ -44,8 +47,6 @@ public class GameState extends State
             new BlinkSystem(),
             new Clock()
         );
-
-
 
         // APPLY AI LEVELS DEPENDING ON THE NIGHT
         NightConfig config = stateManager.getNightManager().getConfig();

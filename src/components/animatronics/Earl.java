@@ -23,7 +23,7 @@ public class Earl extends Animatronic
     private int moveTimer = 0;
     private int doorTimer = 0;
 
-    private static final int MOVE_INTERVAL = 300; // 10 SECONDS
+    private static final int MOVE_INTERVAL = 510; // 10 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
 
     // PLAYER HAS TO HOLD FOR AT LEAST 1 SECOND BEFORE EARL GOES AWAY
@@ -96,17 +96,6 @@ public class Earl extends Animatronic
         moveTimer++;
         if(state == EarlState.BOOST)moveTimer++;
         if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
-
-        String speedMode = "NORMAL";
-        if(state == EarlState.BOOST && !ctx.cameras.isCameraViewable(currentCamera))
-            speedMode = "BOOSTED + BROKEN";
-        else if(state == EarlState.BOOST)
-            speedMode = "BOOSTED";
-        else if(!ctx.cameras.isCameraViewable(currentCamera))
-            speedMode = "BROKEN";
-
-        System.out.println(getClass().getSimpleName() + " speed: " + speedMode +
-                " | moveTimer: " + moveTimer + "/" + MOVE_INTERVAL);
 
         if(moveTimer >= MOVE_INTERVAL)
         {

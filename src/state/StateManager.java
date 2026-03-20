@@ -2,6 +2,7 @@ package state;
 
 import components.nights.NightManager;
 import state.states.*;
+import utilities.SoundManager;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -54,7 +55,11 @@ public class StateManager
     }
 
     // DEALLOCATES THE REMOVED STATE
-    private void unloadState(int state) { states[state] = null; }
+    private void unloadState(int state)
+    {
+        if(state == GAME_STATE) SoundManager.stopAll();
+        states[state] = null;
+    }
 
     // LOADS STATE DEPENDING ON INDEX
     private void loadState(int state)

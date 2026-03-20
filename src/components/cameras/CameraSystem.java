@@ -3,6 +3,7 @@ package components.cameras;
 import components.animatronics.Animatronic;
 import main.GamePanel;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -68,6 +69,19 @@ public class CameraSystem
 
     public void update()
     {
+        // HANDLE MUSIC BOX SOUND BASED ON CURRENT CAMERA
+        if(currentCamera == 0 && monitorUp)
+        {
+            if(!SoundManager.MUSIC_BOX.isPlaying() && !SoundManager.MUSIC_BOX_SPED_UP.isPlaying())
+                SoundManager.MUSIC_BOX.loop();
+        }
+        else
+        {
+            SoundManager.MUSIC_BOX.stop();
+            SoundManager.MUSIC_BOX_SPED_UP.stop();
+        }
+
+
         if(rebooting)
         {
             rebootTimer--;

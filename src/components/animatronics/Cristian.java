@@ -12,6 +12,7 @@ import java.awt.*;
 
 // EVERY 30-40 SECONDS, CRISTIAN EYES TURN RED
 // PLAYER MUST STARE AT HIM FOR 2 SECONDS TO RESET HIS PATIENCE
+// RED EYE ONLY HAPPENS WHEN CRISTIAN AI LEVEL IS HIGHER THAN 10
 public class Cristian extends Animatronic
 {
     private enum CristianState { IDLE, IMPATIENT, AGGRESSIVE, CRITICAL, RED_EYE, RED_EYE_CRITICAL }
@@ -31,11 +32,15 @@ public class Cristian extends Animatronic
     // CRISTIAN JUMPSCARES THE PLAYER WHEN THEY MOVE THEIR HEAD, FLIP THE CAMERA, OR CLOSE THEIR EYES
     private static final int FREEZE_DURATION = 150;
     private static final int STARE_REQUIRED = 60;
-    private static final int RED_EYE_MAX = 1200; // 40 SECONDS
-    private static final int RED_EYE_MIN = 900;  // 30 SECONDS
+    private static final int RED_EYE_GRACE = 45;
+
+    private static final int RED_EYE_MAX = 2100; // 70 SECONDS
+    private static final int RED_EYE_MIN = 1800; // 60 SECONDS
+
+    private int redEyeTrigger;
+    private int redEyeGraceTimer = 0;
 
     private int redEyeTimer = 0;
-    private int redEyeTrigger = 0;
     private int stareTimer = 0;
     private int freezeTimer = 0;
     private boolean warningShown = false;
@@ -43,13 +48,12 @@ public class Cristian extends Animatronic
     public Cristian()
     {
         location = Location.MAIN;
-        redEyeTrigger = (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
+        redEyeTrigger = RED_EYE_MIN + (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
     }
 
     @Override
     public void update(GameContext ctx)
     {
-        debugLog();
         handleRedEye(ctx);
         handleMovement(ctx);
         handlePatience(ctx);
@@ -71,6 +75,8 @@ public class Cristian extends Animatronic
 
     private void tickRedEyeTrigger(GameContext ctx)
     {
+        if(aiLevel <= 10) return;
+
         redEyeTimer++;
         if(redEyeTimer >= redEyeTrigger)
             activateRedEye(ctx);
@@ -79,6 +85,7 @@ public class Cristian extends Animatronic
     private void activateRedEye(GameContext ctx)
     {
         warningShown = ctx.cameras.isMonitorUp();
+        redEyeGraceTimer = RED_EYE_GRACE;
         state = CristianState.RED_EYE;
         redEyeTimer = 0;
         stareTimer = 0;
@@ -89,6 +96,13 @@ public class Cristian extends Animatronic
 
     private void handleRedEyeStare(GameContext ctx)
     {
+        // PLAYER WILL NOT LOSE DURING THE GRACE PERIOD
+        if(redEyeGraceTimer > 0)
+        {
+            redEyeGraceTimer--;
+            return;
+        }
+
         boolean playerInOffice = !ctx.cameras.isMonitorUp() && !ctx.office.isPlayerAtDoor();
         boolean playerInCameras = ctx.cameras.isMonitorUp();
 
@@ -217,23 +231,19 @@ public class Cristian extends Animatronic
         int barW = 200;
         int barH = 10;
 
-        // BACKGROUND
         g2.setColor(new Color(20, 20, 20, 180));
         g2.fillRoundRect(barX, barY, barW, barH, 4, 4);
 
-        // FILL — SCALES WITH PATIENCE (0-100)
         int fillW = (int)(barW * (patience / 100.0));
         g2.setColor(new Color(255, 100, 100, 220));
         g2.fillRoundRect(barX, barY, fillW, barH, 4, 4);
 
-        // BORDER
         g2.setColor(new Color(255, 180, 180));
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(barX, barY, barW, barH, 4, 4);
         g2.setStroke(new BasicStroke(1));
     }
 
-    // --- GETTERS ---
     public boolean shouldShowCameraWarning()
     {
         return (state == CristianState.RED_EYE || state == CristianState.RED_EYE_CRITICAL) && warningShown;
@@ -245,35 +255,4 @@ public class Cristian extends Animatronic
     }
 
     public int getPatience() { return patience; }
-
-    // DEBUG LOG
-    private int lastLoggedState = -1; // TRACK STATE CHANGES TO AVOID SPAM
-
-    private void debugLog()
-    {
-        int stateOrdinal = state.ordinal();
-
-        // ONLY LOG WHEN STATE CHANGES
-        if(stateOrdinal != lastLoggedState)
-        {
-            System.out.println("=== CRISTIAN STATE CHANGE ===");
-            System.out.println("  NEW STATE:   " + state);
-            System.out.println("  PATIENCE:    " + patience);
-            System.out.println("  FREEZE:      " + freezeTimer);
-            System.out.println("  NEXT RED EYE: " + redEyeTrigger + " frames (" + redEyeTrigger/30 + "s)");
-            lastLoggedState = stateOrdinal;
-        }
-
-        // LOG RED EYE PROGRESS EVERY SECOND
-        if(state == CristianState.RED_EYE && stareTimer % 30 == 0 && stareTimer > 0)
-            System.out.println("CRISTIAN RED EYE — STARE: " + stareTimer/30 + "s / " + STARE_REQUIRED/30 + "s");
-
-        // LOG FREEZE COUNTDOWN EVERY SECOND
-        if(freezeTimer > 0 && freezeTimer % 30 == 0)
-            System.out.println("CRISTIAN FROZEN — " + freezeTimer/30 + "s remaining");
-
-        // LOG RED EYE TRIGGER COUNTDOWN EVERY 5 SECONDS
-        if(state != CristianState.RED_EYE && redEyeTimer % 150 == 0 && redEyeTimer > 0)
-            System.out.println("CRISTIAN RED EYE IN: " + (redEyeTrigger - redEyeTimer)/30 + "s");
-    }
 }

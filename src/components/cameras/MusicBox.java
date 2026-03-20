@@ -1,6 +1,7 @@
 package components.cameras;
 
 import utilities.FontManager;
+import utilities.SoundManager;
 
 import java.awt.*;
 
@@ -8,6 +9,7 @@ public class MusicBox
 {
     private boolean clicked = false;
     private boolean winding = false;
+    private boolean spedUp = false;
 
     private static final int X = 830;
     private static final int Y = 645;
@@ -51,6 +53,20 @@ public class MusicBox
         int labelX = X + (W - g2.getFontMetrics().stringWidth(label)) / 2;
         int labelY = Y + H / 2 + 5;
         g2.drawString(label, labelX, labelY);
+    }
+
+    public void setSpedUp(boolean boosted)
+    {
+        if(this.spedUp == boosted) return;
+
+        this.spedUp = boosted;
+
+        // SWAP TRACKS
+        SoundManager.MUSIC_BOX.stop();
+        SoundManager.MUSIC_BOX_SPED_UP.stop();
+
+        if(boosted) SoundManager.MUSIC_BOX_SPED_UP.loop();
+        else SoundManager.MUSIC_BOX.loop();
     }
 
     public void startWinding() { winding = true; }

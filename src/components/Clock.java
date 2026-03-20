@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class Clock
 {
-    // 45 SECONDS TIMES 30 FPS EQUALS 1500 FRAMES PER HOUR
+    // 45 SECONDS TIMES 30 FPS EQUALS 1350 FRAMES PER HOUR
     // 4:30 PER NIGHT
     private static final int FRAMES_PER_HOUR = 1350;
     private static final String[] HOURS = { "12 AM", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM" };

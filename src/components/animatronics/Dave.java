@@ -105,19 +105,9 @@ public class Dave extends Animatronic
         boolean playerWatching = ctx.cameras.isMonitorUp() && (watchedCamera == currentCamera);
         boolean cameraViewable = ctx.cameras.isCameraViewable(currentCamera);
 
-        if(playerWatching && cameraViewable){
-            System.out.println("DAVE CANNOT MOVE");
-            return;
-        }
-
+        if(playerWatching && cameraViewable)return;
         if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
         moveTimer++;
-
-        String speedMode = "NORMAL";
-        if(!ctx.cameras.isCameraViewable(currentCamera)) speedMode = "BROKEN";
-
-        System.out.println(getClass().getSimpleName() + " speed: " + speedMode +
-                " | moveTimer: " + moveTimer + "/" + MOVE_INTERVAL);
 
         if(moveTimer >= MOVE_INTERVAL)
         {

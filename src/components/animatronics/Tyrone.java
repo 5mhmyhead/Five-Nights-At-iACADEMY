@@ -18,13 +18,13 @@ public class Tyrone extends Animatronic
     public enum TyroneState { MOVING, BOOST, MAIN }
     private TyroneState state = TyroneState.MOVING;
 
-    private static final int[] PATH = { 3, 1, 2, 4 };
+    private static final int[] PATH = { 3, 0, 1, 2, 4 };
     private int pathIndex = 0;
 
     private int moveTimer = 0;
     private int doorTimer = 0;
 
-    private static final int MOVE_INTERVAL = 210; // 7 SECONDS
+    private static final int MOVE_INTERVAL = 180; // 6 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
 
     // PLAYER HAS TO HOLD FOR AT LEAST 1 SECOND BEFORE TYRONE GOES AWAY

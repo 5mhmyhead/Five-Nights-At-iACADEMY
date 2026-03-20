@@ -128,11 +128,11 @@ public class Jirsten extends Animatronic {
     }
 
     // CALCULATES THE STAY LIMIT DEPENDING ON THE AI LEVEL OF JIRSTEN
-    // 15 SECONDS - 8 SECONDS RANGE
+    // 15 SECONDS - 6 SECONDS RANGE
     private int getStayLimit()
     {
         int maxLimit = 450;
-        int minLimit = 240;
+        int minLimit = 180;
         return maxLimit - (int)((maxLimit - minLimit) * (aiLevel - 1) / 19.0);
     }
 }
