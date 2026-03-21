@@ -1,6 +1,7 @@
 package components.animatronics;
 
 import components.GameContext;
+import components.JumpscarePlayer;
 import utilities.FontManager;
 
 import java.awt.*;
@@ -9,7 +10,8 @@ import java.awt.*;
 // CAMERAS CAN BE REBOOTED, BUT ANIMATRONICS WILL MOVE FASTER
 // STARING AT A CAMERA FOR LONGER THAN 10 SECONDS BREAKS A RANDOM CAMERA
 // STARTS AT CAMERA 4, CAN'T BREAK HER STARTING CAMERA
-public class Jirsten extends Animatronic {
+public class Jirsten extends Animatronic
+{
     private static final int MOVE_INTERVAL = 150; // MOVES EVERY 5 SECONDS
     private static final int STARE_LIMIT = 50;
 
@@ -17,10 +19,14 @@ public class Jirsten extends Animatronic {
     private int stareTimer = 0;
     private int stayTimer = 0;
 
+    private final JumpscarePlayer jumpscare;
+
     public Jirsten()
     {
         currentCamera = 3;
         location = Location.CAMERA;
+
+        jumpscare = new JumpscarePlayer("/jumpscares/jirsten", 8);
     }
 
     @Override
@@ -31,7 +37,8 @@ public class Jirsten extends Animatronic {
         handleStay(ctx);
     }
 
-    private void handleMovement(GameContext ctx) {
+    private void handleMovement(GameContext ctx)
+    {
         int watchedCamera = ctx.cameras.getCurrentCamera();
         boolean playerWatching = ctx.cameras.isMonitorUp() && watchedCamera == currentCamera;
 
@@ -126,6 +133,12 @@ public class Jirsten extends Animatronic {
         g2.setFont(FontManager.LCD_SMALL);
         g2.drawString("JIRSTEN", 75, 100);
     }
+
+    @Override
+    public boolean jumpscareIsPlaying() { return jumpscare.isPlaying(); }
+
+    @Override
+    public void drawJumpscare(Graphics2D g2) { jumpscare.draw(g2); }
 
     // CALCULATES THE STAY LIMIT DEPENDING ON THE AI LEVEL OF JIRSTEN
     // 15 SECONDS - 6 SECONDS RANGE
