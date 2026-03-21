@@ -93,20 +93,21 @@ public class GameState extends State
         // DRAW ANIMATRONICS
         if(!ctx.cameras.isMonitorUp())
         {
-            if(!ctx.office.isPlayerAtDoor())
+            if(!ctx.office.isPlayerAtDoor() && !ctx.office.isTransitioning())
             {
                 // OFFICE ANIMATRONICS
                 for(Animatronic a : animatronics)
                     if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.MAIN)
                         a.drawOnOffice(g2);
             }
-            else
+            // DOOR ANIMATRONICS
+            else if(ctx.office.isPlayerAtDoor() && !ctx.office.isTransitioning())
             {
-                // DOOR ANIMATRONICS
                 for(Animatronic a : animatronics)
                     if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.DOOR)
                         a.drawOnDoor(g2);
             }
+            // DURING TRANSITION, DRAW NOTHING
         }
 
         ctx.cameras.draw(g2, ctx.isInMainView(), animatronics);

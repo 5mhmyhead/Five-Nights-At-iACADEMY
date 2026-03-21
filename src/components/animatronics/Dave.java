@@ -8,6 +8,7 @@ import utilities.FontManager;
 import utilities.Utility;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 // BIG BAD FREDDY, MOVES SLOWLY AND FREEZES WHEN STARED AT
 // CAN ONLY BE SHOCKED 3 TIMES TO MAKE HIM GO BACK TO HIS STARTING CAMERA
@@ -32,6 +33,9 @@ public class Dave extends Animatronic
     private int jumpscareDelay;
     private boolean delayStarted = false;
 
+    // SPRITES
+    private final BufferedImage doorImage;
+
     public Dave()
     {
         currentCamera = 6;
@@ -40,8 +44,9 @@ public class Dave extends Animatronic
         // ROLLS A RANDOM NUMBER TO MATCH JUMPSCARE DELAY
         jumpscareDelay = (int)(Math.random() * 10 + 1) * GamePanel.FPS;
 
-        // LOAD JUMPSCARE
+        // LOAD SPRITES
         jumpscare = new JumpscarePlayer("/jumpscares/dave", 7);
+        doorImage = Utility.loadImage("/animatronics/dave/door.png");
     }
 
     @Override
@@ -161,6 +166,17 @@ public class Dave extends Animatronic
 
     @Override
     public void drawOnDoor(Graphics2D g2)
+    {
+        if(!jumpscareIsPlaying())
+        {
+            if(doorImage != null)
+                g2.drawImage(doorImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+            else
+                drawPlaceholder(g2);
+        }
+    }
+
+    public void drawPlaceholder(Graphics2D g2)
     {
         g2.setColor(new Color(38, 135, 255, 180));
         g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);

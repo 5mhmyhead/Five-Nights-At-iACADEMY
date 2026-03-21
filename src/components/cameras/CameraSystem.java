@@ -196,6 +196,11 @@ public class CameraSystem
         {
             drawCameraFeed(g2, animatronics);
 
+            // DRAW JIRSTEN WARNING ON TOP OF CAMERA FEED
+            for(Animatronic a : animatronics)
+                if(a instanceof Jirsten jirsten)
+                    jirsten.drawWarning(g2, this);
+
             // JIRSTEN JUMPSCARE DRAWN AFTER CAMERA FEED BUT BEFORE UI
             for(Animatronic a : animatronics)
                 if(a instanceof Jirsten jirsten && jirsten.jumpscareIsPlaying())

@@ -5,7 +5,6 @@ import components.JumpscarePlayer;
 import components.cameras.MusicBox;
 import state.StateManager;
 import utilities.FontManager;
-import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -49,10 +48,10 @@ public class Lanze extends Animatronic
         currentCamera = 0;
         location = Location.CAMERA;
 
-        imageIdle = Utility.loadImage("/animatronics/lanzeIdle.png");
-        imageImpatient = Utility.loadImage("/animatronics/lanzeImpatient.png");
-        imageAggressive = Utility.loadImage("/animatronics/lanzeAggressive.png");
-        imageCritical = Utility.loadImage("/animatronics/lanzeCritical.png");
+        imageIdle = Utility.loadImage("/animatronics/lanze/lanzeIdle.png");
+        imageImpatient = Utility.loadImage("/animatronics/lanze/lanzeImpatient.png");
+        imageAggressive = Utility.loadImage("/animatronics/lanze/lanzeAggressive.png");
+        imageCritical = Utility.loadImage("/animatronics/lanze/lanzeCritical.png");
 
         // SPRITE STARTS AT IDLE
         displayedImage = imageIdle;

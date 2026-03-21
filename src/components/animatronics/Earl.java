@@ -1,12 +1,14 @@
 package components.animatronics;
 
 import components.GameContext;
+import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
 import utilities.Utility;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 // LIKE BONNIE, MOVES IN THE CAMERAS ON THE LEFT OF THE PLAYER
 // WHEN THEY ARE AT THE OFFICE, GO TO THE CORRESPONDING VIEW AND BLINK
@@ -23,7 +25,7 @@ public class Earl extends Animatronic
     private int moveTimer = 0;
     private int doorTimer = 0;
 
-    private static final int MOVE_INTERVAL = 510; // 10 SECONDS
+    private static final int MOVE_INTERVAL = 510; // 17 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
 
     // PLAYER HAS TO HOLD FOR AT LEAST 1 SECOND BEFORE EARL GOES AWAY
@@ -35,15 +37,32 @@ public class Earl extends Animatronic
     private int stareCancelTimer = 0;
     private int boostFrames = 0;
 
+    // SPRITES
+    private final JumpscarePlayer jumpscare;
+    private final BufferedImage doorImage;
+
     public Earl()
     {
         currentCamera = 6;
         location = Location.CAMERA;
+
+        // LOAD SPRITES
+        jumpscare = new JumpscarePlayer("/jumpscares/earl", 7);
+        doorImage = Utility.loadImage("/animatronics/earl/door.png");
     }
 
     @Override
     public void update(GameContext ctx)
     {
+        // IF JUMPSCARE IS PLAYING, ONLY UPDATE IT
+        if(jumpscare.isPlaying())
+        {
+            jumpscare.update();
+            if(jumpscare.isFinished())
+                ctx.stateManager.setState(StateManager.LOSE_STATE);
+            return;
+        }
+
         switch(state)
         {
             case MOVING, BOOST -> handleMoving(ctx);
@@ -140,7 +159,10 @@ public class Earl extends Animatronic
             blinkHoldTimer = 0; // RESET IF PLAYER STOPS BLINKING
             doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
-                ctx.stateManager.setState(StateManager.LOSE_STATE);
+            {
+                ctx.cameras.forceMonitorDown();
+                jumpscare.play();
+            }
         }
     }
 
@@ -168,6 +190,17 @@ public class Earl extends Animatronic
     @Override
     public void drawOnDoor(Graphics2D g2)
     {
+        if(!jumpscareIsPlaying())
+        {
+            if(doorImage != null)
+                g2.drawImage(doorImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+            else
+                drawPlaceholder(g2);
+        }
+    }
+
+    public void drawPlaceholder(Graphics2D g2)
+    {
         g2.setColor(new Color(67, 191, 48, 180));
         g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
 
@@ -177,5 +210,14 @@ public class Earl extends Animatronic
 
         g2.setFont(FontManager.LCD_SMALL);
         Utility.drawCentered(g2, "BLINK! " + (doorTimer / 30 + 1) + "s", GamePanel.HEIGHT / 2 + 20);
+    }
+
+    @Override
+    public void drawJumpscare(Graphics2D g2) { jumpscare.draw(g2); }
+
+    @Override
+    public boolean jumpscareIsPlaying()
+    {
+        return jumpscare.isPlaying();
     }
 }

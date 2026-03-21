@@ -36,6 +36,7 @@ public class Tyrone extends Animatronic
     private int stareCancelTimer = 0;
     private int boostFrames = 0;
 
+    // SPRITES
     private final JumpscarePlayer jumpscare;
 
     public Tyrone()
@@ -43,7 +44,7 @@ public class Tyrone extends Animatronic
         currentCamera = 3;
         location = Location.CAMERA;
 
-        // LOAD JUMPSCARE
+        // LOAD SPRITES
         jumpscare = new JumpscarePlayer("/jumpscares/tyrone", 7);
     }
 
@@ -155,7 +156,10 @@ public class Tyrone extends Animatronic
             blinkHoldTimer = 0; // RESET IF PLAYER STOPS BLINKING
             doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
+            {
+                ctx.cameras.forceMonitorDown();
                 jumpscare.play();
+            }
         }
     }
 
@@ -173,6 +177,14 @@ public class Tyrone extends Animatronic
     @Override
     public void drawOnCamera(Graphics2D g2, int swayX)
     {
+//        if(!jumpscareIsPlaying())
+//        {
+//            if(doorImage != null)
+//                g2.drawImage(doorImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+//            else
+//                drawPlaceholder(g2);
+//        }
+
         g2.setColor(new Color(196, 180, 74));
         g2.fillRect(200, 30, 30, 30);
 
