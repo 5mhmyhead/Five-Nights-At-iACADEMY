@@ -122,7 +122,8 @@ public class GameState extends State
 
         // JUMPSCARE WILL PLAY IF A PLAYER LOSES
         for(Animatronic a : animatronics)
-            if(a.jumpscareIsPlaying()) a.drawJumpscare(g2);
+            if(a.jumpscareIsPlaying() && !(a instanceof Jirsten))
+                a.drawJumpscare(g2);
     }
 
     @Override public void keyPressed(int key)

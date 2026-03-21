@@ -1,6 +1,7 @@
 package components.cameras;
 
 import components.animatronics.Animatronic;
+import components.animatronics.Jirsten;
 import main.GamePanel;
 import utilities.FontManager;
 import utilities.SoundManager;
@@ -194,6 +195,12 @@ public class CameraSystem
         if(monitorUp)
         {
             drawCameraFeed(g2, animatronics);
+
+            // JIRSTEN JUMPSCARE DRAWN AFTER CAMERA FEED BUT BEFORE UI
+            for(Animatronic a : animatronics)
+                if(a instanceof Jirsten jirsten && jirsten.jumpscareIsPlaying())
+                    jirsten.drawJumpscare(g2);
+
             drawCameraMap(g2);
             drawCameraButtons(g2);
             drawRebootButton(g2);
