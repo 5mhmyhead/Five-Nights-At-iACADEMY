@@ -6,7 +6,7 @@ public class NightManager
     private static final NightConfig[] NIGHTS =
     {
         // ORDER IS DAVE, EARL, TYRONE, CRISTIAN, JIRSTEN, LANZE
-        new NightConfig(1, 5, 8, 8, 0, 0, 3),
+        new NightConfig(1, 5, 8, 8, 0, 20, 3),
         new NightConfig(2, 8, 10, 10, 0, 5, 5),
         new NightConfig(3, 10, 12, 12, 10, 10, 10),
         new NightConfig(4, 12, 15, 15, 12, 15, 12),

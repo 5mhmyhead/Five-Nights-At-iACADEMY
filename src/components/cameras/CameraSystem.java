@@ -47,6 +47,9 @@ public class CameraSystem
     private static final int REBOOT_W = 200;
     private static final int REBOOT_H = 40;
 
+    // INPUT LOCK THE PLAYER WHEN AN EVENT HAPPENS IN THE CAMERAS
+    private boolean inputLocked = false;
+
     // MUSIC BOX IN CAMERA 1 AND CONTROLLED SHOCK
     private final MusicBox musicBox = new MusicBox();
     private final ControlledShock shockButton = new ControlledShock();
@@ -111,6 +114,8 @@ public class CameraSystem
 
     public void mouseMoved(int mouseX, int mouseY)
     {
+        if(inputLocked) return;
+
         boolean inHoverZone =
                    mouseX >= HOVER_ZONE_X_MIN
                 && mouseX <= HOVER_ZONE_X_MAX
@@ -129,6 +134,7 @@ public class CameraSystem
 
     public void mouseClicked(int mouseX, int mouseY)
     {
+        if(inputLocked) return;
         if(!monitorUp) return;
 
         // CHECKS IF THE MOUSE CURSOR IS INSIDE THE BUTTON ZONE
@@ -166,6 +172,7 @@ public class CameraSystem
 
     public void keyPressed(int key)
     {
+        if(inputLocked) return;
         if(!monitorUp) return;
 
         if(key == KeyEvent.VK_A)
@@ -496,4 +503,8 @@ public class CameraSystem
     public boolean isMonitorUp() { return monitorUp; }
     public int getCurrentCamera() { return currentCamera; }
     public boolean wasCameraSwitched() { return cameraSwitched; }
+
+    public void lockInput() { inputLocked = true; }
+    public void unlockInput() { inputLocked = false; }
+    public boolean isInputLocked() { return inputLocked; }
 }

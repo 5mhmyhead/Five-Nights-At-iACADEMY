@@ -32,6 +32,23 @@ public class Jirsten extends Animatronic
     @Override
     public void update(GameContext ctx)
     {
+        if(jumpscare.isPlaying())
+        {
+            jumpscare.update();
+
+            if(jumpscare.isFinished())
+            {
+                // BREAK THE CAMERA AFTER JUMPSCARE ENDS
+                ctx.cameras.breakCamera(ctx.cameras.getCurrentCamera());
+                ctx.cameras.unlockInput(); // UNLOCK AFTER CAMERA BREAKS
+
+                currentCamera = pickRandomCamera(ctx.cameras.getCurrentCamera());
+                stareTimer = 0;
+                moveTimer = 0;
+            }
+            return; // BLOCK ALL OTHER UPDATES WHILE JUMPSCARE PLAYS
+        }
+
         handleMovement(ctx);
         handleStare(ctx);
         handleStay(ctx);
@@ -61,24 +78,29 @@ public class Jirsten extends Animatronic
 
     private void handleStay(GameContext ctx)
     {
-        // STAY COUNTER RESETS WHEN MOVING CAMERAS
         if(ctx.cameras.wasCameraSwitched())
         {
             stayTimer = 0;
             return;
         }
 
-        // WHEN MONITOR IS UP, INCREMENT STAY TIMER
         if(ctx.cameras.isMonitorUp())
         {
             stayTimer++;
-            System.out.println("JIRSTEN STAY: " + stayTimer + "/" + getStayLimit() + " (AI: " + aiLevel + ")");
 
             if(stayTimer >= getStayLimit())
             {
                 stayTimer = 0;
-                ctx.cameras.breakCamera(ctx.cameras.getCurrentCamera());
-                System.out.println("JIRSTEN BROKE CAM " + (ctx.cameras.getCurrentCamera() + 1));
+                // ONLY JUMPSCARE IF CAMERA IS VIEWABLE
+                if(ctx.cameras.isCameraViewable(currentCamera))
+                {
+                    jumpscare.play();
+                    ctx.cameras.lockInput();
+                }
+                else
+                {
+                    ctx.cameras.breakCamera(ctx.cameras.getCurrentCamera());
+                }
             }
         }
     }
@@ -95,10 +117,13 @@ public class Jirsten extends Animatronic
             // BREAK CAMERA IF STARED AT TOO LONG (NOT ON CAM 4)
             if(stareTimer >= STARE_LIMIT && currentCamera != 3)
             {
-                ctx.cameras.breakCamera(currentCamera);
                 stareTimer = 0;
-                currentCamera = pickRandomCamera(watchedCamera);
-                moveTimer = 0;
+                // ONLY JUMPSCARE IF CAMERA IS VIEWABLE
+                if(ctx.cameras.isCameraViewable(currentCamera))
+                {
+                    jumpscare.play();
+                    ctx.cameras.lockInput();
+                }
             }
         }
         else
