@@ -41,6 +41,10 @@ public class Earl extends Animatronic
     private final JumpscarePlayer jumpscare;
     private final BufferedImage doorImage;
 
+    private final BufferedImage camera5;
+    private final BufferedImage camera6;
+    private final BufferedImage camera7;
+
     public Earl()
     {
         currentCamera = 6;
@@ -49,6 +53,9 @@ public class Earl extends Animatronic
         // LOAD SPRITES
         jumpscare = new JumpscarePlayer("/jumpscares/earl", 7);
         doorImage = Utility.loadImage("/animatronics/earl/door.png");
+        camera5 = Utility.loadImage("/animatronics/earl/camera5.png");
+        camera6 = Utility.loadImage("/animatronics/earl/camera6.png");
+        camera7 = Utility.loadImage("/animatronics/earl/camera7.png");
     }
 
     @Override
@@ -188,11 +195,18 @@ public class Earl extends Animatronic
     @Override
     public void drawOnCamera(Graphics2D g2, int swayX)
     {
-        g2.setColor(new Color(74, 196, 87));
-        g2.fillRect(30, 30, 30, 30);
+        BufferedImage sprite = getSpriteForCamera();
 
-        g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("EARL", 75, 50);
+        if(sprite != null)
+            g2.drawImage(sprite, swayX, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        else
+        {
+            g2.setColor(new Color(74, 196, 87));
+            g2.fillRect(30, 30, 30, 30);
+
+            g2.setFont(FontManager.LCD_SMALL);
+            g2.drawString("EARL", 75, 50);
+        }
     }
 
     @Override
@@ -205,6 +219,17 @@ public class Earl extends Animatronic
             else
                 drawPlaceholder(g2);
         }
+    }
+
+    private BufferedImage getSpriteForCamera()
+    {
+        return switch(currentCamera)
+        {
+            case 4 -> camera5;
+            case 5 -> camera6;
+            case 6 -> camera7;
+            default -> null;
+        };
     }
 
     public void drawPlaceholder(Graphics2D g2)

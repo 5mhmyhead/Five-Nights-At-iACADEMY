@@ -17,7 +17,7 @@ public class Dave extends Animatronic
     private enum DaveState { GRACE, MOVING, DOOR }
     private DaveState state = DaveState.GRACE;
 
-    private static final int MAX_JUMPS = 5; // MOVES 5 CAMERAS BEFORE GOING TO THE DOOR
+    private static final int MAX_JUMPS = 100; // MOVES 5 CAMERAS BEFORE GOING TO THE DOOR
     private int moveCount = 0;
 
     private static final int GRACE_DURATION = 300;
@@ -33,12 +33,13 @@ public class Dave extends Animatronic
     private int watchPauseTimer = 0;
     private boolean wasWatched  = false;
 
+    // SPRITES
     // DAVE TAKES HIS TIME PLAYING HIS JUMPSCARE ANIMATION
     private final JumpscarePlayer jumpscare;
     private int jumpscareDelay;
     private boolean delayStarted = false;
 
-    // SPRITES
+    private final BufferedImage[] cameraSprites;
     private final BufferedImage doorImage;
 
     public Dave()
@@ -52,6 +53,10 @@ public class Dave extends Animatronic
         // LOAD SPRITES
         jumpscare = new JumpscarePlayer("/jumpscares/dave", 7);
         doorImage = Utility.loadImage("/animatronics/dave/door.png");
+
+        cameraSprites = new BufferedImage[7];
+        for(int i = 0; i < 7; i++)
+            cameraSprites[i] = Utility.loadImage("/animatronics/dave/camera" + (i + 1) + ".png");
     }
 
     @Override
@@ -185,11 +190,21 @@ public class Dave extends Animatronic
     @Override
     public void drawOnCamera(Graphics2D g2, int swayX)
     {
-        g2.setColor(new Color(91, 139, 241));
-        g2.fillRect(200, 80, 30, 30);
+        if(currentCamera >= 0
+            && currentCamera < cameraSprites.length
+            && cameraSprites[currentCamera] != null)
+        {
+            g2.drawImage(cameraSprites[currentCamera], swayX, 0,
+                GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        }
+        else
+        {
+            g2.setColor(new Color(91, 139, 241));
+            g2.fillRect(200, 80, 30, 30);
 
-        g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("DAVE", 245, 100);
+            g2.setFont(FontManager.LCD_SMALL);
+            g2.drawString("DAVE", 245, 100);
+        }
     }
 
     @Override

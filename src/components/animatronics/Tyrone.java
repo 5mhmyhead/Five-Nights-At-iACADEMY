@@ -8,11 +8,12 @@ import utilities.FontManager;
 import utilities.Utility;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 // LIKE CHIKA, MOVES IN THE CAMERAS ON THE RIGHT OF THE PLAYER
 // WHEN THEY ARE AT THE OFFICE, GO TO THE CORRESPONDING VIEW AND BLINK
 // TYRONE MOVES FASTER THAN EARL, BUT VISITS MORE CAMERAS
-// PATH: CAMERA 4 -> 2 -> 3 -> 5
+// PATH: CAMERA 4 -> 1 -> 2 -> 3 -> 5
 public class Tyrone extends Animatronic
 {
     public enum TyroneState { MOVING, BOOST, MAIN }
@@ -38,6 +39,13 @@ public class Tyrone extends Animatronic
 
     // SPRITES
     private final JumpscarePlayer jumpscare;
+    private final BufferedImage mainImage;
+
+    private final BufferedImage camera1;
+    private final BufferedImage camera2;
+    private final BufferedImage camera3;
+    private final BufferedImage camera4;
+    private final BufferedImage camera5;
 
     public Tyrone()
     {
@@ -46,6 +54,13 @@ public class Tyrone extends Animatronic
 
         // LOAD SPRITES
         jumpscare = new JumpscarePlayer("/jumpscares/tyrone", 7);
+        mainImage = Utility.loadImage("/animatronics/tyrone/main.png");
+
+        camera1 = Utility.loadImage("/animatronics/tyrone/camera1.png");
+        camera2 = Utility.loadImage("/animatronics/tyrone/camera2.png");
+        camera3 = Utility.loadImage("/animatronics/tyrone/camera3.png");
+        camera4 = Utility.loadImage("/animatronics/tyrone/camera4.png");
+        camera5 = Utility.loadImage("/animatronics/tyrone/camera5.png");
     }
 
     @Override
@@ -185,23 +200,46 @@ public class Tyrone extends Animatronic
     @Override
     public void drawOnCamera(Graphics2D g2, int swayX)
     {
-//        if(!jumpscareIsPlaying())
-//        {
-//            if(doorImage != null)
-//                g2.drawImage(doorImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
-//            else
-//                drawPlaceholder(g2);
-//        }
+        BufferedImage sprite = getSpriteForCamera();
 
-        g2.setColor(new Color(196, 180, 74));
-        g2.fillRect(200, 30, 30, 30);
+        if(sprite != null)
+            g2.drawImage(sprite, swayX, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        else
+        {
+            g2.setColor(new Color(196, 180, 74));
+            g2.fillRect(200, 30, 30, 30);
 
-        g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("TYRONE", 245, 50);
+            g2.setFont(FontManager.LCD_SMALL);
+            g2.drawString("TYRONE", 245, 50);
+        }
     }
 
     @Override
     public void drawOnOffice(Graphics2D g2)
+    {
+        if(!jumpscareIsPlaying())
+        {
+            if(mainImage != null)
+                g2.drawImage(mainImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+            else
+                drawPlaceholder(g2);
+        }
+    }
+
+    private BufferedImage getSpriteForCamera()
+    {
+        return switch(currentCamera)
+        {
+            case 0 -> camera1;
+            case 1 -> camera2;
+            case 2 -> camera3;
+            case 3 -> camera4;
+            case 4 -> camera5;
+            default -> null;
+        };
+    }
+
+    private void drawPlaceholder(Graphics2D g2)
     {
         g2.setColor(new Color(191, 150, 48, 180));
         g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);

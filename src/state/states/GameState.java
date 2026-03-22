@@ -102,7 +102,6 @@ public class GameState extends State
         {
             nightOver = true;
             fadeOutTimer = FADE_OUT_DURATION;
-            SoundManager.SIX_AM.play();
         }
 
         if(nightOver)
@@ -206,6 +205,7 @@ public class GameState extends State
     @Override
     public void onEnter()
     {
+        SoundManager.MAIN_MENU.stop();
         SoundManager.AMBIENCE.loop();
         SoundManager.MUSIC_BOX.loop();
         SoundManager.MUSIC_BOX.mute();

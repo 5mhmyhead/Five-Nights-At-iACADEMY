@@ -25,11 +25,11 @@ public class Jirsten extends Animatronic
 
     // SPRITES
     private final JumpscarePlayer jumpscare;
-
     private final JumpscarePlayer warningJumpscare;    // JUMPSCARE WHEN PLAYER STAYS IN CAM FOR TOO LONG
     private float warningAlpha = 0f;
 
     private final BufferedImage warningImage;
+    private final BufferedImage[] cameraSprites;
 
     public Jirsten()
     {
@@ -41,6 +41,9 @@ public class Jirsten extends Animatronic
         warningJumpscare = new JumpscarePlayer("/jumpscares/jirsten/warning", 4);
 
         warningImage = Utility.loadImage("/animatronics/jirsten/warning.png");
+        cameraSprites = new BufferedImage[7];
+        for(int i = 0; i < 7; i++)
+            cameraSprites[i] = Utility.loadImage("/animatronics/jirsten/camera" + (i + 1) + ".png");
     }
 
     @Override
@@ -200,11 +203,21 @@ public class Jirsten extends Animatronic
     @Override
     public void drawOnCamera(Graphics2D g2, int swayX)
     {
-        g2.setColor(new Color(180, 100, 100));
-        g2.fillRect(30, 80, 30, 30);
+        if(currentCamera >= 0
+                && currentCamera < cameraSprites.length
+                && cameraSprites[currentCamera] != null)
+        {
+            g2.drawImage(cameraSprites[currentCamera], swayX, 0,
+                    GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        }
+        else
+        {
+            g2.setColor(new Color(180, 100, 100));
+            g2.fillRect(30, 80, 30, 30);
 
-        g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("JIRSTEN", 75, 100);
+            g2.setFont(FontManager.LCD_SMALL);
+            g2.drawString("JIRSTEN", 75, 100);
+        }
     }
 
     @Override

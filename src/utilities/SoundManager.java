@@ -17,25 +17,23 @@ public class SoundManager
 
     // SHOCK BUTTON
     public static final SoundPlayer SHOCK = new SoundPlayer("/sounds/shock.wav");
+
     // CAMERAS
     public static final SoundPlayer CAMERA_REBOOTING = new SoundPlayer("/sounds/cameraRebooting.wav");
     public static final SoundPlayer CAMERA_BROKEN = new SoundPlayer("/sounds/cameraBroken.wav");
-
-    public static final SoundPlayer SIX_AM = new SoundPlayer("/sounds/sixAm.wav");
     public static final SoundPlayer JUMPSCARE = new SoundPlayer("/sounds/jumpscare.wav");
-
 
     //MISC
     public static final SoundPlayer MAIN_MENU = new SoundPlayer("/sounds/mainMenu.wav");
     public static final SoundPlayer NIGHT_START = new SoundPlayer("/sounds/nightStart.wav");
-
+    public static final SoundPlayer SIX_AM = new SoundPlayer("/sounds/sixAM.wav");
     public static final SoundPlayer RISER = new SoundPlayer("/sounds/riser.wav");
 
     // ARRAY FOR BULK OPERATIONS
     private static final SoundPlayer[] soundPlayers = new SoundPlayer[]
     {
-        AMBIENCE, CAMERA_SWITCH, CAMERA_STATIC, MONITOR,
-        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOTING, CAMERA_BROKEN, SIX_AM, RISER, MAIN_MENU, NIGHT_START
+        AMBIENCE, CAMERA_SWITCH, CAMERA_STATIC, MONITOR, MAIN_MENU, NIGHT_START,
+        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOTING, CAMERA_BROKEN, SIX_AM, RISER,
     };
 
     public static void stopAll()
