@@ -160,8 +160,16 @@ public class Earl extends Animatronic
             doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
             {
-                ctx.cameras.forceMonitorDown();
-                jumpscare.play();
+                // TRIGGER CAMERA OR BLINK TRANSITION FIRST
+                if(!ctx.cameras.isTransitioning() && ctx.cameras.isMonitorUp())
+                    ctx.cameras.forceMonitorDown();
+
+                if(ctx.blink.areEyesClosed())
+                    ctx.blink.forceOpen();
+
+                // WAIT FOR TRANSITIONS TO FINISH BEFORE JUMPSCARE
+                if(!ctx.cameras.isMonitorUp() && !ctx.cameras.isTransitioning() && !ctx.blink.areEyesClosed())
+                    jumpscare.play();
             }
         }
     }

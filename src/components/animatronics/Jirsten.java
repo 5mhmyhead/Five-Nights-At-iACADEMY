@@ -83,18 +83,15 @@ public class Jirsten extends Animatronic
         boolean playerWatching = ctx.cameras.isMonitorUp() && watchedCamera == currentCamera;
 
         // PAUSE MOVE TIMER WHILE PLAYER IS WATCHING JIRSTEN
-        if (!playerWatching) {
+        if (!playerWatching)
+        {
             moveTimer++;
-            if (moveTimer >= MOVE_INTERVAL) {
+            if (moveTimer >= MOVE_INTERVAL)
+            {
                 moveTimer = 0;
                 stareTimer = 0;
 
-                if (shouldMove()) {
-                    currentCamera = pickRandomCamera(watchedCamera);
-                    System.out.println("JIRSTEN MOVED TO CAM " + (currentCamera + 1));
-                } else {
-                    System.out.println("JIRSTEN FAILED MOVEMENT OPPORTUNITY");
-                }
+                if (shouldMove()) currentCamera = pickRandomCamera(watchedCamera);
             }
         }
     }
@@ -108,7 +105,9 @@ public class Jirsten extends Animatronic
             return;
         }
 
-        if(ctx.cameras.isMonitorUp() && ctx.cameras.isCameraViewable(ctx.cameras.getCurrentCamera()))
+        if(ctx.cameras.isMonitorUp()
+            && ctx.cameras.isCameraViewable(ctx.cameras.getCurrentCamera())
+            && ctx.cameras.getCurrentCamera() != 3)
         {
             stayTimer++;
 
@@ -147,7 +146,7 @@ public class Jirsten extends Animatronic
         {
             stareTimer++;
 
-            // BREAK CAMERA IF STARED AT TOO LONG (NOT ON CAM 4)
+            // BREAK CAMERA IF STARED AT TOO LONG
             if(stareTimer >= STARE_LIMIT && currentCamera != 3)
             {
                 stareTimer = 0;
@@ -175,9 +174,12 @@ public class Jirsten extends Animatronic
     private int pickRandomCamera(int watchedCamera)
     {
         int next;
-        do {
+
+        do
+        {
             next = (int)(Math.random() * 7);
-        } while(next == currentCamera || next == watchedCamera);
+        }
+        while(next == currentCamera || next == watchedCamera);
 
         return next;
     }

@@ -24,11 +24,18 @@ public class SoundManager
     public static final SoundPlayer SIX_AM = new SoundPlayer("/sounds/sixAm.wav");
     public static final SoundPlayer JUMPSCARE = new SoundPlayer("/sounds/jumpscare.wav");
 
+
+    //MISC
+    public static final SoundPlayer MAIN_MENU = new SoundPlayer("/sounds/mainMenu.wav");
+    public static final SoundPlayer NIGHT_START = new SoundPlayer("/sounds/nightStart.wav");
+
+    public static final SoundPlayer RISER = new SoundPlayer("/sounds/riser.wav");
+
     // ARRAY FOR BULK OPERATIONS
     private static final SoundPlayer[] soundPlayers = new SoundPlayer[]
     {
         AMBIENCE, CAMERA_SWITCH, CAMERA_STATIC, MONITOR,
-        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOTING, CAMERA_BROKEN, SIX_AM
+        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOTING, CAMERA_BROKEN, SIX_AM, RISER, MAIN_MENU, NIGHT_START
     };
 
     public static void stopAll()

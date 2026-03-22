@@ -3,19 +3,37 @@ package components.nights;
 public class NightManager
 {
     private int currentNight = 0;
+
     private static final NightConfig[] NIGHTS =
     {
         // ORDER IS DAVE, EARL, TYRONE, CRISTIAN, JIRSTEN, LANZE
-        new NightConfig(1, 5, 8, 8, 0, 20, 3),
-        new NightConfig(2, 8, 10, 10, 0, 5, 5),
-        new NightConfig(3, 10, 12, 12, 10, 10, 10),
-        new NightConfig(4, 12, 15, 15, 12, 15, 12),
-        new NightConfig(5, 15, 18, 18, 15, 20, 15),
+        new NightConfig(1, 6, 8, 8, 0, 0, 4),
+        new NightConfig(2, 8, 10, 10, 0, 5, 6),
+        new NightConfig(3, 10, 12, 12, 10, 10, 8),
+        new NightConfig(4, 12, 14, 14, 12, 15, 10),
+        new NightConfig(5, 14, 16, 16, 14, 18, 12),
     };
 
-    public NightConfig getConfig() { return NIGHTS[currentNight]; }
-    public int getNightNumber() { return NIGHTS[currentNight].night; }
-    public boolean isFinalNight() { return currentNight == NIGHTS.length - 1; }
+    public void loadNight(int nightNumber)
+    {
+        // CLAMP TO VALID RANGE
+        currentNight = Math.max(0, Math.min(nightNumber - 1, NIGHTS.length - 1));
+    }
+
+    public NightConfig getConfig()
+    {
+        return NIGHTS[currentNight];
+    }
+
+    public int getNightNumber()
+    {
+        return NIGHTS[currentNight].night();
+    }
+
+    public boolean isFinalNight()
+    {
+        return currentNight == NIGHTS.length - 1;
+    }
 
     public void advanceNight()
     {

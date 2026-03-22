@@ -64,6 +64,14 @@ public class JumpscarePlayer
             g2.drawImage(frame, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
     }
 
-    public boolean isPlaying()  { return playing; }
-    public boolean isFinished() { return finished; }
+    public boolean isPlaying()
+    {
+        return playing;
+    }
+
+
+    public boolean isFinished()
+    {
+        return finished;
+    }
 }

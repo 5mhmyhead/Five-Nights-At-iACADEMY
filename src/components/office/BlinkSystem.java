@@ -23,11 +23,7 @@ public class BlinkSystem
     {
         init();
     }
-
-    public void init()
-    {
-
-    }
+    public void init() {}
 
     public void update()
     {
@@ -133,9 +129,13 @@ public class BlinkSystem
     }
 
     // FORCES EYES OPEN
-    public void forceDown()
+    public void forceOpen()
     {
-        eyesClosed = false;
+        if(eyesClosed)
+        {
+            eyesClosed = false;
+            closeTimer = BLINK_DURATION;
+        }
     }
 
     public int getCloseTimer() { return closeTimer; }

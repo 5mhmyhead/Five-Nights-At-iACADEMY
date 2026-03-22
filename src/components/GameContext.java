@@ -42,13 +42,7 @@ public class GameContext
     {
         return !office.isPlayerAtDoor()
             && !office.isTransitioning()
-            && !blink.areEyesClosed();
-    }
-
-    public boolean isInDoorView()
-    {
-        return office.isPlayerAtDoor()
-            && !office.isTransitioning()
+            && !cameras.isTransitioning()
             && !blink.areEyesClosed();
     }
 

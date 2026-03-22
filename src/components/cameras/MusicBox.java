@@ -9,6 +9,8 @@ public class MusicBox
 {
     private boolean clicked = false;
     private boolean winding = false;
+    private boolean spedUp = false;
+
     private int boostFrames = 0;
 
     private static final int X = 830;
@@ -24,17 +26,7 @@ public class MusicBox
     public void update()
     {
         clicked = false;
-
-        if(boostFrames > 0)
-        {
-            boostFrames--;
-            if(boostFrames <= 0)
-            {
-                // BOOST EXPIRED, SWAP BACK TO NORMAL
-                SoundManager.MUSIC_BOX_SPED_UP.mute();
-                SoundManager.MUSIC_BOX.unmute();
-            }
-        }
+        if(boostFrames > 0) boostFrames--;
     }
 
     public void mouseClicked(int mouseX, int mouseY)
@@ -69,12 +61,20 @@ public class MusicBox
     public void applyBoost(int patience)
     {
         boostFrames = patience * 3;
+    }
+
+    public void setSpedUpSound(boolean spedUp)
+    {
+        if(this.spedUp == spedUp) return;
+        this.spedUp = spedUp;
+
         SoundManager.MUSIC_BOX.mute();
-        SoundManager.MUSIC_BOX_SPED_UP.unmute();
+        SoundManager.MUSIC_BOX_SPED_UP.mute();
     }
 
     public void startWinding() { winding = true; }
     public void stopWinding()  { winding = false; }
+    public boolean isSpedUp() { return spedUp; }
 
     public boolean isWinding()   { return winding; }
     public boolean wasClicked()  { return clicked; }

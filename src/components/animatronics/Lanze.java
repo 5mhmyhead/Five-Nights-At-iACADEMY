@@ -5,6 +5,7 @@ import components.JumpscarePlayer;
 import components.cameras.MusicBox;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -71,8 +72,8 @@ public class Lanze extends Animatronic
             return;
         }
 
-        // TRIGGER JUMPSCARE ONCE MONITOR IS DOWN
-        if(!(!jumpscareWaiting || ctx.cameras.isMonitorUp()))
+        // TRIGGER JUMPSCARE ONCE MONITOR IS DOWN OR BLINK IS DOWN
+        if(!(!jumpscareWaiting || ctx.cameras.isMonitorUp() || ctx.blink.areEyesClosed()))
         {
             jumpscareWaiting = false;
             jumpscare.play();
@@ -82,6 +83,7 @@ public class Lanze extends Animatronic
         handleMovement();
         handlePatience(ctx);
         updateDisplayedImage(ctx);
+        updateMusicBoxSound(ctx);
     }
 
     private void handleMovement()
@@ -223,5 +225,10 @@ public class Lanze extends Animatronic
                 && ctx.cameras.getCurrentCamera() == currentCamera;
 
         if(!playerWatching) displayedImage = getCurrentImage();
+    }
+
+    private void updateMusicBoxSound(GameContext ctx)
+    {
+        ctx.cameras.getMusicBox().setSpedUpSound(patience <= 33);
     }
 }

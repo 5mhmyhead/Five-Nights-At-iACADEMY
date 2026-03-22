@@ -9,6 +9,7 @@ import utilities.Utility;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 
 public class CameraSystem
 {
@@ -32,9 +33,15 @@ public class CameraSystem
     private static final int HOVER_ZONE_X_MIN = (int)(GamePanel.WIDTH * 0.05);
     private static final int HOVER_ZONE_X_MAX = (int)(GamePanel.WIDTH * 0.45);
 
-    // STATIC WHEN FLIPPING CAMERAS
+    // STATIC AND FLICKER WHEN FLIPPING CAMERAS
     private int staticTimer = 0;
     private static final int STATIC_DURATION = 20;
+
+    private static int scanlineTimer = 0;
+    private static final int SCANLINE_DURATION = 7;
+
+    private int flickerTimer = 0;
+    private static final int FLICKER_DURATION = 120;
 
     // X AND Y COORDINATES OF EACH BUTTON STORED IN AN ARRAY
     private static final int[] BUTTON_X = { 285, 160, 245, 160, 285, 185, 85 };
@@ -51,12 +58,20 @@ public class CameraSystem
     // INPUT LOCK THE PLAYER WHEN AN EVENT HAPPENS IN THE CAMERAS
     private boolean inputLocked = false;
 
+    // TRANSITION BETWEEN THE MAIN AND MAIN VIEWS
+    private static final int TRANSITION_LENGTH = 5;
+    private final BufferedImage[] transitionFrames;
+
+    private int transitionIndex = 0;
+    private boolean transitioning = false;
+    private boolean transitionForward = true;
+
+    private static final int FRAMES_PER_IMAGE = 1;  // VARIABLE TO TUNE TRANSITION ANIMATION
+    private int frameHoldCounter = 0;
+
     // MUSIC BOX IN CAMERA 1 AND CONTROLLED SHOCK
     private final MusicBox musicBox = new MusicBox();
     private final ControlledShock shockButton = new ControlledShock();
-
-    private int flickerTimer = 0;
-    private static final int FLICKER_DURATION = 120;
 
     public CameraSystem()
     {
@@ -72,49 +87,104 @@ public class CameraSystem
         };
 
         brokenCameras = new boolean[cameras.length];
+
+        // LOAD TRANSITION FRAMES
+        transitionFrames = new BufferedImage[TRANSITION_LENGTH];
+        for(int i = 0; i < TRANSITION_LENGTH; i++)
+            transitionFrames[i] = Utility.applyMotionBlur(Utility.loadImage("/office/monitor/transition" + (i + 1) + ".png"));
     }
 
     public void update()
     {
         updateAudio();
+        updateFlicker();
+        updateRebooting();
+        updateTransition();
+        updateTimers();
 
-        // FLICKER CAMERAS WHEN SHOCK IS PRESSED
+        musicBox.update();
+        shockButton.update();
+        cameras[currentCamera].update();
+
+        cameraSwitched = false;
+    }
+
+    private void updateFlicker()
+    {
         if(shockButton.wasShockPressed())
         {
             flickerTimer = FLICKER_DURATION;
             SoundManager.SHOCK.play();
         }
-
         if(flickerTimer > 0) flickerTimer--;
+    }
 
-        if(rebooting)
+    private void updateRebooting()
+    {
+        if(!rebooting) return;
+        rebootTimer--;
+        if(rebootTimer <= 0)
         {
-            rebootTimer--;
-            if(rebootTimer <= 0)
+            SoundManager.CAMERA_REBOOTING.stop();
+            rebooting = false;
+            brokenCameras = new boolean[cameras.length];
+            shockButton.addCharge();
+        }
+    }
+
+    private void updateTransition()
+    {
+        if(!transitioning) return;
+
+        frameHoldCounter++;
+        if(frameHoldCounter < FRAMES_PER_IMAGE) return;
+        frameHoldCounter = 0;
+
+        if(transitionForward)
+        {
+            transitionIndex++;
+            if(transitionIndex >= TRANSITION_LENGTH)
             {
-                SoundManager.CAMERA_REBOOTING.stop();
-                rebooting = false;
-                brokenCameras = new boolean[cameras.length];
-                shockButton.addCharge();
+                transitioning = false;
+                monitorUp = true;
+                transitionIndex = 0;
+                staticTimer = STATIC_DURATION;
+                scanlineTimer = SCANLINE_DURATION;
             }
         }
+        else
+        {
+            transitionIndex--;
+            if(transitionIndex < 0)
+            {
+                transitioning = false;
+                monitorUp = false;
+                transitionIndex = 0;
+            }
+        }
+    }
 
-        // UPDATE THE SHOCK BUTTON AND MUSIC BOX
-        musicBox.update();
-        shockButton.update();
+    private void updateTimers()
+    {
+        if(staticTimer > 0)   staticTimer--;
+        if(scanlineTimer > 0) scanlineTimer--;
 
-        // UPDATE CAMERA SWAY ANIMATION
-        cameras[currentCamera].update();
+        if(!monitorUp || transitioning) return;
 
-        // UPDATE THE TIMER STATIC
-        if(staticTimer > 0) staticTimer--;
-
-        // CAMERA SWITCHED IS FALSE EVERY OTHER FRAME
-        cameraSwitched = false;
+        if(rebooting || brokenCameras[currentCamera])
+        {
+            Utility.updateScanlines();
+            scanlineTimer = SCANLINE_DURATION;
+        }
+        else if(staticTimer % 3 == 0)
+        {
+            Utility.updateScanlines();
+        }
     }
 
     public void mouseMoved(int mouseX, int mouseY)
     {
+        if(transitioning) return;
         if(inputLocked) return;
 
         boolean inHoverZone =
@@ -126,8 +196,9 @@ public class CameraSystem
         {
             SoundManager.MONITOR.setVolume(0.5);
             SoundManager.MONITOR.play();
-            monitorUp = !monitorUp;
-            if(monitorUp) staticTimer = STATIC_DURATION;
+            transitioning = true;
+            transitionForward = !monitorUp;
+            transitionIndex = transitionForward ? 0 : TRANSITION_LENGTH - 1;
         }
 
         wasInHoverZone = inHoverZone;
@@ -148,9 +219,13 @@ public class CameraSystem
                 SoundManager.CAMERA_SWITCH.setVolume(0.3);
                 SoundManager.CAMERA_SWITCH.play();
 
-                currentCamera = i;
-                if(!rebooting) staticTimer = STATIC_DURATION; // ADD STATIC EFFECT
-                cameraSwitched = true;
+                if(i != currentCamera) // ONLY FLAG IF ACTUALLY SWITCHING TO A DIFFERENT CAMERA
+                {
+                    currentCamera  = i;
+                    cameraSwitched = true;
+                    staticTimer = STATIC_DURATION;
+                    scanlineTimer = SCANLINE_DURATION;
+                }
                 return;
             }
         }
@@ -179,45 +254,78 @@ public class CameraSystem
         if(key == KeyEvent.VK_A)
         {
             currentCamera = (currentCamera - 1 + cameras.length) % cameras.length;
-            if(!rebooting) staticTimer = STATIC_DURATION;
+            staticTimer = STATIC_DURATION;
+            scanlineTimer = SCANLINE_DURATION;
             cameraSwitched = true;
         }
         if(key == KeyEvent.VK_D)
         {
             currentCamera = (currentCamera + 1) % cameras.length;
-            if(!rebooting) staticTimer = STATIC_DURATION;
+            staticTimer = STATIC_DURATION;
+            scanlineTimer = SCANLINE_DURATION;
             cameraSwitched = true;
         }
     }
 
-    public void draw(Graphics2D g2, boolean showHover, Animatronic[] animatronics)
+    public void draw(Graphics2D g2, boolean showHints, Animatronic[] animatronics)
     {
-        if(monitorUp)
+        if(monitorUp && !transitioning)
+            drawMonitorUp(g2, animatronics);
+
+        if(showHints) drawHoverZone(g2);
+        if(transitioning) drawTransitionFrame(g2);
+    }
+
+    private void drawMonitorUp(Graphics2D g2, Animatronic[] animatronics)
+    {
+        drawCameraFeed(g2, animatronics);
+        drawJirstenOverlays(g2, animatronics);
+        drawScanlines(g2);
+        drawCameraUI(g2);
+        drawStatic(g2);
+    }
+
+    private void drawJirstenOverlays(Graphics2D g2, Animatronic[] animatronics)
+    {
+        for(Animatronic a : animatronics)
+            if(a instanceof Jirsten jirsten)
+                jirsten.drawWarning(g2, this);
+
+        for(Animatronic a : animatronics)
+            if(a instanceof Jirsten jirsten && jirsten.jumpscareIsPlaying())
+                jirsten.drawJumpscare(g2);
+    }
+
+    private void drawScanlines(Graphics2D g2)
+    {
+        if(scanlineTimer > 0 || rebooting || brokenCameras[currentCamera])
+            Utility.drawScanlines(g2, getTextColor());
+    }
+
+    private void drawCameraUI(Graphics2D g2)
+    {
+        drawCameraMap(g2);
+        drawCameraButtons(g2);
+        drawRebootButton(g2);
+
+        if(currentCamera == 0) musicBox.draw(g2);
+        shockButton.draw(g2);
+
+        drawCameraLabel(g2);
+    }
+
+    private void drawTransitionFrame(Graphics2D g2)
+    {
+        // CURRENT FRAME IS LOADED DEPENDING ON THE INDEX
+        BufferedImage frame = transitionFrames[transitionIndex];
+
+        if(frame != null)
+            g2.drawImage(frame, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        else
         {
-            drawCameraFeed(g2, animatronics);
-
-            // DRAW JIRSTEN WARNING ON TOP OF CAMERA FEED
-            for(Animatronic a : animatronics)
-                if(a instanceof Jirsten jirsten)
-                    jirsten.drawWarning(g2, this);
-
-            // JIRSTEN JUMPSCARE DRAWN AFTER CAMERA FEED BUT BEFORE UI
-            for(Animatronic a : animatronics)
-                if(a instanceof Jirsten jirsten && jirsten.jumpscareIsPlaying())
-                    jirsten.drawJumpscare(g2);
-
-            drawCameraMap(g2);
-            drawCameraButtons(g2);
-            drawRebootButton(g2);
-
-            if(currentCamera == 0) musicBox.draw(g2);
-            shockButton.draw(g2);
-
-            drawCameraLabel(g2);
-            drawStatic(g2);
+            g2.setColor(Color.BLACK);
+            g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
         }
-
-        if(showHover) drawHoverZone(g2);
     }
 
     private void drawCameraFeed(Graphics2D g2, Animatronic[] animatronics)
@@ -475,20 +583,21 @@ public class CameraSystem
         return new Color(0, 180, 0);
     }
 
-    public void forceMonitorDown()
-    {
-        monitorUp = false;
-    }
-
     public void updateAudio()
     {
         // HANDLE MUSIC BOX SOUND BASED ON CURRENT CAMERA
         if(currentCamera == 0 && monitorUp)
         {
-            if(musicBox.isBoostActive())
+            if(musicBox.isSpedUp())
+            {
+                SoundManager.MUSIC_BOX.mute();
                 SoundManager.MUSIC_BOX_SPED_UP.unmute();
+            }
             else
+            {
+                SoundManager.MUSIC_BOX_SPED_UP.mute();
                 SoundManager.MUSIC_BOX.unmute();
+            }
         }
         else
         {
@@ -509,14 +618,24 @@ public class CameraSystem
             SoundManager.CAMERA_REBOOTING.mute();
     }
 
+    public void forceMonitorDown()
+    {
+        if(!monitorUp) return;
+        transitioning = true;
+        transitionForward = false;
+        transitionIndex = TRANSITION_LENGTH - 1;
+        frameHoldCounter = 0;
+    }
+
     public MusicBox getMusicBox() { return musicBox; }
     public ControlledShock getShockButton() { return shockButton; }
 
     public boolean isMonitorUp() { return monitorUp; }
+    public boolean isTransitioning() { return transitioning; }
+
     public int getCurrentCamera() { return currentCamera; }
     public boolean wasCameraSwitched() { return cameraSwitched; }
 
     public void lockInput() { inputLocked = true; }
     public void unlockInput() { inputLocked = false; }
-    public boolean isInputLocked() { return inputLocked; }
 }

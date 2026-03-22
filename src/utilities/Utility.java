@@ -13,6 +13,9 @@ import java.util.Objects;
 
 public class Utility
 {
+    private static int[] scanlinePositions;
+    private static int SCANLINE_COUNT = 4;
+
     // DRAW STRING TO THE CENTER OF SCREEN
     public static void drawCentered(Graphics2D g, String text, int y)
     {
@@ -72,7 +75,7 @@ public class Utility
     public static void drawStatic(Graphics2D g2, int staticTimer, int staticDuration, Color baseColor)
     {
         float minAlpha = 0.20f;
-        float maxAlpha = 0.80f;
+        float maxAlpha = 0.90f;
 
         float fadeRange = maxAlpha - minAlpha;
         float alpha = minAlpha;
@@ -97,5 +100,56 @@ public class Utility
                 }
             }
         }
+    }
+
+    // DRAW SCANLINES WHENEVER THE PLAYER PULLS UP THE CAMERAS
+    public static void drawScanlines(Graphics2D g2, Color baseColor)
+    {
+        if(scanlinePositions == null) return;
+
+        g2.setColor(new Color(
+            baseColor.getRed(),
+            baseColor.getGreen(),
+            baseColor.getBlue()
+        ));
+
+        for(int pos : scanlinePositions)
+        {
+            int height = 20 + (int)(Math.random() * 100);
+            g2.fillRect(0, pos, GamePanel.WIDTH, height);
+        }
+    }
+
+    // FOR SCANLINES OUTSIDE OF CAMERAS
+    public static void drawAmbientScanlines(Graphics2D g2, Color baseColor, int count)
+    {
+        // GENERATE FRESH POSITIONS FOR THIS DRAW
+        int sectionHeight = GamePanel.HEIGHT / count;
+
+        g2.setColor(new Color(
+            baseColor.getRed(),
+            baseColor.getGreen(),
+            baseColor.getBlue(),
+            baseColor.getAlpha()
+        ));
+
+        for(int i = 0; i < count; i++)
+        {
+            int pos = i * sectionHeight + (int)(Math.random() * sectionHeight) - 30;
+            int height = 20 + (int)(Math.random() * 120);
+            g2.fillRect(0, pos, GamePanel.WIDTH, height);
+        }
+    }
+
+    public static void updateScanlines()
+    {
+        scanlinePositions = new int[SCANLINE_COUNT];
+        for(int i = 0; i < SCANLINE_COUNT; i++)
+            scanlinePositions[i] = (int)(Math.random() * GamePanel.HEIGHT);
+    }
+
+    public static void setScanlineCount(int count)
+    {
+        SCANLINE_COUNT = count;
     }
 }

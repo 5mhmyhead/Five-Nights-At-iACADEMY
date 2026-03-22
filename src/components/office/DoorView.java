@@ -10,7 +10,11 @@ import java.awt.image.BufferedImage;
 public class DoorView
 {
     private final BufferedImage doorImage;
-    public DoorView() { doorImage = Utility.loadImage("/office/door.png"); }
+
+    public DoorView()
+    {
+        doorImage = Utility.loadImage("/office/door.png");
+    }
 
     public void draw(Graphics2D g2)
     {

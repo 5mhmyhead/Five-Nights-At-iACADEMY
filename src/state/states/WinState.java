@@ -4,6 +4,7 @@ import main.GamePanel;
 import state.State;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.SaveManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -17,7 +18,10 @@ public class WinState extends State
     }
 
     @Override
-    public void init() {}
+    public void init()
+    {
+        Utility.setScanlineCount(3);
+    }
 
     @Override
     public void update() {}
@@ -33,7 +37,7 @@ public class WinState extends State
         g2.fillRect(0, 0, w, h);
 
         g2.setColor(Color.YELLOW);
-        g2.setFont(FontManager.LCD_LARGE);
+        g2.setFont(FontManager.LCD_CLOCK);
         Utility.drawCentered(g2, "6 AM - YOU SURVIVED!", h / 2 - 20);
 
         g2.setColor(Color.WHITE);
@@ -49,6 +53,7 @@ public class WinState extends State
         else
         {
             stateManager.getNightManager().advanceNight();
+            SaveManager.save(stateManager.getNightManager().getNightNumber());
             stateManager.setState(StateManager.INTRO_STATE);
         }
     }

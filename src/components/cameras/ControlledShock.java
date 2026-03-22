@@ -13,6 +13,10 @@ public class ControlledShock
     private int charges = MAX_CHARGES;
     private boolean shockPressed = false;
 
+    // COOLDOWN AFTER SHOCKING
+    private static final int COOLDOWN_DURATION = 90;
+    private int cooldownTimer = 0;
+
     // SHOCK BUTTON LAYOUT
     private static final int X = 1040;
     private static final int Y = 595;
@@ -26,18 +30,21 @@ public class ControlledShock
     public void update()
     {
         shockPressed = false;
+        if(cooldownTimer > 0) cooldownTimer--;
     }
 
     public void mouseClicked(int mouseX, int mouseY)
     {
         if(charges <= 0) return;
+        if(cooldownTimer > 0) return;
 
         if(mouseX >= X && mouseX <= X + W && mouseY >= Y && mouseY <= Y + H)
         {
             SoundManager.SHOCK.setVolume(0.5);
             SoundManager.SHOCK.play();
-            shockPressed = true;
+            shockPressed  = true;
             charges--;
+            cooldownTimer = COOLDOWN_DURATION;
         }
     }
 
@@ -49,7 +56,7 @@ public class ControlledShock
 
     public void draw(Graphics2D g2)
     {
-        boolean canShock = charges > 0;
+        boolean canShock = charges > 0 && cooldownTimer <= 0;
 
         g2.setColor(canShock ? COLOR_ACTIVE : COLOR_EMPTY);
         g2.fillRoundRect(X, Y, W, H, 8, 8);
@@ -60,7 +67,13 @@ public class ControlledShock
         g2.setStroke(new BasicStroke(1));
 
         g2.setFont(FontManager.LCD_SMALL);
-        String label = "SHOCK [" + charges + "/" + MAX_CHARGES + "]";
+
+        String label;
+        if(cooldownTimer > 0)
+            label = "RECALIBRATING...";
+        else
+            label = "SHOCK [" + charges + "/" + MAX_CHARGES + "]";
+
         int labelX = X + (W - g2.getFontMetrics().stringWidth(label)) / 2;
         int labelY = Y + H / 2 + 5;
         g2.drawString(label, labelX, labelY);

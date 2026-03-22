@@ -52,6 +52,9 @@ public class StateManager
         unloadState(currentState);
         currentState = state;
         loadState(currentState);
+
+        if(states[currentState] != null)
+            states[currentState].onEnter(); // CALLED WHEN STATE BECOMES ACTIVE
     }
 
     // DEALLOCATES THE REMOVED STATE
@@ -61,14 +64,23 @@ public class StateManager
         states[state] = null;
     }
 
+    public void preloadGameState()
+    {
+        if(states[GAME_STATE] == null)
+            states[GAME_STATE] = new GameState(this);
+    }
+
     // LOADS STATE DEPENDING ON INDEX
     private void loadState(int state)
     {
         if(state == TITLE_STATE) states[state] = new TitleState(this);
         if(state == INTRO_STATE) states[state] = new IntroState(this);
-        if(state == GAME_STATE) states[state] = new GameState(this);
         if(state == LOSE_STATE) states[state] = new LoseState(this);
         if(state == WIN_STATE) states[state] = new WinState(this);
+
+        if(state == GAME_STATE
+            && states[state] == null)
+            states[state] = new GameState(this);
     }
 
     // SENDS THE KEY PRESS TO THE CURRENT STATE

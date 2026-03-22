@@ -10,7 +10,11 @@ import java.awt.image.BufferedImage;
 public class MainView
 {
     private final BufferedImage mainImage;
-    public MainView() { mainImage = Utility.loadImage("/office/main.png"); }
+
+    public MainView()
+    {
+        mainImage = Utility.loadImage("/office/main.png");
+    }
 
     public void draw(Graphics2D g2)
     {

@@ -10,6 +10,7 @@ import components.office.OfficeView;
 import state.State;
 import state.StateManager;
 import utilities.SoundManager;
+import utilities.Utility;
 
 import java.awt.*;
 
@@ -17,6 +18,11 @@ public class GameState extends State
 {
     private GameContext ctx;               // A CONTEXT CLASS THAT HOLDS ALL THE MECHANICS OF THE GAME
     private Animatronic[] animatronics;    // THE ANIMATRONICS IN THE GAME
+
+    // NIGHT OVER FADE
+    private boolean nightOver = false;
+    private int fadeOutTimer  = 0;
+    private static final int FADE_OUT_DURATION = 75; // 2.5 SECONDS
 
     public GameState(StateManager stateManager)
     {
@@ -27,14 +33,13 @@ public class GameState extends State
     @Override
     public void init()
     {
-        SoundManager.AMBIENCE.loop();
+        initAnimatronics();
+        initContext();
+        applyNightConfig();
+    }
 
-        SoundManager.MUSIC_BOX.loop();
-        SoundManager.MUSIC_BOX.mute();
-
-        SoundManager.MUSIC_BOX_SPED_UP.loop();
-        SoundManager.MUSIC_BOX_SPED_UP.mute();
-
+    private void initAnimatronics()
+    {
         animatronics = new Animatronic[]
         {
             new Dave(),
@@ -44,7 +49,10 @@ public class GameState extends State
             new Jirsten(),
             new Lanze(),
         };
+    }
 
+    private void initContext()
+    {
         ctx = new GameContext(
             stateManager,
             animatronics,
@@ -53,32 +61,69 @@ public class GameState extends State
             new BlinkSystem(),
             new Clock()
         );
+    }
 
+    private void applyNightConfig()
+    {
         // APPLY AI LEVELS DEPENDING ON THE NIGHT
         NightConfig config = stateManager.getNightManager().getConfig();
         for(int i = 0; i < animatronics.length; i++)
-            animatronics[i].setAiLevel(config.aiLevels[i]);
+            animatronics[i].setAiLevel(config.aiLevels()[i]);
     }
 
     @Override
     public void update()
     {
-        // CHECK FOR ACTIVE JUMPSCARE FIRST
+        if(handleActiveJumpscare()) return;
+        if(handleNightOver()) return;
+
+        updateAnimatronics();
+        updateSystems();
+    }
+
+    private boolean handleActiveJumpscare()
+    {
         for(Animatronic a : animatronics)
+        {
             if(a.jumpscareIsPlaying())
             {
-                a.update(ctx); // ONLY UPDATE THE ANIMATRONIC WITH ACTIVE JUMPSCARE
-                return;        // BLOCK EVERYTHING ELSE
+                a.update(ctx);
+                ctx.cameras.update();
+                ctx.blink.update();
+                return true;
             }
+        }
+        return false;
+    }
 
-        // NIGHT ENDS WHEN CLOCK HITS 6 AM
-        if(ctx.clock.isNightOver()) stateManager.setState(StateManager.WIN_STATE);
+    private boolean handleNightOver()
+    {
+        if(ctx.clock.isNightOver() && !nightOver)
+        {
+            nightOver = true;
+            fadeOutTimer = FADE_OUT_DURATION;
+            SoundManager.SIX_AM.play();
+        }
 
-        // UPDATE ANIMATRONICS
+        if(nightOver)
+        {
+            fadeOutTimer--;
+            if(fadeOutTimer <= 0)
+                stateManager.setState(StateManager.WIN_STATE);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void updateAnimatronics()
+    {
         for(Animatronic a : animatronics)
             if(a.getAiLevel() > 0) a.update(ctx);
+    }
 
-        // DRAW THE GAME UI
+    private void updateSystems()
+    {
         ctx.cameras.update();
         ctx.office.update();
         ctx.blink.update();
@@ -88,30 +133,46 @@ public class GameState extends State
     @Override
     public void draw(Graphics2D g2)
     {
+        drawOffice(g2);
+        drawCameraSystem(g2);
+        drawHUD(g2);
+        drawJumpscares(g2);
+        drawNightOverFade(g2);
+    }
+
+    private void drawOffice(Graphics2D g2)
+    {
         ctx.office.draw(g2);
 
-        // DRAW ANIMATRONICS
-        if(!ctx.cameras.isMonitorUp())
-        {
-            if(!ctx.office.isPlayerAtDoor() && !ctx.office.isTransitioning())
-            {
-                // OFFICE ANIMATRONICS
-                for(Animatronic a : animatronics)
-                    if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.MAIN)
-                        a.drawOnOffice(g2);
-            }
-            // DOOR ANIMATRONICS
-            else if(ctx.office.isPlayerAtDoor() && !ctx.office.isTransitioning())
-            {
-                for(Animatronic a : animatronics)
-                    if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.DOOR)
-                        a.drawOnDoor(g2);
-            }
-            // DURING TRANSITION, DRAW NOTHING
-        }
+        if(ctx.cameras.isMonitorUp()) return;
 
+        if(!ctx.office.isPlayerAtDoor() && !ctx.office.isTransitioning())
+            drawOfficeAnimatronics(g2);
+        else if(ctx.office.isPlayerAtDoor() && !ctx.office.isTransitioning())
+            drawDoorAnimatronics(g2);
+    }
+
+    private void drawOfficeAnimatronics(Graphics2D g2)
+    {
+        for(Animatronic a : animatronics)
+            if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.MAIN)
+                a.drawOnOffice(g2);
+    }
+
+    private void drawDoorAnimatronics(Graphics2D g2)
+    {
+        for(Animatronic a : animatronics)
+            if(a.getAiLevel() > 0 && a.getLocation() == Animatronic.Location.DOOR)
+                a.drawOnDoor(g2);
+    }
+
+    private void drawCameraSystem(Graphics2D g2)
+    {
         ctx.cameras.draw(g2, ctx.isInMainView(), animatronics);
+    }
 
+    private void drawHUD(Graphics2D g2)
+    {
         // CRISTIAN CAMERA WARNING
         if(ctx.cameras.isMonitorUp())
             for(Animatronic a : animatronics)
@@ -119,31 +180,64 @@ public class GameState extends State
                     cristian.drawOnCamera(g2, 0);
 
         ctx.clock.draw(g2, ctx.getClockColor(), ctx.getNightNumber());
-        ctx.blink.draw(g2, !ctx.isInCameras(), ctx.office.isTransitioning());
+        ctx.blink.draw(g2, !ctx.isInCameras() && !ctx.cameras.isTransitioning(), ctx.office.isTransitioning());
+    }
 
-        // JUMPSCARE WILL PLAY IF A PLAYER LOSES
+    private void drawJumpscares(Graphics2D g2)
+    {
         for(Animatronic a : animatronics)
             if(a.jumpscareIsPlaying() && !(a instanceof Jirsten))
                 a.drawJumpscare(g2);
     }
 
+    private void drawNightOverFade(Graphics2D g2)
+    {
+        if(!nightOver) return;
+        SoundManager.RISER.loop();
+
+        float progress = 1.0f - (float) fadeOutTimer / FADE_OUT_DURATION;
+        int scanlineCount = (int)(4 + progress * 15);
+
+        Utility.drawAmbientScanlines(g2, new Color(255, 255, 255), scanlineCount);
+        Utility.drawStatic(g2, (int)(progress * FADE_OUT_DURATION),
+                FADE_OUT_DURATION, new Color(255, 255, 255));
+    }
+
+    @Override
+    public void onEnter()
+    {
+        SoundManager.AMBIENCE.loop();
+        SoundManager.MUSIC_BOX.loop();
+        SoundManager.MUSIC_BOX.mute();
+        SoundManager.MUSIC_BOX_SPED_UP.loop();
+        SoundManager.MUSIC_BOX_SPED_UP.mute();
+    }
+
     @Override public void keyPressed(int key)
     {
+        if(nightOver) return;
         ctx.cameras.keyPressed(key);
+    }
+
+    @Override public void mouseClicked(int x, int y)
+    {
+        if(nightOver) return;
+        ctx.cameras.mouseClicked(x, y);
     }
 
     @Override
     public void mouseMoved(int x, int y)
     {
+        if(nightOver) return;
         // LET THE PLAYER ACCESS THE CAMERAS ONLY WHEN THEY ARE IN MAIN VIEW
-        if(ctx.isInMainView() && ctx.blink.getCloseTimer() == 0) ctx.cameras.mouseMoved(x, y);
-        if(!ctx.isInCameras() && ctx.blink.getCloseTimer() == 0) ctx.office.mouseMoved(x, y);
-        if(!ctx.isInCameras() && !ctx.office.isTransitioning()) ctx.blink.mouseMoved(x, y);
-    }
+        if(ctx.isInMainView() && ctx.blink.getCloseTimer() == 0)
+            ctx.cameras.mouseMoved(x, y);
 
-    @Override public void mouseClicked(int x, int y)
-    {
-        ctx.cameras.mouseClicked(x, y);
+        if(!ctx.isInCameras() && ctx.blink.getCloseTimer() == 0)
+            ctx.office.mouseMoved(x, y);
+
+        if(!ctx.isInCameras() && !ctx.office.isTransitioning())
+            ctx.blink.mouseMoved(x, y);
     }
 
     @Override public void keyReleased(int key) {}

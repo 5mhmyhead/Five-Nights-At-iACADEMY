@@ -28,6 +28,11 @@ public class Dave extends Animatronic
     private int moveTimer = 0;
     private int doorTimer = 0;
 
+    // DAVE CANNOT MOVE FOR 20 FRAMES AFTER PLAYER LEAVES THE CAMERA
+    private static final int WATCH_PAUSE_DURATION = 20;
+    private int watchPauseTimer = 0;
+    private boolean wasWatched  = false;
+
     // DAVE TAKES HIS TIME PLAYING HIS JUMPSCARE ANIMATION
     private final JumpscarePlayer jumpscare;
     private int jumpscareDelay;
@@ -68,8 +73,16 @@ public class Dave extends Animatronic
             jumpscareDelay--;
             if(jumpscareDelay <= 0)
             {
-                ctx.cameras.forceMonitorDown();
-                jumpscare.play();
+                // TRIGGER CAMERA OR BLINK TRANSITION FIRST
+                if(!ctx.cameras.isTransitioning() && ctx.cameras.isMonitorUp())
+                    ctx.cameras.forceMonitorDown();
+
+                if(ctx.blink.areEyesClosed())
+                    ctx.blink.forceOpen();
+
+                // WAIT FOR TRANSITIONS TO FINISH BEFORE JUMPSCARE
+                if(!ctx.cameras.isMonitorUp() && !ctx.cameras.isTransitioning() && !ctx.blink.areEyesClosed())
+                    jumpscare.play();
             }
 
             return;
@@ -107,12 +120,25 @@ public class Dave extends Animatronic
     private void handleMoving(GameContext ctx)
     {
         int watchedCamera = ctx.cameras.getCurrentCamera();
-        boolean playerWatching = ctx.cameras.isMonitorUp() && (watchedCamera == currentCamera);
-        boolean cameraViewable = ctx.cameras.isCameraViewable(currentCamera);
+        boolean playerWatching = ctx.cameras.isMonitorUp()
+                && watchedCamera == currentCamera
+                && ctx.cameras.isCameraViewable(currentCamera);
 
-        if(playerWatching && cameraViewable)return;
-        if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
+        // WHEN PLAYER STOPS WATCHING, START PAUSE TIMER
+        if(wasWatched && !playerWatching)
+            watchPauseTimer = WATCH_PAUSE_DURATION;
+
+        wasWatched = playerWatching;
+
+        // PAUSE MOVE TIMER WHILE BEING WATCHED OR 1 SECOND AFTER WATCHING
+        if(playerWatching || watchPauseTimer > 0)
+        {
+            if(watchPauseTimer > 0) watchPauseTimer--;
+            return;
+        }
+
         moveTimer++;
+        if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
 
         if(moveTimer >= MOVE_INTERVAL)
         {
@@ -152,6 +178,8 @@ public class Dave extends Animatronic
         moveTimer = 0;
         doorTimer = 0;
         moveCount = 0;
+        watchPauseTimer = 0;
+        wasWatched = false;
     }
 
     @Override
