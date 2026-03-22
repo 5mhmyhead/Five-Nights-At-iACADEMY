@@ -2,6 +2,7 @@ package components;
 
 import main.GamePanel;
 import utilities.FontManager;
+import utilities.SoundManager;
 
 import java.awt.*;
 
@@ -34,6 +35,13 @@ public class Clock
 
             if(currentHour == HOURS.length)
                 nightOver = true;
+
+            // START HEARTBEAT AT 5AM
+            if(currentHour == 5)
+            {
+                SoundManager.HEARTBEAT.loop();
+                SoundManager.HEARTBEAT.setVolume(0.3);
+            }
         }
     }
 

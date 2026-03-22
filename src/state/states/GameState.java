@@ -18,6 +18,7 @@ public class GameState extends State
 {
     private GameContext ctx;               // A CONTEXT CLASS THAT HOLDS ALL THE MECHANICS OF THE GAME
     private Animatronic[] animatronics;    // THE ANIMATRONICS IN THE GAME
+    private int[] previousCameras;         // PREVIOUS ANIMATRONICS CAMERAS TO CHECK DISRUPTION
 
     // NIGHT OVER FADE
     private boolean nightOver = false;
@@ -49,6 +50,10 @@ public class GameState extends State
             new Jirsten(),
             new Lanze(),
         };
+
+        previousCameras = new int[animatronics.length];
+        for(int i = 0; i < animatronics.length; i++)
+            previousCameras[i] = animatronics[i].getCurrentCamera();
     }
 
     private void initContext()
@@ -117,8 +122,25 @@ public class GameState extends State
 
     private void updateAnimatronics()
     {
-        for(Animatronic a : animatronics)
-            if(a.getAiLevel() > 0) a.update(ctx);
+        for(int i = 0; i < animatronics.length; i++)
+        {
+            Animatronic a = animatronics[i];
+            if(a.getAiLevel() <= 0) continue;
+
+            int prevCam = previousCameras[i];
+            a.update(ctx);
+            int newCam = a.getCurrentCamera();
+
+            // TRIGGER DISRUPTION IF ANIMATRONIC ENTERED OR LEFT WATCHED CAMERA
+            if(prevCam != newCam && ctx.cameras.isMonitorUp())
+            {
+                int watchedCam = ctx.cameras.getCurrentCamera();
+                if(prevCam == watchedCam || newCam == watchedCam)
+                    ctx.cameras.triggerDisruption();
+            }
+
+            previousCameras[i] = newCam;
+        }
     }
 
     private void updateSystems()

@@ -43,6 +43,9 @@ public class CameraSystem
     private int flickerTimer = 0;
     private static final int FLICKER_DURATION = 120;
 
+    private int disruptionTimer = 0;
+    private static final int DISRUPTION_DURATION = 15;
+
     // X AND Y COORDINATES OF EACH BUTTON STORED IN AN ARRAY
     private static final int[] BUTTON_X = { 285, 160, 245, 160, 285, 185, 85 };
     private static final int[] BUTTON_Y = { 570, 520, 490, 470, 420, 320, 340 };
@@ -168,6 +171,7 @@ public class CameraSystem
     {
         if(staticTimer > 0)   staticTimer--;
         if(scanlineTimer > 0) scanlineTimer--;
+        if(disruptionTimer > 0) disruptionTimer--;
 
         if(!monitorUp || transitioning) return;
 
@@ -335,8 +339,15 @@ public class CameraSystem
 
         drawCameraImage(g2);
         drawAnimatronics(g2, animatronics);
+        drawDisruption(g2);
         drawShockEffect(g2);
         drawCameraBorder(g2);
+    }
+
+    private void drawDisruption(Graphics2D g2)
+    {
+        if(disruptionTimer <= 0) return;
+        Utility.drawStatic(g2, disruptionTimer, DISRUPTION_DURATION, new Color(180, 255, 180));
     }
 
     private void drawAnimatronics(Graphics2D g2, Animatronic[] animatronics)
@@ -625,6 +636,13 @@ public class CameraSystem
         transitionForward = false;
         transitionIndex = TRANSITION_LENGTH - 1;
         frameHoldCounter = 0;
+    }
+
+    public void triggerDisruption()
+    {
+        disruptionTimer = DISRUPTION_DURATION;
+        scanlineTimer = SCANLINE_DURATION;
+        Utility.updateScanlines();
     }
 
     public MusicBox getMusicBox() { return musicBox; }

@@ -5,6 +5,7 @@ import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -17,7 +18,7 @@ public class Dave extends Animatronic
     private enum DaveState { GRACE, MOVING, DOOR }
     private DaveState state = DaveState.GRACE;
 
-    private static final int MAX_JUMPS = 100; // MOVES 5 CAMERAS BEFORE GOING TO THE DOOR
+    private static final int MAX_JUMPS = 5; // MOVES 5 CAMERAS BEFORE GOING TO THE DOOR
     private int moveCount = 0;
 
     private static final int GRACE_DURATION = 300;
@@ -160,6 +161,8 @@ public class Dave extends Animatronic
             location = Location.DOOR;
             state = DaveState.DOOR;
             doorTimer = DOOR_COUNTDOWN;
+            SoundManager.KNOCK_DAVE.play();
+            SoundManager.KNOCK_DAVE.setVolume(0.2);
             return;
         }
 
@@ -169,7 +172,8 @@ public class Dave extends Animatronic
         do
         {
             next = (int)(Math.random() * 7);
-        } while(next == currentCamera || next == watchedCamera);
+        }
+        while(next == currentCamera || next == watchedCamera);
 
         currentCamera = next;
     }

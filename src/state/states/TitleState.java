@@ -118,16 +118,33 @@ public class TitleState extends State
         // ANIMATRONIC AND MENU
         drawAnimatronic(g2);
         drawMenu(g2);
+        drawRightGradient(g2);
 
         // SUBTLE STATIC AND SCANLINES
         Utility.drawStatic(g2, 1, 10, new Color(255, 255, 255));
         Utility.drawAmbientScanlines(g2, new Color(255, 255, 255, 40), 2);
     }
 
+    private void drawRightGradient(Graphics2D g2)
+    {
+        int gradientWidth = 500;
+        int offsetX = 100;
+
+        GradientPaint gradient = new GradientPaint(
+                GamePanel.WIDTH - gradientWidth - offsetX, 0, new Color(0, 0, 0, 0),   // TRANSPARENT
+                GamePanel.WIDTH - offsetX, 0, new Color(0, 0, 0, 255)  // BLACK
+        );
+
+        g2.setPaint(gradient);
+        g2.fillRect(GamePanel.WIDTH - gradientWidth - offsetX, 0,
+                gradientWidth + offsetX, GamePanel.HEIGHT);
+        g2.setPaint(null);
+    }
+
     private void drawAnimatronic(Graphics2D g2)
     {
         if(animatronicFrames[currentFrame] == null) return;
-        g2.drawImage(animatronicFrames[currentFrame], 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        g2.drawImage(animatronicFrames[currentFrame], 50, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
     }
 
     private void drawMenu(Graphics2D g2)

@@ -5,6 +5,7 @@ import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -145,6 +146,8 @@ public class Tyrone extends Animatronic
             location = Location.MAIN;
             state = TyroneState.MAIN;
             doorTimer = 0;
+            SoundManager.FOOTSTEPS.play();
+            SoundManager.FOOTSTEPS.setVolume(0.2);
         }
         else
         {
@@ -156,6 +159,8 @@ public class Tyrone extends Animatronic
     {
         boolean playerDefending = !ctx.office.isPlayerAtDoor()
                 && ctx.blink.areEyesClosed();
+
+        doorTimer++;
 
         if(playerDefending)
         {
@@ -169,9 +174,9 @@ public class Tyrone extends Animatronic
         else
         {
             blinkHoldTimer = 0; // RESET IF PLAYER STOPS BLINKING
-            doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
             {
+                if(ctx.blink.areEyesClosed()) return;
                 // TRIGGER CAMERA OR BLINK TRANSITION FIRST
                 if(!ctx.cameras.isTransitioning() && ctx.cameras.isMonitorUp())
                     ctx.cameras.forceMonitorDown();

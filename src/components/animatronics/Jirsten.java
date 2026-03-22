@@ -176,11 +176,20 @@ public class Jirsten extends Animatronic
 
     private int pickRandomCamera(int watchedCamera)
     {
-        int next;
+        // WEIGHTED RANDOMNESS BASED ON MOST USED CAMERAS
+        int[] weightedCameras = {
+                0, 0,     // CAM 1 (LANZE) MORE LIKELY
+                1,        // CAM 2
+                2,        // CAM 3
+                4, 4,     // CAM 5 (HOTSPOT FOR EARL AND TYRONE) MORE LIKELY
+                5,        // CAM 6
+                6, 6,     // CAM 7 (DAVE) MORE LIKELY
+        };
 
+        int next;
         do
         {
-            next = (int)(Math.random() * 7);
+            next = weightedCameras[(int)(Math.random() * weightedCameras.length)];
         }
         while(next == currentCamera || next == watchedCamera);
 

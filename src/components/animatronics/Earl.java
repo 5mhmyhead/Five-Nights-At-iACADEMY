@@ -5,6 +5,7 @@ import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -140,6 +141,8 @@ public class Earl extends Animatronic
             location = Location.DOOR;
             state = EarlState.DOOR;
             doorTimer = 0;
+            SoundManager.KNOCK_EARL.play();
+            SoundManager.KNOCK_EARL.setVolume(0.2);
         }
         else
         {
@@ -151,6 +154,8 @@ public class Earl extends Animatronic
     {
         boolean playerDefending = ctx.office.isPlayerAtDoor()
                 && ctx.blink.areEyesClosed();
+
+        doorTimer++;
 
         if(playerDefending)
         {
@@ -164,9 +169,9 @@ public class Earl extends Animatronic
         else
         {
             blinkHoldTimer = 0; // RESET IF PLAYER STOPS BLINKING
-            doorTimer++;
             if(doorTimer >= DOOR_COUNTDOWN)
             {
+                if(ctx.blink.areEyesClosed()) return;
                 // TRIGGER CAMERA OR BLINK TRANSITION FIRST
                 if(!ctx.cameras.isTransitioning() && ctx.cameras.isMonitorUp())
                     ctx.cameras.forceMonitorDown();
