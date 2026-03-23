@@ -46,6 +46,7 @@ public class TitleState extends State
     @Override
     public void init()
     {
+        SoundManager.MAIN_MENU.loop();
         glitchTimer = randomGlitchInterval();
 
         hasSave = SaveManager.hasSave();
@@ -227,10 +228,7 @@ public class TitleState extends State
     }
 
     @Override
-    public void onEnter()
-    {
-        SoundManager.MAIN_MENU.loop();
-    }
+    public void onEnter() {}
 
     @Override
     public void keyPressed(int key)

@@ -33,6 +33,9 @@ public class WinState extends State
     @Override
     public void init()
     {
+        SoundManager.SIX_AM.setVolume(0.6);
+        SoundManager.SIX_AM.play();
+
         displayNightNumber = stateManager.getNightManager().getNightNumber();
         Utility.setScanlineCount(3);
         fireworks = new Fireworks();
@@ -131,11 +134,7 @@ public class WinState extends State
     }
 
     @Override
-    public void onEnter()
-    {
-        SoundManager.SIX_AM.setVolume(0.6);
-        SoundManager.SIX_AM.play();
-    }
+    public void onEnter() {}
 
     @Override
     public void keyPressed(int key)
