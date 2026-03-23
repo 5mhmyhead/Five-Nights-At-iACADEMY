@@ -25,7 +25,7 @@ public class Lanze extends Animatronic
     private int patience = 100;
     private int criticalTimer = 0;
 
-    private static final int MOVE_INTERVAL = 5;
+    private static final int MOVE_INTERVAL = 7;
     private int moveTimer = 0;
 
     // MULTIPLIER FOR MUSIC BOX BOOST
@@ -68,7 +68,10 @@ public class Lanze extends Animatronic
         {
             jumpscare.update();
             if(jumpscare.isFinished())
+            {
+                ctx.stateManager.setKiller("Lanze");
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
+            }
             return;
         }
 

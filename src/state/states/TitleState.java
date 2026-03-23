@@ -14,7 +14,11 @@ import java.awt.image.BufferedImage;
 
 public class TitleState extends State
 {
-    private int selectedOption = 0; // 0 = NEW GAME, 1 = CONTINUE
+    private static final int NEW_GAME = 0;
+    private static final int CONTINUE = 1;
+    private static final int CUSTOM_NIGHT = 2;
+
+    private int selectedOption = 0; // 0 = NEW GAME, 1 = CONTINUE, 2 = CUSTOM NIGHT
     private boolean hasSave = false;
 
     private final BufferedImage[] animatronicFrames;
@@ -23,6 +27,10 @@ public class TitleState extends State
     private boolean glitching = false;
 
     private int scanlineUpdateTimer = 0;
+
+    // CUSTOM NIGHT
+    private boolean customNightUnlocked = false;
+    private int stars = 0;
 
     public TitleState(StateManager stateManager)
     {
@@ -38,10 +46,11 @@ public class TitleState extends State
     @Override
     public void init()
     {
-        SoundManager.MAIN_MENU.loop();
         glitchTimer = randomGlitchInterval();
 
         hasSave = SaveManager.hasSave();
+        customNightUnlocked = SaveManager.isCustomNightUnlocked();
+        stars = SaveManager.loadStars();
         selectedOption = 0;
     }
 
@@ -103,32 +112,32 @@ public class TitleState extends State
     @Override
     public void draw(Graphics2D g2)
     {
-        int w = GamePanel.WIDTH;
-        int h = GamePanel.HEIGHT;
-
-        // PLACEHOLDER TITLE SCREEN
         g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, w, h);
+        g2.fillRect(0, 0, 1280, 720);
+
+        drawAnimatronic(g2);
 
         g2.setColor(Color.WHITE);
         g2.setFont(FontManager.LCD_TITLE);
-        g2.drawString("FIVE NIGHTS", 75, 150);
-        g2.drawString("AT iACADEMY", 75, 210);
+        g2.drawString("FIVE", 75, 150);
+        g2.drawString("NIGHTS", 75, 210);
+        g2.drawString("AT", 75, 270);
+        g2.drawString("iACADEMY", 75, 330);
 
-        // ANIMATRONIC AND MENU
-        drawAnimatronic(g2);
         drawMenu(g2);
+        drawStars(g2);
         drawRightGradient(g2);
 
         // SUBTLE STATIC AND SCANLINES
         Utility.drawStatic(g2, 1, 10, new Color(255, 255, 255));
-        Utility.drawAmbientScanlines(g2, new Color(255, 255, 255, 40), 2);
+        Utility.drawAmbientScanlines(g2, new Color(255, 255, 255, 20), 2);
+        Utility.drawCRTScanlines(g2, 4, 2, 100);
     }
 
     private void drawRightGradient(Graphics2D g2)
     {
         int gradientWidth = 500;
-        int offsetX = 100;
+        int offsetX = 150;
 
         GradientPaint gradient = new GradientPaint(
                 GamePanel.WIDTH - gradientWidth - offsetX, 0, new Color(0, 0, 0, 0),   // TRANSPARENT
@@ -144,56 +153,120 @@ public class TitleState extends State
     private void drawAnimatronic(Graphics2D g2)
     {
         if(animatronicFrames[currentFrame] == null) return;
-        g2.drawImage(animatronicFrames[currentFrame], 50, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        g2.drawImage(animatronicFrames[currentFrame], 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
     }
 
     private void drawMenu(Graphics2D g2)
     {
         g2.setFont(FontManager.LCD_CLOCK);
 
+        int selectedY = switch (selectedOption)
+        {
+            case 0 -> 500;
+            case 1 -> 550;
+            case 2 -> 620;
+            default -> 0;
+        };
+
         // DRAW CURSOR
-        int selectedY = selectedOption == 0 ? 500 : 550;
         g2.drawString(">", 75, selectedY);
 
         // NEW GAME
-        g2.setColor(selectedOption == 0 ? new Color(255, 255, 255) : Color.DARK_GRAY);
+        g2.setColor(selectedOption == NEW_GAME ? new Color(255, 255, 255) : Color.DARK_GRAY);
         g2.drawString("NEW GAME", 125, 500);
 
         // CONTINUE
         if(hasSave)
         {
-            g2.setColor(selectedOption == 1 ? new Color(255, 255, 255) : Color.DARK_GRAY);
+            g2.setColor(selectedOption == CONTINUE ? new Color(255, 255, 255) : Color.DARK_GRAY);
             g2.drawString("CONTINUE", 125, 550);
 
             g2.setFont(FontManager.LCD_SMALL);
             g2.setColor(Color.DARK_GRAY);
-            g2.drawString("Night " + SaveManager.load(), 125, 570);
+            g2.drawString("Night " + SaveManager.loadNight(), 125, 570);
         }
+
+        // CUSTOM NIGHT
+        if(customNightUnlocked)
+        {
+            g2.setFont(FontManager.LCD_CLOCK);
+            g2.setColor(selectedOption == CUSTOM_NIGHT ? Color.WHITE : Color.DARK_GRAY);
+            g2.drawString("CUSTOM NIGHT", 125, 620);
+        }
+    }
+
+    private void drawStars(Graphics2D g2)
+    {
+        if(stars <= 0) return;
+
+        for(int i = 0; i < stars; i++)
+            drawStar(g2, 90 + i * 45);
+    }
+
+    private void drawStar(Graphics2D g2, int centerX)
+    {
+        g2.setColor(Color.WHITE);
+
+        int points = 5;
+        int[] xPoints = new int[points * 2];
+        int[] yPoints = new int[points * 2];
+
+        double outerRadius = 20;
+        double innerRadius = 20 * 0.4;
+
+        for(int i = 0; i < points * 2; i++)
+        {
+            double angle = Math.PI / points * i - Math.PI / 2;
+            double radius = (i % 2 == 0) ? outerRadius : innerRadius;
+
+            xPoints[i] = (int)(centerX + Math.cos(angle) * radius);
+            yPoints[i] = (int)(370 + Math.sin(angle) * radius);
+        }
+
+        g2.fillPolygon(xPoints, yPoints, points * 2);
+    }
+
+    @Override
+    public void onEnter()
+    {
+        SoundManager.MAIN_MENU.loop();
     }
 
     @Override
     public void keyPressed(int key)
     {
-        if(key == KeyEvent.VK_UP
-        || key == KeyEvent.VK_DOWN
-        || key == KeyEvent.VK_W
-        || key == KeyEvent.VK_S)
-        {
-            if(hasSave) // ONLY NAVIGATE IF CONTINUE EXISTS
-                selectedOption = selectedOption == 0 ? 1 : 0;
-        }
+        // BUILD AVAILABLE OPTIONS LIST
+        java.util.List<Integer> options = new java.util.ArrayList<>();
+        options.add(NEW_GAME);
+
+        if(hasSave) options.add(CONTINUE);
+        if(customNightUnlocked) options.add(CUSTOM_NIGHT);
+
+        int currentIndex = options.indexOf(selectedOption);
+
+        if(key == KeyEvent.VK_UP || key == KeyEvent.VK_W)
+            selectedOption = options.get((currentIndex - 1 + options.size()) % options.size());
+
+        if(key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)
+            selectedOption = options.get((currentIndex + 1) % options.size());
 
         if(key == KeyEvent.VK_ENTER)
         {
-            if(selectedOption == 1 && hasSave)
+            if(selectedOption == CUSTOM_NIGHT && customNightUnlocked)
+            {
+                stateManager.setState(StateManager.CUSTOM_STATE);
+                return;
+            }
+            else if(selectedOption == CONTINUE && hasSave)
             {
                 // CONTINUE LOADS SAVED NIGHT
-                int savedNight = SaveManager.load();
-                stateManager.getNightManager().loadNight(savedNight);
+                stateManager.getNightManager().clearCustomNight(); // CLEAR CUSTOM NIGHT FIRST
+                stateManager.getNightManager().loadNight(SaveManager.loadNight());
             }
             else
             {
                 // NEW GAME RESETS TO NIGHT 1
+                stateManager.getNightManager().clearCustomNight();
                 SaveManager.deleteSave();
                 stateManager.getNightManager().loadNight(1);
             }

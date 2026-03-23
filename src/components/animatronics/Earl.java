@@ -67,7 +67,10 @@ public class Earl extends Animatronic
         {
             jumpscare.update();
             if(jumpscare.isFinished())
+            {
+                ctx.stateManager.setKiller("Earl");
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
+            }
             return;
         }
 
@@ -142,7 +145,7 @@ public class Earl extends Animatronic
             state = EarlState.DOOR;
             doorTimer = 0;
             SoundManager.KNOCK_EARL.play();
-            SoundManager.KNOCK_EARL.setVolume(0.2);
+            SoundManager.KNOCK_EARL.setVolume(0.1);
         }
         else
         {

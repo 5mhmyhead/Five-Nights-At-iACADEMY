@@ -72,7 +72,10 @@ public class Tyrone extends Animatronic
         {
             jumpscare.update();
             if(jumpscare.isFinished())
+            {
+                ctx.stateManager.setKiller("Tyrone");
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
+            }
             return;
         }
 
@@ -147,7 +150,7 @@ public class Tyrone extends Animatronic
             state = TyroneState.MAIN;
             doorTimer = 0;
             SoundManager.FOOTSTEPS.play();
-            SoundManager.FOOTSTEPS.setVolume(0.2);
+            SoundManager.FOOTSTEPS.setVolume(0.1);
         }
         else
         {

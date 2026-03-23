@@ -12,15 +12,17 @@ public class StateManager
 {
     // MANAGES THE FIVE NIGHTS AND ITS AI LEVELS OF THE ANIMATRONICS
     private final NightManager nightManager = new NightManager();
+    private String lastKiller = ""; // IF PLAYER DIED, SAVE ANIMATRONICS NAME FOR LOSE STATE
 
     // GAME STATES
-    private static final int NUMBER_OF_STATES = 5;
+    private static final int NUMBER_OF_STATES = 6;
 
-    public static final int TITLE_STATE = 0;
-    public static final int INTRO_STATE = 1;
-    public static final int GAME_STATE = 2;
-    public static final int LOSE_STATE = 3;
-    public static final int WIN_STATE = 4;
+    public static final int CUSTOM_STATE = 0;
+    public static final int TITLE_STATE = 1;
+    public static final int INTRO_STATE = 2;
+    public static final int GAME_STATE = 3;
+    public static final int LOSE_STATE = 4;
+    public static final int WIN_STATE = 5;
 
     private final State[] states;   // ARRAY HOLDING THE STATES
     private int currentState;       // ID REPRESENTING THE CURRENT STATE
@@ -73,6 +75,7 @@ public class StateManager
     // LOADS STATE DEPENDING ON INDEX
     private void loadState(int state)
     {
+        if(state == CUSTOM_STATE) states[state] = new CustomState(this);
         if(state == TITLE_STATE) states[state] = new TitleState(this);
         if(state == INTRO_STATE) states[state] = new IntroState(this);
         if(state == LOSE_STATE) states[state] = new LoseState(this);
@@ -87,10 +90,11 @@ public class StateManager
     public void keyPressed(int key)
     {
         // GLOBAL DEBUG KEYS TO MOVE BETWEEN STATES
-        if(key == KeyEvent.VK_F1) { setState(TITLE_STATE); return; }
-        if(key == KeyEvent.VK_F2) { setState(GAME_STATE);  return; }
-        if(key == KeyEvent.VK_F3) { setState(LOSE_STATE);  return; }
-        if(key == KeyEvent.VK_F4) { setState(WIN_STATE);   return; }
+        if(key == KeyEvent.VK_F1) { setState(TITLE_STATE);  return; }
+        if(key == KeyEvent.VK_F2) { setState(GAME_STATE);   return; }
+        if(key == KeyEvent.VK_F3) { setState(LOSE_STATE);   return; }
+        if(key == KeyEvent.VK_F4) { setState(WIN_STATE);    return; }
+        if(key == KeyEvent.VK_F5) { setState(CUSTOM_STATE); return; }
 
         if(states[currentState] != null) states[currentState].keyPressed(key);
     }
@@ -103,4 +107,7 @@ public class StateManager
     public void mouseClicked(int x, int y) { if(states[currentState] != null) states[currentState].mouseClicked(x, y); }
 
     public NightManager getNightManager() { return nightManager; }
+
+    public void setKiller(String killer) { lastKiller = killer; }
+    public String getKiller() { return lastKiller; }
 }

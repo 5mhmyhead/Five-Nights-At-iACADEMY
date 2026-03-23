@@ -567,6 +567,7 @@ public class CameraSystem
     {
         if(flickerTimer > 0) Utility.drawStatic(g2, flickerTimer, FLICKER_DURATION, new Color(255, 255, 255));
         else Utility.drawStatic(g2, staticTimer, STATIC_DURATION, new Color(255, 255, 255));
+        Utility.drawCRTScanlines(g2, 4, 2, 100);
     }
 
     // THE CAMERA UI CHANGES DEPENDING ON THE STATE OF THE CAMERA

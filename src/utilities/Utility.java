@@ -152,4 +152,11 @@ public class Utility
     {
         SCANLINE_COUNT = count;
     }
+
+    public static void drawCRTScanlines(Graphics2D g2, int spacing, int lineHeight, int alpha)
+    {
+        g2.setColor(new Color(0, 0, 0, alpha));
+        for(int y = 0; y < GamePanel.HEIGHT; y += spacing)
+            g2.fillRect(0, y, GamePanel.WIDTH, lineHeight);
+    }
 }

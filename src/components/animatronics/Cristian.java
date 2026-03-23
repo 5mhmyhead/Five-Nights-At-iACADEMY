@@ -22,7 +22,7 @@ public class Cristian extends Animatronic
     // WHEN PATIENCE REACHES 0, THE PLAYER HAS 3 SECONDS OF BUFFER TIME TO REACT
     private static final int MAX_PATIENCE = 100;
     private static final int CRITICAL_COUNTDOWN = 150;
-    private static final int MOVE_INTERVAL = 5;
+    private static final int MOVE_INTERVAL = 7;
 
     private int patience = 100;
     private int criticalTimer = 0;
@@ -75,7 +75,7 @@ public class Cristian extends Animatronic
 
     private void tickRedEyeTrigger(GameContext ctx)
     {
-        if(aiLevel <= 10) return;
+        if(aiLevel <= 8) return;
 
         redEyeTimer++;
         if(redEyeTimer >= redEyeTrigger)
@@ -117,6 +117,7 @@ public class Cristian extends Animatronic
         else if(stareTimer > 0)
         {
             // IF PLAYER LOOKS AWAY MID STARE THEN PLAYER LOSES
+            ctx.stateManager.setKiller("Cristian");
             ctx.stateManager.setState(StateManager.LOSE_STATE);
         }
     }
@@ -182,7 +183,10 @@ public class Cristian extends Animatronic
         {
             criticalTimer--;
             if(criticalTimer <= 0)
+            {
+                ctx.stateManager.setKiller("Cristian");
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
+            }
         }
     }
 

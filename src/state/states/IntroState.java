@@ -27,10 +27,6 @@ public class IntroState extends State
     @Override
     public void init()
     {
-        SoundManager.MAIN_MENU.stop();
-
-        SoundManager.NIGHT_START.setVolume(0.3);
-        SoundManager.NIGHT_START.play();
         timer = 0;
 
         // PRELOAD GAME STATE IN BACKGROUND WHILE INTRO PLAYS
@@ -56,6 +52,7 @@ public class IntroState extends State
         drawText(g2);
         drawScanlinesFadeIn(g2);
         drawStaticFadeIn(g2);
+        Utility.drawCRTScanlines(g2, 4, 2, 100);
     }
 
     private void drawBackground(Graphics2D g2)
@@ -129,6 +126,15 @@ public class IntroState extends State
     private String getNightName()
     {
         return "Night " + stateManager.getNightManager().getNightNumber();
+    }
+
+    @Override
+    public void onEnter()
+    {
+        SoundManager.MAIN_MENU.stop();
+
+        SoundManager.NIGHT_START.setVolume(0.3);
+        SoundManager.NIGHT_START.play();
     }
 
     @Override public void keyPressed(int key) {}

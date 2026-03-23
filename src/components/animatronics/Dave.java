@@ -68,7 +68,10 @@ public class Dave extends Animatronic
         {
             jumpscare.update();
             if(jumpscare.isFinished())
+            {
+                ctx.stateManager.setKiller("Dave");
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
+            }
             return;
         }
 
@@ -162,7 +165,7 @@ public class Dave extends Animatronic
             state = DaveState.DOOR;
             doorTimer = DOOR_COUNTDOWN;
             SoundManager.KNOCK_DAVE.play();
-            SoundManager.KNOCK_DAVE.setVolume(0.2);
+            SoundManager.KNOCK_DAVE.setVolume(0.1);
             return;
         }
 

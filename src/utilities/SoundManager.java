@@ -27,6 +27,8 @@ public class SoundManager
     // MISC
     public static final SoundPlayer MAIN_MENU = new SoundPlayer("/sounds/mainMenu.wav");
     public static final SoundPlayer NIGHT_START = new SoundPlayer("/sounds/nightStart.wav");
+
+    public static final SoundPlayer CHEERING = new SoundPlayer("/sounds/cheering.wav");
     public static final SoundPlayer SIX_AM = new SoundPlayer("/sounds/sixAM.wav");
     public static final SoundPlayer RISER = new SoundPlayer("/sounds/riser.wav");
     public static final SoundPlayer HEARTBEAT = new SoundPlayer("/sounds/heartbeat.wav");
@@ -35,7 +37,7 @@ public class SoundManager
     private static final SoundPlayer[] soundPlayers = new SoundPlayer[]
     {
         AMBIENCE, CAMERA_SWITCH, MONITOR, MAIN_MENU, NIGHT_START, HEARTBEAT, KNOCK_EARL, KNOCK_DAVE, FOOTSTEPS,
-        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOTING, CAMERA_BROKEN, SIX_AM, RISER,
+        MUSIC_BOX, MUSIC_BOX_SPED_UP, SHOCK, CAMERA_REBOOTING, CAMERA_BROKEN, SIX_AM, RISER, CHEERING
     };
 
     public static void stopAll()
