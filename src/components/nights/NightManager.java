@@ -10,10 +10,10 @@ public class NightManager
     {
         // ORDER IS DAVE, EARL, TYRONE, CRISTIAN, JIRSTEN, LANZE
         new NightConfig(1, 4, 8, 6, 0, 0, 4),
-        new NightConfig(2, 6, 10, 8, 0, 5, 6),
-        new NightConfig(3, 8, 12, 10, 6, 8, 8),
-        new NightConfig(4, 10, 14, 12, 9, 11, 10),
-        new NightConfig(5, 12, 16, 14, 12, 14, 12),
+        new NightConfig(2, 6, 9, 8, 0, 5, 6),
+        new NightConfig(3, 8, 10, 10, 6, 8, 8),
+        new NightConfig(4, 10, 12, 12, 9, 11, 10),
+        new NightConfig(5, 12, 14, 14, 12, 14, 12),
     };
 
     public void setCustomConfig(NightConfig config)

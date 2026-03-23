@@ -24,7 +24,7 @@ public class CameraSystem
     private boolean cameraSwitched = false;
 
     // REBOOTING SYSTEM
-    private static final int REBOOT_DURATION = 450;
+    private static final int REBOOT_DURATION = 300;
     private boolean rebooting = false;
     private int rebootTimer = 0;
 

@@ -124,6 +124,15 @@ public class WinState extends State
         }
     }
 
+    private boolean isMidMode()
+    {
+        if(!stateManager.getNightManager().isCustomNight()) return false;
+        NightConfig config = stateManager.getNightManager().getConfig();
+        for(int level : config.aiLevels())
+            if(level < 15) return false;
+        return true;
+    }
+
     private boolean isMaxMode()
     {
         if(!stateManager.getNightManager().isCustomNight()) return false;
@@ -148,26 +157,23 @@ public class WinState extends State
         // STORE WHICH STATE TO GO TO AFTER FADE
         if(stateManager.getNightManager().isCustomNight())
         {
-            // STAR TWO FOR BEATING MAX MODE
+            // STAR TWO FOR BEATING 6/15
+            // STAR THREE FOR BEATING MAX MODE
+            int stars = SaveManager.loadStars();
+
             if(isMaxMode())
-            {
-                int stars = Math.min(2, SaveManager.loadStars() + 1);
-                SaveManager.save(SaveManager.loadNight(), stars, true); // USE EXISTING SAVED NIGHT
-            }
-            else
-            {
-                SaveManager.save(
-                    SaveManager.loadNight(), // KEEP EXISTING NIGHT NUMBER
-                    SaveManager.loadStars(),
-                    true
-                );
-            }
+                stars = 3; // STAR 3
+            else if(isMidMode())
+                stars = Math.min(3, Math.max(stars, 2)); // STAR 2
+
+            SaveManager.save(SaveManager.loadNight(), stars, true);
             pendingState = StateManager.TITLE_STATE;
         }
         else if(stateManager.getNightManager().isFinalNight())
         {
             // ADD ONE STAR WHEN BEATING NIGHT 5
-            SaveManager.save(5, 1, true);
+            int stars = Math.max(SaveManager.loadStars(), 1);
+            SaveManager.save(5, stars, true);
             pendingState = StateManager.TITLE_STATE;
         }
         else
