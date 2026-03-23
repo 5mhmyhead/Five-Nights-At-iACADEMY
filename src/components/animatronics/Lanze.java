@@ -5,7 +5,6 @@ import components.JumpscarePlayer;
 import components.cameras.MusicBox;
 import state.StateManager;
 import utilities.FontManager;
-import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -27,9 +26,6 @@ public class Lanze extends Animatronic
 
     private static final int MOVE_INTERVAL = 7;
     private int moveTimer = 0;
-
-    // MULTIPLIER FOR MUSIC BOX BOOST
-    private static final int BOOST_MULTIPLIER = 3;
 
     // SPRITES
     private final BufferedImage imageIdle;
@@ -135,11 +131,9 @@ public class Lanze extends Animatronic
             // NOTIFY SPEED BOOST ON THE FRAME WINDING STARTS
             if(musicBox.wasClicked())
             {
-                // EARL AND TYRONE MOVE FASTER WHEN THE MUSIC BOX IS WOUND
-                // MUSIC BOX BOOST IS LANZE PATIENCE MULTIPLIED BY THREE
-                // THE LOWER LANZE PATIENCE IS, THE LOWER THE BOOST
+                // EARL AND TYRONE MOVE FASTER WHEN THE MUSIC BOX IS STILL WOUND HIGH
                 ctx.cameras.getMusicBox().applyBoost(patience);
-                int boostFrames = patience * BOOST_MULTIPLIER;
+                int boostFrames = calculateBoost(patience);
 
                 for(Animatronic a : ctx.animatronics)
                 {
@@ -154,6 +148,17 @@ public class Lanze extends Animatronic
             if(criticalTimer <= 0)
                 jumpscareWaiting = true;
         }
+    }
+
+    // WOUNDING OCCASIONALLY IS REWARDED TO PREVENT CAMERA CAMPING
+    private int calculateBoost(int patience)
+    {
+        if(patience <= 33)
+            return 0;              // NO BOOST
+        else if(patience <= 66)
+            return patience * 3;   // MODERATE BOOST
+        else
+            return patience * 4;   // HEAVY BOOST, PUNISH PREEMPTIVE WINDING
     }
 
     @Override

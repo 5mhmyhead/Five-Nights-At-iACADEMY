@@ -45,11 +45,4 @@ public class SoundManager
         for(SoundPlayer soundPlayer : soundPlayers)
             soundPlayer.stop();
     }
-
-    public static SoundPlayer getPlaying()
-    {
-        for(SoundPlayer soundPlayer : soundPlayers)
-            if(soundPlayer.isPlaying()) return soundPlayer;
-        return null;
-    }
 }

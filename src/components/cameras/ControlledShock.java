@@ -80,5 +80,4 @@ public class ControlledShock
     }
 
     public boolean wasShockPressed() { return shockPressed; }
-    public int getCharges() { return charges; }
 }

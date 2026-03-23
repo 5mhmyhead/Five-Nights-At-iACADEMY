@@ -17,7 +17,7 @@ import java.awt.image.BufferedImage;
 public class Jirsten extends Animatronic
 {
     private static final int MOVE_INTERVAL = 150; // MOVES EVERY 5 SECONDS
-    private static final int STARE_LIMIT = 50;
+    private static final int STARE_LIMIT = 60;
 
     private int moveTimer = 0;
     private int stareTimer = 0;
@@ -216,8 +216,8 @@ public class Jirsten extends Animatronic
                 && currentCamera < cameraSprites.length
                 && cameraSprites[currentCamera] != null)
         {
-            g2.drawImage(cameraSprites[currentCamera], swayX, 0,
-                    GamePanel.WIDTH, GamePanel.HEIGHT, null);
+            g2.drawImage(cameraSprites[currentCamera], swayX - 16, 0,
+                    GamePanel.WIDTH + 16 * 2, GamePanel.HEIGHT, null);
         }
         else
         {

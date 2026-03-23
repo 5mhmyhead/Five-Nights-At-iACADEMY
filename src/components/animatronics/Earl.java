@@ -206,7 +206,7 @@ public class Earl extends Animatronic
         BufferedImage sprite = getSpriteForCamera();
 
         if(sprite != null)
-            g2.drawImage(sprite, swayX, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+            g2.drawImage(sprite, swayX - 16, 0, GamePanel.WIDTH + 16 * 2, GamePanel.HEIGHT, null);
         else
         {
             g2.setColor(new Color(74, 196, 87));

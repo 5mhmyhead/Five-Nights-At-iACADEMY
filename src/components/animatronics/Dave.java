@@ -22,7 +22,7 @@ public class Dave extends Animatronic
     private int moveCount = 0;
 
     private static final int GRACE_DURATION = 300;
-    private static final int MOVE_INTERVAL = 250;
+    private static final int MOVE_INTERVAL = 270;
     private static final int DOOR_COUNTDOWN = 120;
 
     private int graceTimer = 0;
@@ -201,8 +201,8 @@ public class Dave extends Animatronic
             && currentCamera < cameraSprites.length
             && cameraSprites[currentCamera] != null)
         {
-            g2.drawImage(cameraSprites[currentCamera], swayX, 0,
-                GamePanel.WIDTH, GamePanel.HEIGHT, null);
+            g2.drawImage(cameraSprites[currentCamera], swayX  - 16, 0,
+                GamePanel.WIDTH  + 16 * 2, GamePanel.HEIGHT, null);
         }
         else
         {

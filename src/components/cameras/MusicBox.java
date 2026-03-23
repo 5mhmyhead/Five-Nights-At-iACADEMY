@@ -72,12 +72,9 @@ public class MusicBox
         SoundManager.MUSIC_BOX_SPED_UP.mute();
     }
 
-    public void startWinding() { winding = true; }
     public void stopWinding()  { winding = false; }
     public boolean isSpedUp() { return spedUp; }
 
     public boolean isWinding()   { return winding; }
     public boolean wasClicked()  { return clicked; }
-
-    public boolean isBoostActive() { return boostFrames > 0; }
 }

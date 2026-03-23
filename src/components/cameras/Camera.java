@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 public class Camera
 {
     private final String name;
-    private BufferedImage image;
+    private final BufferedImage image;
 
     // CAMERAS SWAY TO ADD REALISM
     private double swayTimer = 0;

@@ -50,18 +50,6 @@ public class SoundPlayer
         mediaPlayer.stop();
     }
 
-    public void pause()
-    {
-        if(mediaPlayer == null) return;
-        mediaPlayer.pause();
-    }
-
-    public void resume()
-    {
-        if(mediaPlayer == null) return;
-        mediaPlayer.play();
-    }
-
     public void setVolume(double volume)
     {
         // VOLUME IS 0.0 TO 1.0 IN JAVAFX
@@ -80,18 +68,4 @@ public class SoundPlayer
         if(mediaPlayer == null) return;
         mediaPlayer.setMute(false);
     }
-
-    public boolean isPlaying()
-    {
-        return mediaPlayer != null &&
-                mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
-    }
-
-    public boolean isFinished()
-    {
-        return mediaPlayer != null &&
-                mediaPlayer.getCurrentTime().equals(mediaPlayer.getTotalDuration());
-    }
-
-    public boolean isLooping() { return isLooping; }
 }

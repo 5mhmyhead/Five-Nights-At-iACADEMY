@@ -106,8 +106,6 @@ public class CustomState extends State
     {
         int[] rowX = { 200, 565, 930, 200, 565, 930 };
         int[] columnY = { 350, 350, 350, 600, 600, 600 };
-
-        int rowY = 150 + i * 80;
         boolean sel = (i == selectedRow);
 
         // HIGHLIGHT SELECTED ROW

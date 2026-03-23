@@ -30,7 +30,7 @@ public class Cristian extends Animatronic
 
     // RED EYES MECHANIC, PATIENCE LOWERS TWICE AS FAST IN THIS STATE
     // CRISTIAN JUMPSCARES THE PLAYER WHEN THEY MOVE THEIR HEAD, FLIP THE CAMERA, OR CLOSE THEIR EYES
-    private static final int FREEZE_DURATION = 150;
+    private static final int FREEZE_DURATION = 210;
     private static final int STARE_REQUIRED = 60;
     private static final int RED_EYE_GRACE = 45;
 
