@@ -1,11 +1,14 @@
 package components.animatronics;
 
 import components.GameContext;
+import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.Utility;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 // OFFICE ANIMATRONIC, PATIENCE WILL GO DOWN WHEN LOOKING AT CAMERAS OR MAIN VIEW
 // WILL ONLY REGAIN PATIENCE WHEN LOOKING AWAY AT THE DOOR
@@ -45,18 +48,54 @@ public class Cristian extends Animatronic
     private int freezeTimer = 0;
     private boolean warningShown = false;
 
+    // SPRITES
+    private final BufferedImage imageIdle;
+    private final BufferedImage imageImpatient;
+    private final BufferedImage imageAggressive;
+    private final BufferedImage imageCritical;
+    private final BufferedImage imageLookAtMe;
+
+    // CRISTIAN SPRITE DOESN'T UPDATE IF PLAYER LOOKS AT HIM
+    private BufferedImage displayedImage;
+
+    // JUMPSCARE
+    private final JumpscarePlayer jumpscare;
+
     public Cristian()
     {
         location = Location.MAIN;
-        redEyeTrigger = RED_EYE_MIN + (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
+        redEyeTrigger = (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
+
+        imageIdle = Utility.loadImage("/animatronics/cristian/cristianIdle.png");
+        imageImpatient = Utility.loadImage("/animatronics/cristian/cristianImpatient.png");
+        imageAggressive = Utility.loadImage("/animatronics/cristian/cristianAggressive.png");
+        imageCritical = Utility.loadImage("/animatronics/cristian/cristianCritical.png");
+        imageLookAtMe = Utility.loadImage("/animatronics/cristian/cristianLookAtMe.png");
+
+        // SPRITE STARTS AT IDLE
+        displayedImage = imageIdle;
+        jumpscare = new JumpscarePlayer("/jumpscares/cristian", 8);
     }
 
     @Override
     public void update(GameContext ctx)
     {
+        // IF JUMPSCARE IS PLAYING, ONLY UPDATE IT
+        if(jumpscare.isPlaying())
+        {
+            jumpscare.update();
+            if(jumpscare.isFinished())
+            {
+                ctx.stateManager.setKiller("Lanze");
+                ctx.stateManager.setState(StateManager.LOSE_STATE);
+            }
+            return;
+        }
+
         handleRedEye(ctx);
         handleMovement(ctx);
         handlePatience(ctx);
+        updateDisplayedImage(ctx);
     }
 
     // RED EYE MECHANICS
@@ -118,7 +157,7 @@ public class Cristian extends Animatronic
         {
             // IF PLAYER LOOKS AWAY MID STARE THEN PLAYER LOSES
             ctx.stateManager.setKiller("Cristian");
-            ctx.stateManager.setState(StateManager.LOSE_STATE);
+            jumpscare.play();
         }
     }
 
@@ -185,7 +224,7 @@ public class Cristian extends Animatronic
             if(criticalTimer <= 0)
             {
                 ctx.stateManager.setKiller("Cristian");
-                ctx.stateManager.setState(StateManager.LOSE_STATE);
+                jumpscare.play();
             }
         }
     }
@@ -193,15 +232,18 @@ public class Cristian extends Animatronic
     @Override
     public void drawOnOffice(Graphics2D g2)
     {
-        Color eyeColor = (state == CristianState.RED_EYE)
-                ? new Color(255, 0, 0)
-                : new Color(255, 56, 56);
+        if(displayedImage != null)
+        {
+            g2.drawImage(displayedImage, 0, 0, 1280, 720, null);
+        }
+        else
+        {
+            g2.setColor(new Color(243, 33, 82));
+            g2.fillRect(30, 30, 30, 30);
 
-        g2.setColor(eyeColor);
-        g2.fillRect(30, 30, 30, 30);
-
-        g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("CRISTIAN [" + state + "]", 75, 50);
+            g2.setFont(FontManager.LCD_SMALL);
+            g2.drawString("CRISTIAN [state: " + state + "]", 75, 50);
+        }
 
         if(state == CristianState.RED_EYE)
         {
@@ -228,24 +270,59 @@ public class Cristian extends Animatronic
         }
     }
 
+    @Override
+    public void drawJumpscare(Graphics2D g2)
+    {
+        jumpscare.draw(g2);
+    }
+
+    @Override
+    public boolean jumpscareIsPlaying()
+    {
+        return jumpscare.isPlaying();
+    }
+
     private void drawPatienceBar(Graphics2D g2)
     {
-        int barX = 30;
-        int barY = 75;
+        int barX = 830;
+        int barY = 630;
         int barW = 200;
         int barH = 10;
 
+        // BACKGROUND
         g2.setColor(new Color(20, 20, 20, 180));
         g2.fillRoundRect(barX, barY, barW, barH, 4, 4);
 
+        // FILL — SCALES WITH PATIENCE (0-100)
         int fillW = (int)(barW * (patience / 100.0));
-        g2.setColor(new Color(255, 100, 100, 220));
+        g2.setColor(new Color(100, 180, 255, 220));
         g2.fillRoundRect(barX, barY, fillW, barH, 4, 4);
 
-        g2.setColor(new Color(255, 180, 180));
+        // BORDER
+        g2.setColor(new Color(180, 220, 255));
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(barX, barY, barW, barH, 4, 4);
         g2.setStroke(new BasicStroke(1));
+    }
+
+    private BufferedImage getCurrentImage()
+    {
+        return switch(state)
+        {
+            case IDLE -> imageIdle;
+            case IMPATIENT -> imageImpatient;
+            case AGGRESSIVE -> imageAggressive;
+            case CRITICAL -> imageCritical;
+            case RED_EYE, RED_EYE_CRITICAL -> imageLookAtMe;
+        };
+    }
+
+    public void updateDisplayedImage(GameContext ctx)
+    {
+        boolean playerWatching = ctx.cameras.isMonitorUp()
+                && ctx.cameras.getCurrentCamera() == currentCamera;
+
+        if(!playerWatching) displayedImage = getCurrentImage();
     }
 
     public boolean shouldShowCameraWarning()

@@ -21,14 +21,23 @@ public class TitleState extends State
     private int selectedOption = 0; // 0 = NEW GAME, 1 = CONTINUE, 2 = CUSTOM NIGHT
     private boolean hasSave = false;
 
-    private final BufferedImage[] animatronicFrames;
+    // ANIMATRONIC ROTATION
+    private static final String[] ANIMATRONICS = { "dave", "tyrone", "jirsten", "lanze", "cristian" };
+    private final BufferedImage[][] animatronicFrames; // [character][frame]
+    private int currentCharacter = 0;
     private int currentFrame = 0;
+
+    // GLITCH STATE
     private int glitchTimer = 0;
     private boolean glitching = false;
 
+    // CHARACTER SWAP TIMER
+    private int characterTimer = 0;
+    private boolean pendingSwap = false;
+
     private int scanlineUpdateTimer = 0;
 
-    // CUSTOM NIGHT
+    // CUSTOM NIGHT AND STARS
     private boolean customNightUnlocked = false;
     private int stars = 0;
 
@@ -36,9 +45,12 @@ public class TitleState extends State
     {
         super(stateManager);
 
-        animatronicFrames = new BufferedImage[8];
-        for(int i = 0; i < 8; i++)
-            animatronicFrames[i] = Utility.loadImage("/menu/frame" + (i + 1) + ".png");
+        animatronicFrames = new BufferedImage[ANIMATRONICS.length][8];
+        for (int c = 0; c < ANIMATRONICS.length; c++)
+            for (int f = 0; f < 8; f++)
+                animatronicFrames[c][f] = Utility.loadImage(
+                        "/menu/" + ANIMATRONICS[c] + "/frame" + (f + 1) + ".png"
+                );
 
         init();
     }
@@ -46,8 +58,12 @@ public class TitleState extends State
     @Override
     public void init()
     {
-        SoundManager.MAIN_MENU.loop();
+        //SoundManager.MAIN_MENU.loop();
         glitchTimer = randomGlitchInterval();
+        characterTimer = randomCharacterInterval();
+        pendingSwap = false;
+        currentCharacter = 0;
+        currentFrame = 0;
 
         hasSave = SaveManager.hasSave();
         customNightUnlocked = SaveManager.isCustomNightUnlocked();
@@ -57,14 +73,20 @@ public class TitleState extends State
 
     private int randomGlitchInterval()
     {
-        // STAY AT REST FOR 3-8 SECONDS BETWEEN GLITCHES
-        return 90 + (int)(Math.random() * 150);
+        // 3-8 SECONDS BETWEEN GLITCHES (AT 30 FPS)
+        return 60 + (int)(Math.random() * 120);
     }
 
     private int randomGlitchFrame()
     {
-        // PICK ANY FRAME EXCEPT 0 (RESTING STATE)
+        // ANY FRAME EXCEPT 0 (RESTING STATE)
         return 1 + (int)(Math.random() * 7);
+    }
+
+    private int randomCharacterInterval()
+    {
+        // 7-10 SECONDS BETWEEN CHARACTER SWAPS (AT 30 FPS)
+        return 150 + (int)(Math.random() * 90);
     }
 
     @Override
@@ -81,31 +103,43 @@ public class TitleState extends State
     {
         glitchTimer--;
 
-        if(!glitching)
+        // TICK CHARACTER TIMER ONLY WHILE RESTING
+        if (!glitching)
         {
-            currentFrame = 0; // STAY AT RESTING STATE
+            characterTimer--;
+            if (characterTimer <= 0)
+                pendingSwap = true; // FLAG — SWAP ON NEXT GLITCH END
+        }
 
-            if(glitchTimer <= 0)
+        if (!glitching)
+        {
+            currentFrame = 0;
+
+            if (glitchTimer <= 0)
             {
-                // START GLITCH
                 glitching = true;
-                // 2-8 FRAMES
-                glitchTimer = 2 + (int) (Math.random() * 8);
+                glitchTimer = 2 + (int)(Math.random() * 8);
                 currentFrame = randomGlitchFrame();
             }
         }
         else
         {
-            // DURING GLITCH, RAPIDLY SWITCH FRAMES
-            if(glitchTimer % 2 == 0)
+            if (glitchTimer % 2 == 0)
                 currentFrame = randomGlitchFrame();
 
-            if(glitchTimer <= 0)
+            if (glitchTimer <= 0)
             {
-                // END GLITCH
                 glitching = false;
                 currentFrame = 0;
                 glitchTimer = randomGlitchInterval();
+
+                // SWAP CHARACTER IF FLAGGED
+                if (pendingSwap)
+                {
+                    currentCharacter = (currentCharacter + 1) % ANIMATRONICS.length;
+                    characterTimer = randomCharacterInterval();
+                    pendingSwap = false;
+                }
             }
         }
     }
@@ -126,7 +160,7 @@ public class TitleState extends State
         g2.drawString("iACADEMY", 75, 330);
 
         g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("Made by DWYANE SIDO, ver 0.8", 25, 700);
+        g2.drawString("Made by DWYANE SIDO, ver 1.0", 25, 700);
 
         g2.setColor(Color.DARK_GRAY);
         g2.drawString("DEBUG KEYS f1 - f5 to move between states", 25, 30);
@@ -159,8 +193,9 @@ public class TitleState extends State
 
     private void drawAnimatronic(Graphics2D g2)
     {
-        if(animatronicFrames[currentFrame] == null) return;
-        g2.drawImage(animatronicFrames[currentFrame], 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        BufferedImage frame = animatronicFrames[currentCharacter][currentFrame];
+        if (frame == null) return;
+        g2.drawImage(frame, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
     }
 
     private void drawMenu(Graphics2D g2)
@@ -176,6 +211,7 @@ public class TitleState extends State
         };
 
         // DRAW CURSOR
+        g2.setColor(Color.WHITE);
         g2.drawString(">", 75, selectedY);
 
         // NEW GAME
@@ -205,7 +241,6 @@ public class TitleState extends State
     private void drawStars(Graphics2D g2)
     {
         if(stars <= 0) return;
-
         for(int i = 0; i < stars; i++)
             drawStar(g2, 90 + i * 45);
     }
