@@ -28,6 +28,18 @@ public class NightManager
         isCustomNight = false;
     }
 
+    public void startNewGame()
+    {
+        clearCustomNight();
+        currentNight = 0;
+    }
+
+    public void continueGame(int savedNight)
+    {
+        clearCustomNight();
+        loadNight(savedNight);
+    }
+
     public void loadNight(int nightNumber)
     {
         currentNight = Math.max(0, Math.min(nightNumber - 1, NIGHTS.length - 1));

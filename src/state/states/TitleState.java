@@ -258,15 +258,13 @@ public class TitleState extends State
             else if(selectedOption == CONTINUE && hasSave)
             {
                 // CONTINUE LOADS SAVED NIGHT
-                stateManager.getNightManager().clearCustomNight(); // CLEAR CUSTOM NIGHT FIRST
-                stateManager.getNightManager().loadNight(SaveManager.loadNight());
+                stateManager.getNightManager().continueGame(SaveManager.loadNight());
             }
             else
             {
                 // NEW GAME RESETS TO NIGHT 1
-                stateManager.getNightManager().clearCustomNight();
                 SaveManager.deleteSave();
-                stateManager.getNightManager().loadNight(1);
+                stateManager.getNightManager().startNewGame();
             }
 
             stateManager.setState(StateManager.INTRO_STATE);

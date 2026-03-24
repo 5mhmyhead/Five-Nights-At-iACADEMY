@@ -23,6 +23,7 @@ public class WinState extends State
     private int pendingState = -1;
 
     private int displayNightNumber = 0;
+    private boolean shouldAdvanceNight = false;
 
     public WinState(StateManager stateManager)
     {
@@ -51,7 +52,18 @@ public class WinState extends State
         {
             fadeOutTimer--;
             if(fadeOutTimer <= 0)
+            {
+                if(shouldAdvanceNight)
+                {
+                    stateManager.getNightManager().advanceNight();
+                    SaveManager.save(
+                            stateManager.getNightManager().getNightNumber(),
+                            SaveManager.loadStars(),
+                            SaveManager.isCustomNightUnlocked()
+                    );
+                }
                 stateManager.setState(pendingState);
+            }
             return;
         }
 
@@ -157,30 +169,27 @@ public class WinState extends State
         // STORE WHICH STATE TO GO TO AFTER FADE
         if(stateManager.getNightManager().isCustomNight())
         {
-            // STAR TWO FOR BEATING 6/15
-            // STAR THREE FOR BEATING MAX MODE
+            // SECOND STAR FOR 6/15
+            // THIRD STAR FOR MAX MODE
             int stars = SaveManager.loadStars();
 
-            if(isMaxMode())
-                stars = 3; // STAR 3
-            else if(isMidMode())
-                stars = Math.min(3, Math.max(stars, 2)); // STAR 2
+            if(isMaxMode()) stars = 3;
+            else if(isMidMode()) stars = Math.min(3, Math.max(stars, 2));
 
             SaveManager.save(SaveManager.loadNight(), stars, true);
+            stateManager.getNightManager().clearCustomNight();
+
             pendingState = StateManager.TITLE_STATE;
         }
         else if(stateManager.getNightManager().isFinalNight())
         {
             // ADD ONE STAR WHEN BEATING NIGHT 5
-            int stars = Math.max(SaveManager.loadStars(), 1);
-            SaveManager.save(5, stars, true);
+            SaveManager.save(5, Math.max(SaveManager.loadStars(), 1), true);
             pendingState = StateManager.TITLE_STATE;
         }
         else
         {
-            stateManager.getNightManager().advanceNight();
-            SaveManager.save(stateManager.getNightManager().getNightNumber(),
-                    SaveManager.loadStars(), SaveManager.isCustomNightUnlocked());
+            shouldAdvanceNight = true;
             pendingState = StateManager.INTRO_STATE;
         }
     }
