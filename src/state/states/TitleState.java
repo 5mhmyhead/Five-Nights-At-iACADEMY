@@ -125,6 +125,12 @@ public class TitleState extends State
         g2.drawString("AT", 75, 270);
         g2.drawString("iACADEMY", 75, 330);
 
+        g2.setFont(FontManager.LCD_SMALL);
+        g2.drawString("Made by DWYANE SIDO, ver 0.8", 25, 700);
+
+        g2.setColor(Color.DARK_GRAY);
+        g2.drawString("DEBUG KEYS f1 - f5 to move between states", 25, 30);
+
         drawMenu(g2);
         drawStars(g2);
         drawRightGradient(g2);
