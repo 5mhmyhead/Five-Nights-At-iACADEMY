@@ -262,8 +262,8 @@ public class TitleState extends State
             }
             else
             {
-                // NEW GAME RESETS TO NIGHT 1
-                SaveManager.deleteSave();
+                // KEEP STARS AND CUSTOM NIGHT, ONLY RESET NIGHT PROGRESS
+                SaveManager.save(1, SaveManager.loadStars(), SaveManager.isCustomNightUnlocked());
                 stateManager.getNightManager().startNewGame();
             }
 

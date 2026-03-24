@@ -10,6 +10,7 @@ import utilities.Utility;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 public class CustomState extends State
 {
@@ -166,8 +167,9 @@ public class CustomState extends State
     private void startCustomNight()
     {
         // SET CUSTOM CONFIG IN NIGHT MANAGER
-        stateManager.getNightManager().setCustomConfig(
-                new NightConfig(0, aiLevels));
+        int[] levelsCopy = Arrays.copyOf(aiLevels, aiLevels.length);
+        stateManager.getNightManager().setCustomConfig(new NightConfig(0, levelsCopy));
+        stateManager.forceUnloadGameState(); // CLEAR ANY PRELOADED GAME STATE
         stateManager.setState(StateManager.INTRO_STATE);
     }
 

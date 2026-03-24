@@ -66,6 +66,11 @@ public class StateManager
         states[state] = null;
     }
 
+    public void forceUnloadGameState()
+    {
+        states[GAME_STATE] = null;
+    }
+
     public void preloadGameState()
     {
         if(states[GAME_STATE] == null)

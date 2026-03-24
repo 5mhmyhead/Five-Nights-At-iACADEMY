@@ -74,6 +74,13 @@ public class GameState extends State
         NightConfig config = stateManager.getNightManager().getConfig();
         for(int i = 0; i < animatronics.length; i++)
             animatronics[i].setAiLevel(config.aiLevels()[i]);
+
+        System.out.println("Dave AI: " + config.aiLevels()[0]);
+        System.out.println("Earl AI: " + config.aiLevels()[1]);
+        System.out.println("Tyrone AI: " + config.aiLevels()[2]);
+        System.out.println("Cristian AI: " + config.aiLevels()[3]);
+        System.out.println("Jirsten AI: " + config.aiLevels()[4]);
+        System.out.println("Lanze AI: " + config.aiLevels()[5]);
     }
 
     @Override

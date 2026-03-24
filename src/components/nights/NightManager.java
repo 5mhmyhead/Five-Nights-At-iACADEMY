@@ -1,5 +1,7 @@
 package components.nights;
 
+import static state.StateManager.GAME_STATE;
+
 public class NightManager
 {
     private int currentNight = 0;
