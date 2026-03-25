@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 public class Main
 {
     public static JFrame window;
-    BufferedImage icon = Utility.loadImage("/icon.png");
+    BufferedImage icon = Utility.loadImage("/icons/icon.png");
 
     public static void main(String[] args) { new Main().startGame(); }
 
