@@ -118,6 +118,12 @@ public class OfficeView
         drawHoverZone(g2);
     }
 
+    public void drawHoverZoneOverlay(Graphics2D g2)
+    {
+        if(!transitioning)
+            drawHoverZone(g2);
+    }
+
     private void drawTransitionFrame(Graphics2D g2)
     {
         // CURRENT FRAME IS LOADED DEPENDING ON THE INDEX

@@ -172,7 +172,9 @@ public class GameState extends State
     {
         ctx.office.draw(g2);
 
-        if(ctx.cameras.isMonitorUp()) return;
+        boolean monitorGoingDown = ctx.cameras.isTransitioningDown();
+
+        if(ctx.cameras.isMonitorUp() && !monitorGoingDown) return;
 
         if(!ctx.office.isPlayerAtDoor() && !ctx.office.isTransitioning())
             drawOfficeAnimatronics(g2);
@@ -202,13 +204,21 @@ public class GameState extends State
     private void drawHUD(Graphics2D g2)
     {
         // CRISTIAN CAMERA WARNING
-        if(ctx.cameras.isMonitorUp())
-            for(Animatronic a : animatronics)
-                if(a instanceof Cristian cristian && cristian.getAiLevel() > 0)
-                    cristian.drawOnCamera(g2, 0);
-
         ctx.clock.draw(g2, ctx.getClockColor(), ctx.getNightNumber());
+
+        if (!ctx.isInCameras())
+            ctx.office.drawHoverZoneOverlay(g2);
+
         ctx.blink.draw(g2, !ctx.isInCameras() && !ctx.cameras.isTransitioning(), ctx.office.isTransitioning());
+
+        // DRAW CRISTIAN OVERLAY IN CAMERAS, AT DOOR, AND WHEN EYES CLOSED
+        for (Animatronic a : animatronics)
+        {
+            if (!(a instanceof Cristian cristian) || cristian.getAiLevel() <= 0) continue;
+
+            if (cristian.isRedEyeActive() || cristian.shouldShowWarning())
+                cristian.drawRedEyeOverlay(g2, ctx);
+        }
     }
 
     private void drawJumpscares(Graphics2D g2)

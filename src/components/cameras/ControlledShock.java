@@ -36,15 +36,22 @@ public class ControlledShock
     public void mouseClicked(int mouseX, int mouseY)
     {
         if(charges <= 0) return;
-        if(cooldownTimer > 0) return;
 
         if(mouseX >= X && mouseX <= X + W && mouseY >= Y && mouseY <= Y + H)
         {
-            SoundManager.SHOCK.setVolume(0.5);
-            SoundManager.SHOCK.play();
-            shockPressed  = true;
-            charges--;
-            cooldownTimer = COOLDOWN_DURATION;
+            if(cooldownTimer > 0)
+            {
+                SoundManager.BUTTON_BROKEN.setVolume(0.3);
+                SoundManager.BUTTON_BROKEN.play();
+            }
+            else
+            {
+                SoundManager.SHOCK.setVolume(0.5);
+                SoundManager.SHOCK.play();
+                shockPressed = true;
+                charges--;
+                cooldownTimer = COOLDOWN_DURATION;
+            }
         }
     }
 

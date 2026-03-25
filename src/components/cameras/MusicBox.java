@@ -32,7 +32,12 @@ public class MusicBox
     public void mouseClicked(int mouseX, int mouseY)
     {
         // WHILE WINDING, PLAYER CANNOT CLICK
-        if(winding) return;
+        if(winding)
+        {
+            SoundManager.BUTTON_BROKEN.setVolume(0.3);
+            SoundManager.BUTTON_BROKEN.play();
+            return;
+        }
 
         if(mouseX >= X && mouseX <= X + W && mouseY >= Y && mouseY <= Y + H)
         {

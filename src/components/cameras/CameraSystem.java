@@ -235,14 +235,22 @@ public class CameraSystem
         }
 
         // REBOOT BUTTON
-        if(!rebooting
-            && mouseX >= REBOOT_X && mouseX <= REBOOT_X + REBOOT_W
+        if(mouseX >= REBOOT_X && mouseX <= REBOOT_X + REBOOT_W
             && mouseY >= REBOOT_Y && mouseY <= REBOOT_Y + REBOOT_H)
         {
-            rebooting = true;
-            rebootTimer = REBOOT_DURATION;
-            SoundManager.CAMERA_REBOOTING.setVolume(0.7);
-            SoundManager.CAMERA_REBOOTING.loop();
+            if(!rebooting)
+            {
+                rebooting = true;
+                rebootTimer = REBOOT_DURATION;
+                SoundManager.CAMERA_REBOOTING.setVolume(0.7);
+                SoundManager.CAMERA_REBOOTING.loop();
+            }
+            else
+            {
+                SoundManager.BUTTON_BROKEN.setVolume(0.3);
+                SoundManager.BUTTON_BROKEN.play();
+            }
+
         }
 
         // FORWARDS MOUSE CLICKS TO MUSIC BOX
@@ -651,6 +659,7 @@ public class CameraSystem
 
     public boolean isMonitorUp() { return monitorUp; }
     public boolean isTransitioning() { return transitioning; }
+    public boolean isTransitioningDown() { return transitioning && !transitionForward; }
 
     public int getCurrentCamera() { return currentCamera; }
     public boolean wasCameraSwitched() { return cameraSwitched; }

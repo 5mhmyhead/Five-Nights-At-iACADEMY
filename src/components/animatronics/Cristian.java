@@ -5,6 +5,7 @@ import components.JumpscarePlayer;
 import main.GamePanel;
 import state.StateManager;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -19,93 +20,140 @@ import java.awt.image.BufferedImage;
 public class Cristian extends Animatronic
 {
     private enum CristianState { IDLE, IMPATIENT, AGGRESSIVE, CRITICAL, RED_EYE, RED_EYE_CRITICAL }
-    private CristianState state = CristianState.IDLE;
+    private enum FlickerState  { NONE, ACTIVE }
 
-    // PATIENCE GOES DOWN BY 1 EVERY SUCCESSFUL MOVEMENT OPPORTUNITY
-    // WHEN PATIENCE REACHES 0, THE PLAYER HAS 3 SECONDS OF BUFFER TIME TO REACT
     private static final int MAX_PATIENCE = 100;
     private static final int CRITICAL_COUNTDOWN = 150;
     private static final int MOVE_INTERVAL = 7;
 
-    private int patience = 100;
+    private CristianState state = CristianState.IDLE;
+    private int patience = MAX_PATIENCE;
     private int criticalTimer = 0;
     private int moveTimer = 0;
 
-    // RED EYES MECHANIC, PATIENCE LOWERS TWICE AS FAST IN THIS STATE
-    // CRISTIAN JUMPSCARES THE PLAYER WHEN THEY MOVE THEIR HEAD, FLIP THE CAMERA, OR CLOSE THEIR EYES
     private static final int FREEZE_DURATION = 210;
     private static final int STARE_REQUIRED = 60;
     private static final int RED_EYE_GRACE = 45;
-
-    private static final int RED_EYE_MAX = 2100; // 70 SECONDS
     private static final int RED_EYE_MIN = 1800; // 60 SECONDS
+    private static final int RED_EYE_MAX = 2100; // 70 SECONDS
 
-    private int redEyeTrigger;
-    private int redEyeGraceTimer = 0;
-
+    private int redEyeTrigger = 60;
+    //private int redEyeTrigger = RED_EYE_MIN + (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
     private int redEyeTimer = 0;
+    private int redEyeGraceTimer = 0;
     private int stareTimer = 0;
     private int freezeTimer = 0;
     private boolean warningShown = false;
+    private boolean waitingForRedEye = false;
 
-    // SPRITES
+    private static final int FLASH_INTERVAL_MIN = 15;
+    private static final int FLASH_INTERVAL_MAX = 45;
+
+    private final BufferedImage[] flashFrames = new BufferedImage[4];
+    private int currentFlashFrame = -1;
+    private int flashTimer = 0;
+    private int nextFlash = 20;
+
+    private static final int TEXT_COUNT = 2;
+    private static final int TEXT_VISIBLE_DURATION = 4;
+    private static final int TEXT_POPUP_MIN = 8;
+    private static final int TEXT_POPUP_MAX = 20;
+
+    private final int[] textX = new int[TEXT_COUNT];
+    private final int[] textY = new int[TEXT_COUNT];
+    private final float[] textSize = new float[TEXT_COUNT];
+    private final float[] textAlpha = new float[TEXT_COUNT];
+
+    private boolean textVisible = false;
+    private int textVisibleTimer = 0;
+    private int nextTextPopup = 0;
+
+    private static final int[] FLICKER_ALPHAS  = { 0, 190, 60, 255, 190, 60, 0 };
+    private static final int FRAMES_PER_STEP = 3;
+
+    private FlickerState flickerState = FlickerState.NONE;
+    private int flickerStep = 0;
+    private int flickerFrameTimer = 0;
+    private Runnable onFlickerMidpoint; // CALLED WHEN ALPHA HITS 255
+
     private final BufferedImage imageIdle;
     private final BufferedImage imageImpatient;
     private final BufferedImage imageAggressive;
     private final BufferedImage imageCritical;
     private final BufferedImage imageLookAtMe;
-
-    // CRISTIAN SPRITE DOESN'T UPDATE IF PLAYER LOOKS AT HIM
     private BufferedImage displayedImage;
 
-    // JUMPSCARE
     private final JumpscarePlayer jumpscare;
 
     public Cristian()
     {
         location = Location.MAIN;
-        redEyeTrigger = (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
 
         imageIdle = Utility.loadImage("/animatronics/cristian/cristianIdle.png");
         imageImpatient = Utility.loadImage("/animatronics/cristian/cristianImpatient.png");
         imageAggressive = Utility.loadImage("/animatronics/cristian/cristianAggressive.png");
         imageCritical = Utility.loadImage("/animatronics/cristian/cristianCritical.png");
         imageLookAtMe = Utility.loadImage("/animatronics/cristian/cristianLookAtMe.png");
-
-        // SPRITE STARTS AT IDLE
         displayedImage = imageIdle;
+
+        for (int i = 0; i < flashFrames.length; i++)
+            flashFrames[i] = Utility.loadImage("/animatronics/cristian/cristianFlash" + (i + 1) + ".png");
+
         jumpscare = new JumpscarePlayer("/jumpscares/cristian", 8);
+        shuffleTextPositions();
     }
 
     @Override
     public void update(GameContext ctx)
     {
-        // IF JUMPSCARE IS PLAYING, ONLY UPDATE IT
-        if(jumpscare.isPlaying())
+        if (jumpscare.isPlaying())
         {
             jumpscare.update();
-            if(jumpscare.isFinished())
+            if (jumpscare.isFinished())
             {
-                ctx.stateManager.setKiller("Lanze");
+                ctx.stateManager.setKiller("Cristian");
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
             }
             return;
         }
 
+        updateFlicker();
+        handleTransition(ctx);
         handleRedEye(ctx);
         handleMovement(ctx);
         handlePatience(ctx);
         updateDisplayedImage(ctx);
     }
 
-    // RED EYE MECHANICS
+    private void handleTransition(GameContext ctx)
+    {
+        if(waitingForRedEye && playerFacingOffice(ctx))
+        {
+            Runnable midpoint = () ->
+            {
+                state = CristianState.RED_EYE;
+                redEyeGraceTimer = RED_EYE_GRACE;
+            };
+
+            // FLICKER ONLY IF PLAYER IS WATCHING THE OFFICE
+            if (playerFacingOffice(ctx)) startFlicker(midpoint);
+            else midpoint.run();
+
+            waitingForRedEye = false;
+        }
+    }
+
     private void handleRedEye(GameContext ctx)
     {
-        if(freezeTimer > 0) { freezeTimer--; return; }
+        if (freezeTimer > 0) { freezeTimer--; return; }
 
-        if(state != CristianState.RED_EYE && state != CristianState.RED_EYE_CRITICAL)
+        if (!isRedEyeActive())
         {
             tickRedEyeTrigger(ctx);
+
+            if (waitingForRedEye && !warningShown)
+                warningShown = true;
+
             return;
         }
 
@@ -114,91 +162,79 @@ public class Cristian extends Animatronic
 
     private void tickRedEyeTrigger(GameContext ctx)
     {
-        if(aiLevel <= 8) return;
+        if (aiLevel <= 8) return;
 
         redEyeTimer++;
-        if(redEyeTimer >= redEyeTrigger)
+        if (redEyeTimer >= redEyeTrigger)
             activateRedEye(ctx);
     }
 
     private void activateRedEye(GameContext ctx)
     {
-        warningShown = ctx.cameras.isMonitorUp();
-        redEyeGraceTimer = RED_EYE_GRACE;
-        state = CristianState.RED_EYE;
         redEyeTimer = 0;
         stareTimer = 0;
+        redEyeTrigger  = RED_EYE_MIN + (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
+        waitingForRedEye = true;
 
-        // ROLLS FOR THE NEXT RED EYE CALL
-        redEyeTrigger = RED_EYE_MIN + (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
+        SoundManager.ITS_ME.setVolume(0.5);
+        SoundManager.ITS_ME.loop();
     }
 
     private void handleRedEyeStare(GameContext ctx)
     {
         // PLAYER WILL NOT LOSE DURING THE GRACE PERIOD
-        if(redEyeGraceTimer > 0)
-        {
-            redEyeGraceTimer--;
-            return;
-        }
+        if (redEyeGraceTimer > 0) { redEyeGraceTimer--; return; }
 
-        boolean playerInOffice = !ctx.cameras.isMonitorUp() && !ctx.office.isPlayerAtDoor();
-        boolean playerInCameras = ctx.cameras.isMonitorUp();
-
-        // RED EYE WARNING IN THE CAMERAS
-        if(playerInCameras && !warningShown) warningShown = true;
-
-        if(playerInOffice && !ctx.blink.areEyesClosed())
+        // STARE STARTS ONCE PLAYER IS LOOKING AT CRISTIAN
+        if (playerFacingOffice(ctx))
         {
             stareTimer++;
-            if(stareTimer >= STARE_REQUIRED) onRedEyeSuccess();
+            if (stareTimer >= STARE_REQUIRED) onRedEyeSuccess(ctx);
         }
-        else if(stareTimer > 0)
-        {
-            // IF PLAYER LOOKS AWAY MID STARE THEN PLAYER LOSES
-            ctx.stateManager.setKiller("Cristian");
+        else if (stareTimer > 0)
             jumpscare.play();
-        }
     }
 
-    private void onRedEyeSuccess()
+    private void onRedEyeSuccess(GameContext ctx)
     {
+        SoundManager.ITS_ME.stop();
         freezeTimer = FREEZE_DURATION;
         patience = MAX_PATIENCE;
-        state = CristianState.IDLE;
         stareTimer = 0;
         warningShown = false;
+
+        Runnable midpoint = () ->
+        {
+            state = CristianState.IDLE;
+            displayedImage = imageIdle;
+        };
+
+        // FLICKER ONLY IF PLAYER IS WATCHING THE OFFICE
+        if (playerFacingOffice(ctx)) startFlicker(midpoint);
+        else midpoint.run();
     }
 
     private void handleMovement(GameContext ctx)
     {
-        // PATIENCE IS FROZEN AFTER RED EYES
-        if(freezeTimer > 0) return;
+        if (freezeTimer > 0) return; // PATIENCE IS FROZEN AFTER RED EYE SUCCESS
 
         moveTimer++;
-        if(moveTimer >= MOVE_INTERVAL)
+        if (moveTimer >= MOVE_INTERVAL)
         {
             moveTimer = 0;
-            if(shouldMove()) patience -= isRedEyeActive() ? 2 : 1;
+            if (shouldMove()) patience -= isRedEyeActive() ? 2 : 1;
         }
 
-        if(patience <= 0 && state != CristianState.CRITICAL
-                && state != CristianState.RED_EYE_CRITICAL)
+        if (patience <= 0 && state != CristianState.CRITICAL && state != CristianState.RED_EYE_CRITICAL)
         {
-            if(state == CristianState.RED_EYE)
-                state = CristianState.RED_EYE_CRITICAL;
-            else
-                state = CristianState.CRITICAL;
-
+            state = (state == CristianState.RED_EYE) ? CristianState.RED_EYE_CRITICAL : CristianState.CRITICAL;
             criticalTimer = CRITICAL_COUNTDOWN;
         }
-        else if(state != CristianState.CRITICAL
-                && state != CristianState.RED_EYE
-                && state != CristianState.RED_EYE_CRITICAL)
+        else if (state != CristianState.CRITICAL && !isRedEyeActive())
         {
-            if(patience <= 33)
+            if (patience <= 33)
                 state = CristianState.AGGRESSIVE;
-            else if(patience <= 66)
+            else if (patience <= 66)
                 state = CristianState.IMPATIENT;
             else
                 state = CristianState.IDLE;
@@ -207,23 +243,18 @@ public class Cristian extends Animatronic
 
     private void handlePatience(GameContext ctx)
     {
-        if(ctx.office.isPlayerAtDoor())
+        if (ctx.office.isPlayerAtDoor())
         {
-            // PATIENCE RECOVERS WHILE LOOKING AT DOOR
-            patience++;
-            if(patience >= MAX_PATIENCE)
-                patience = MAX_PATIENCE;
-
-            // EXIT CRITICAL IF PATIENCE RECOVERED ABOVE 0
-            if(state == CristianState.CRITICAL && patience > 0)
+            // PATIENCE RECOVERS WHILE LOOKING AT THE DOOR
+            patience = Math.min(patience + 1, MAX_PATIENCE);
+            if (state == CristianState.CRITICAL && patience > 0)
                 state = CristianState.AGGRESSIVE;
         }
-        else if(state == CristianState.CRITICAL || state == CristianState.RED_EYE_CRITICAL)
+        else if (state == CristianState.CRITICAL || state == CristianState.RED_EYE_CRITICAL)
         {
             criticalTimer--;
-            if(criticalTimer <= 0)
+            if (criticalTimer <= 0)
             {
-                ctx.stateManager.setKiller("Cristian");
                 jumpscare.play();
             }
         }
@@ -232,10 +263,8 @@ public class Cristian extends Animatronic
     @Override
     public void drawOnOffice(Graphics2D g2)
     {
-        if(displayedImage != null)
-        {
-            g2.drawImage(displayedImage, 0, 0, 1280, 720, null);
-        }
+        if (displayedImage != null)
+            g2.drawImage(displayedImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
         else
         {
             g2.setColor(new Color(243, 33, 82));
@@ -245,42 +274,47 @@ public class Cristian extends Animatronic
             g2.drawString("CRISTIAN [state: " + state + "]", 75, 50);
         }
 
-        if(state == CristianState.RED_EYE)
-        {
-            g2.setColor(new Color(255, 0, 0, 180));
-            g2.setFont(FontManager.LCD_CLOCK);
-            int x = (GamePanel.WIDTH - g2.getFontMetrics().stringWidth("LOOK AT ME")) / 2;
-            g2.drawString("LOOK AT ME", x, GamePanel.HEIGHT / 2);
-        }
-
         drawPatienceBar(g2);
+        drawFlicker(g2);
     }
 
-    @Override
-    public void drawOnCamera(Graphics2D g2, int swayX)
+    public void drawRedEyeOverlay(Graphics2D g2, GameContext ctx)
     {
-        if(!shouldShowCameraWarning()) return;
+        if (jumpscare.isPlaying()) return; // DON'T DRAW OVERLAY DURING JUMPSCARE
+        updateRedEyeEffect();
 
-        if((System.currentTimeMillis() / 100) % 2 == 0)
+        if(!playerFacingOffice(ctx))
         {
-            g2.setColor(new Color(255, 0, 0, 200));
-            g2.setFont(FontManager.LCD_CLOCK);
-            int x = (GamePanel.WIDTH - g2.getFontMetrics().stringWidth("LOOK AT ME")) / 2;
-            g2.drawString("LOOK AT ME", x, GamePanel.HEIGHT / 2);
+            Utility.drawAmbientScanlines(g2, new Color(255, 255, 255), 2);
+            Utility.drawStatic(g2, 8, 8, new Color(255, 255, 255));
+        }
+        else
+        {
+            Utility.drawAmbientScanlines(g2, new Color(255, 255, 255, 80), 2);
+            Utility.drawStatic(g2, 8, 10, new Color(255, 255, 255));
+        }
+
+        // FLASH FRAMES
+        if(!playerFacingOffice(ctx))
+        {
+            if (currentFlashFrame >= 0 && flashFrames[currentFlashFrame] != null)
+                g2.drawImage(flashFrames[currentFlashFrame], 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
+        }
+
+        // LOOK AT ME TEXT
+        if (textVisible)
+        {
+            for (int i = 0; i < TEXT_COUNT; i++)
+            {
+                g2.setFont(FontManager.LCD_CLOCK.deriveFont(textSize[i]));
+                g2.setColor(new Color(255, 255, 255, (int) textAlpha[i]));
+                g2.drawString("LOOK AT ME", textX[i], textY[i]);
+            }
         }
     }
 
     @Override
-    public void drawJumpscare(Graphics2D g2)
-    {
-        jumpscare.draw(g2);
-    }
-
-    @Override
-    public boolean jumpscareIsPlaying()
-    {
-        return jumpscare.isPlaying();
-    }
+    public void drawJumpscare(Graphics2D g2) { jumpscare.draw(g2); }
 
     private void drawPatienceBar(Graphics2D g2)
     {
@@ -289,25 +323,127 @@ public class Cristian extends Animatronic
         int barW = 200;
         int barH = 10;
 
-        // BACKGROUND
         g2.setColor(new Color(20, 20, 20, 180));
         g2.fillRoundRect(barX, barY, barW, barH, 4, 4);
 
-        // FILL — SCALES WITH PATIENCE (0-100)
         int fillW = (int)(barW * (patience / 100.0));
         g2.setColor(new Color(100, 180, 255, 220));
         g2.fillRoundRect(barX, barY, fillW, barH, 4, 4);
 
-        // BORDER
         g2.setColor(new Color(180, 220, 255));
         g2.setStroke(new BasicStroke(2));
         g2.drawRoundRect(barX, barY, barW, barH, 4, 4);
         g2.setStroke(new BasicStroke(1));
     }
 
+    private void updateRedEyeEffect()
+    {
+        // FLASH FRAME TIMING
+        if (currentFlashFrame >= 0)
+        {
+            flashTimer--;
+            if (flashTimer <= 0) currentFlashFrame = -1;
+        }
+        else
+        {
+            nextFlash--;
+            if (nextFlash <= 0)
+            {
+                currentFlashFrame = (int)(Math.random() * flashFrames.length);
+                flashTimer = 2 + (int)(Math.random() * 4);
+                nextFlash = FLASH_INTERVAL_MIN + (int)(Math.random() * (FLASH_INTERVAL_MAX - FLASH_INTERVAL_MIN));
+            }
+        }
+
+        // TEXT POPUP TIMING
+        if (textVisible)
+        {
+            textVisibleTimer--;
+            if (textVisibleTimer <= 0)
+            {
+                textVisible = false;
+                nextTextPopup = TEXT_POPUP_MIN + (int)(Math.random() * (TEXT_POPUP_MAX - TEXT_POPUP_MIN));
+            }
+        }
+        else
+        {
+            nextTextPopup--;
+            if (nextTextPopup <= 0)
+            {
+                textVisible = true;
+                textVisibleTimer = TEXT_VISIBLE_DURATION;
+                shuffleTextPositions();
+            }
+        }
+    }
+
+    private void shuffleTextPositions()
+    {
+        for (int i = 0; i < TEXT_COUNT; i++)
+        {
+            textX[i] = 50 + (int)(Math.random() * (GamePanel.WIDTH  - 200));
+            textY[i] = 80 + (int)(Math.random() * (GamePanel.HEIGHT - 100));
+            textSize[i] = 40f + (float)(Math.random() * 80f);
+            textAlpha[i] = 80  + (int)(Math.random() * 175);
+        }
+    }
+
+    private void startFlicker(Runnable onMidpoint)
+    {
+        flickerState = FlickerState.ACTIVE;
+        flickerStep = 0;
+        flickerFrameTimer = 0;
+        onFlickerMidpoint = onMidpoint;
+    }
+
+    private void updateFlicker()
+    {
+        if (flickerState == FlickerState.NONE) return;
+
+        flickerFrameTimer++;
+        if (flickerFrameTimer < FRAMES_PER_STEP) return;
+        flickerFrameTimer = 0;
+        flickerStep++;
+
+        // MIDPOINT
+        if (flickerStep == 3 && onFlickerMidpoint != null)
+        {
+            onFlickerMidpoint.run();
+            onFlickerMidpoint = null;
+        }
+
+        if (flickerStep >= FLICKER_ALPHAS.length)
+        {
+            flickerStep  = 0;
+            flickerState = FlickerState.NONE;
+        }
+    }
+
+    private void drawFlicker(Graphics2D g2)
+    {
+        if (flickerState == FlickerState.NONE) return;
+        int alpha = FLICKER_ALPHAS[flickerStep];
+        if (alpha == 0) return;
+        g2.setColor(new Color(0, 0, 0, alpha));
+        g2.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
+    }
+
+    public void updateDisplayedImage(GameContext ctx)
+    {
+        // ALWAYS UPDATE SPRITE DURING FLICKER — MIDPOINT CALLBACK NEEDS TO SHOW THROUGH
+        if (flickerState == FlickerState.ACTIVE || isRedEyeActive())
+        {
+            displayedImage = getCurrentImage();
+            return;
+        }
+
+        if (!playerFacingOffice(ctx))
+            displayedImage = getCurrentImage();
+    }
+
     private BufferedImage getCurrentImage()
     {
-        return switch(state)
+        return switch (state)
         {
             case IDLE -> imageIdle;
             case IMPATIENT -> imageImpatient;
@@ -317,17 +453,16 @@ public class Cristian extends Animatronic
         };
     }
 
-    public void updateDisplayedImage(GameContext ctx)
+    private boolean playerFacingOffice(GameContext ctx)
     {
-        boolean playerWatching = ctx.cameras.isMonitorUp()
-                && ctx.cameras.getCurrentCamera() == currentCamera;
-
-        if(!playerWatching) displayedImage = getCurrentImage();
+        return !ctx.cameras.isMonitorUp()
+                && !ctx.office.isPlayerAtDoor()
+                && !ctx.blink.areEyesClosed();
     }
 
-    public boolean shouldShowCameraWarning()
+    public boolean shouldShowWarning()
     {
-        return (state == CristianState.RED_EYE || state == CristianState.RED_EYE_CRITICAL) && warningShown;
+        return (isRedEyeActive() || waitingForRedEye) && warningShown;
     }
 
     public boolean isRedEyeActive()
@@ -335,5 +470,7 @@ public class Cristian extends Animatronic
         return state == CristianState.RED_EYE || state == CristianState.RED_EYE_CRITICAL;
     }
 
+    @Override
+    public boolean jumpscareIsPlaying() { return jumpscare.isPlaying(); }
     public int getPatience() { return patience; }
 }
