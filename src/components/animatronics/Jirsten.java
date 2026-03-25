@@ -5,6 +5,7 @@ import components.JumpscarePlayer;
 import components.cameras.CameraSystem;
 import main.GamePanel;
 import utilities.FontManager;
+import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
@@ -84,6 +85,18 @@ public class Jirsten extends Animatronic
     {
         int watchedCamera = ctx.cameras.getCurrentCamera();
         boolean playerWatching = ctx.cameras.isMonitorUp() && watchedCamera == currentCamera;
+
+        // FAINT AMBIENT WHEN PLAYER IS WATCHING JIRSTEN
+        if (playerWatching && ctx.cameras.isCameraViewable(currentCamera))
+        {
+            SoundManager.RADIO.setVolume(0.2);
+            SoundManager.RADIO.loop();
+            SoundManager.RADIO.unmute();
+        }
+        else
+        {
+            SoundManager.RADIO.mute();
+        }
 
         // PAUSE MOVE TIMER WHILE PLAYER IS WATCHING JIRSTEN
         if (!playerWatching)

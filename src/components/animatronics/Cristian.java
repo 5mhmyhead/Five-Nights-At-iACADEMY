@@ -37,8 +37,8 @@ public class Cristian extends Animatronic
     private static final int RED_EYE_MIN = 1800; // 60 SECONDS
     private static final int RED_EYE_MAX = 2100; // 70 SECONDS
 
-    private int redEyeTrigger = 60;
-    //private int redEyeTrigger = RED_EYE_MIN + (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
+    //private int redEyeTrigger = 60;
+    private int redEyeTrigger = RED_EYE_MIN + (int)(Math.random() * (RED_EYE_MAX - RED_EYE_MIN));
     private int redEyeTimer = 0;
     private int redEyeGraceTimer = 0;
     private int stareTimer = 0;
@@ -84,6 +84,7 @@ public class Cristian extends Animatronic
     private BufferedImage displayedImage;
 
     private final JumpscarePlayer jumpscare;
+    private boolean jumpscareWaiting = false;
 
     public Cristian()
     {
@@ -114,6 +115,14 @@ public class Cristian extends Animatronic
                 ctx.stateManager.setKiller("Cristian");
                 ctx.stateManager.setState(StateManager.LOSE_STATE);
             }
+            return;
+        }
+
+        // TRIGGER JUMPSCARE ONCE MONITOR IS DOWN OR BLINK IS DOWN
+        if(!(!jumpscareWaiting || ctx.cameras.isMonitorUp() || ctx.blink.areEyesClosed()))
+        {
+            jumpscareWaiting = false;
+            jumpscare.play();
             return;
         }
 
@@ -192,7 +201,16 @@ public class Cristian extends Animatronic
             if (stareTimer >= STARE_REQUIRED) onRedEyeSuccess(ctx);
         }
         else if (stareTimer > 0)
-            jumpscare.play();
+        {
+            if (!ctx.cameras.isTransitioning() && ctx.cameras.isMonitorUp())
+                ctx.cameras.forceMonitorDown();
+
+            if (ctx.blink.areEyesClosed())
+                ctx.blink.forceOpen();
+
+            SoundManager.LOOK_AT_ME.stop();
+            jumpscareWaiting = true;
+        }
     }
 
     private void onRedEyeSuccess(GameContext ctx)
@@ -255,7 +273,14 @@ public class Cristian extends Animatronic
             criticalTimer--;
             if (criticalTimer <= 0)
             {
-                jumpscare.play();
+                if (!ctx.cameras.isTransitioning() && ctx.cameras.isMonitorUp())
+                    ctx.cameras.forceMonitorDown();
+
+                if (ctx.blink.areEyesClosed())
+                    ctx.blink.forceOpen();
+
+                SoundManager.LOOK_AT_ME.stop();
+                jumpscareWaiting = true;
             }
         }
     }
@@ -263,6 +288,8 @@ public class Cristian extends Animatronic
     @Override
     public void drawOnOffice(Graphics2D g2)
     {
+        if(jumpscare.isPlaying()) return;
+
         if (displayedImage != null)
             g2.drawImage(displayedImage, 0, 0, GamePanel.WIDTH, GamePanel.HEIGHT, null);
         else
@@ -274,7 +301,6 @@ public class Cristian extends Animatronic
             g2.drawString("CRISTIAN [state: " + state + "]", 75, 50);
         }
 
-        drawPatienceBar(g2);
         drawFlicker(g2);
     }
 
@@ -315,26 +341,6 @@ public class Cristian extends Animatronic
 
     @Override
     public void drawJumpscare(Graphics2D g2) { jumpscare.draw(g2); }
-
-    private void drawPatienceBar(Graphics2D g2)
-    {
-        int barX = 830;
-        int barY = 630;
-        int barW = 200;
-        int barH = 10;
-
-        g2.setColor(new Color(20, 20, 20, 180));
-        g2.fillRoundRect(barX, barY, barW, barH, 4, 4);
-
-        int fillW = (int)(barW * (patience / 100.0));
-        g2.setColor(new Color(100, 180, 255, 220));
-        g2.fillRoundRect(barX, barY, fillW, barH, 4, 4);
-
-        g2.setColor(new Color(180, 220, 255));
-        g2.setStroke(new BasicStroke(2));
-        g2.drawRoundRect(barX, barY, barW, barH, 4, 4);
-        g2.setStroke(new BasicStroke(1));
-    }
 
     private void updateRedEyeEffect()
     {

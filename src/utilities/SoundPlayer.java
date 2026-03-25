@@ -18,7 +18,6 @@ public class SoundPlayer
                     SoundPlayer.class.getResource(path)).toExternalForm();
             Media media = new Media(uri);
             mediaPlayer = new MediaPlayer(media);
-            System.out.println("Sound loaded: " + path);
         }
         catch(Exception e)
         {

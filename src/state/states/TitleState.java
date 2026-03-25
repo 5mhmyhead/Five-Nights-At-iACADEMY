@@ -58,7 +58,7 @@ public class TitleState extends State
     @Override
     public void init()
     {
-        //SoundManager.MAIN_MENU.loop();
+        SoundManager.MAIN_MENU.loop();
         glitchTimer = randomGlitchInterval();
         characterTimer = randomCharacterInterval();
         pendingSwap = false;
