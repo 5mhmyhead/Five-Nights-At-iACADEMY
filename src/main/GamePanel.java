@@ -13,6 +13,10 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
     public static final int WIDTH  = 1280;
     public static final int HEIGHT = 720;
 
+    private int scaledOffsetX = 0;
+    private int scaledOffsetY = 0;
+    private float scaleFactor = 1f;
+
     // THREAD AND FPS SETTINGS
     public static final int FPS = 30;
 
@@ -86,9 +90,30 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+
+        // FILL ENTIRE PANEL WITH BLACK FIRST
+        g2.setColor(Color.BLACK);
+        g2.fillRect(0, 0, getWidth(), getHeight());
+
+        // CALCULATE SCALE TO FIT 1280x720 INSIDE CURRENT WINDOW SIZE
+        float scaleX = (float) getWidth()  / WIDTH;
+        float scaleY = (float) getHeight() / HEIGHT;
+        scaleFactor  = Math.min(scaleX, scaleY);
+
+        // CENTER THE GAME AREA
+        scaledOffsetX = (int)((getWidth()  - WIDTH  * scaleFactor) / 2);
+        scaledOffsetY = (int)((getHeight() - HEIGHT * scaleFactor) / 2);
+
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        // APPLY TRANSFORM
+        g2.translate(scaledOffsetX, scaledOffsetY);
+        g2.scale(scaleFactor, scaleFactor);
 
         // ADD ANTIALIASING
-        Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
@@ -98,8 +123,10 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
 
     @Override public void keyPressed(KeyEvent e)
     {
-        if(e != null)
-            stateManager.keyPressed(e.getKeyCode());
+        if (e.getKeyCode() == KeyEvent.VK_F11)
+            Main.toggleFullscreen();
+
+        stateManager.keyPressed(e.getKeyCode());
     }
 
     @Override public void keyReleased(KeyEvent e)
@@ -110,12 +137,16 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseMot
 
     @Override public void mousePressed(MouseEvent e)
     {
-        stateManager.mouseClicked(e.getX(), e.getY());
+        stateManager.mouseClicked(toGameX(e.getX()), toGameY(e.getY()));
     }
+
     @Override public void mouseMoved(MouseEvent e)
     {
-        stateManager.mouseMoved(e.getX(), e.getY());
+        stateManager.mouseMoved(toGameX(e.getX()), toGameY(e.getY()));
     }
+
+    private int toGameX(int screenX) { return (int)((screenX - scaledOffsetX) / scaleFactor); }
+    private int toGameY(int screenY) { return (int)((screenY - scaledOffsetY) / scaleFactor); }
 
     @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseClicked(MouseEvent e) {}

@@ -108,9 +108,11 @@ public class LoseState extends State
             stateManager.setState(StateManager.TITLE_STATE);
     }
 
-    @Override
-    public void keyReleased(int key) {}
+    @Override public void mouseClicked(int x, int y)
+    {
+        keyPressed(KeyEvent.VK_R);
+    }
 
+    @Override public void keyReleased(int key) {}
     @Override public void mouseMoved(int x, int y) {}
-    @Override public void mouseClicked(int x, int y) {}
 }

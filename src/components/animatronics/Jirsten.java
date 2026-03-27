@@ -26,7 +26,7 @@ public class Jirsten extends Animatronic
 
     // SPRITES
     private final JumpscarePlayer jumpscare;
-    private final JumpscarePlayer warningJumpscare;    // JUMPSCARE WHEN PLAYER STAYS IN CAM FOR TOO LONG
+    private final JumpscarePlayer warningJumpscare; // JUMPSCARE WHEN PLAYER STAYS IN CAM FOR TOO LONG
     private float warningAlpha = 0f;
 
     private final BufferedImage warningImage;
@@ -256,11 +256,11 @@ public class Jirsten extends Animatronic
     }
 
     // CALCULATES THE STAY LIMIT DEPENDING ON THE AI LEVEL OF JIRSTEN
-    // 15 SECONDS - 6 SECONDS RANGE
+    // 10 SECONDS - 4 SECONDS RANGE
     private int getStayLimit()
     {
-        int maxLimit = 450;
-        int minLimit = 180;
+        int maxLimit = 300;
+        int minLimit = 120;
         return maxLimit - (int)((maxLimit - minLimit) * (aiLevel - 1) / 19.0);
     }
 }

@@ -23,14 +23,14 @@ public class Dave extends Animatronic
 
     private static final int GRACE_DURATION = 300;
     private static final int MOVE_INTERVAL = 270;
-    private static final int DOOR_COUNTDOWN = 120;
+    private static final int DOOR_COUNTDOWN = 90;
 
     private int graceTimer = 0;
     private int moveTimer = 0;
     private int doorTimer = 0;
 
-    // DAVE CANNOT MOVE FOR 20 FRAMES AFTER PLAYER LEAVES THE CAMERA
-    private static final int WATCH_PAUSE_DURATION = 20;
+    // DAVE CANNOT MOVE FOR 0.5 SECONDS AFTER PLAYER LEAVES THE CAMERA
+    private static final int WATCH_PAUSE_DURATION = 15;
     private int watchPauseTimer = 0;
     private boolean wasWatched  = false;
 

@@ -24,7 +24,7 @@ public class CameraSystem
     private boolean cameraSwitched = false;
 
     // REBOOTING SYSTEM
-    private static final int REBOOT_DURATION = 300;
+    private static final int REBOOT_DURATION = 360;
     private boolean rebooting = false;
     private int rebootTimer = 0;
 
@@ -188,8 +188,13 @@ public class CameraSystem
 
     public void mouseMoved(int mouseX, int mouseY)
     {
-        if(transitioning) return;
         if(inputLocked) return;
+
+        if(transitioning)
+        {
+            wasInHoverZone = false;
+            return;
+        }
 
         boolean inHoverZone =
                    mouseX >= HOVER_ZONE_X_MIN

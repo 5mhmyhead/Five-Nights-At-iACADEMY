@@ -31,7 +31,7 @@ public class Cristian extends Animatronic
     private int criticalTimer = 0;
     private int moveTimer = 0;
 
-    private static final int FREEZE_DURATION = 210;
+    private static final int FREEZE_DURATION = 150;
     private static final int STARE_REQUIRED = 60;
     private static final int RED_EYE_GRACE = 45;
     private static final int RED_EYE_MIN = 1800; // 60 SECONDS
@@ -316,7 +316,7 @@ public class Cristian extends Animatronic
         }
         else
         {
-            Utility.drawAmbientScanlines(g2, new Color(255, 255, 255, 80), 2);
+            Utility.drawAmbientScanlines(g2, new Color(255, 255, 255, 20), 2);
             Utility.drawStatic(g2, 8, 10, new Color(255, 255, 255));
         }
 

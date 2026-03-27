@@ -11,6 +11,9 @@ import utilities.Utility;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class TitleState extends State
 {
@@ -22,7 +25,9 @@ public class TitleState extends State
     private boolean hasSave = false;
 
     // ANIMATRONIC ROTATION
-    private static final String[] ANIMATRONICS = { "dave", "tyrone", "jirsten", "lanze", "cristian" };
+    private static final String[] NAMES = { "dave", "earl", "tyrone", "jirsten", "lanze", "cristian" };
+    ArrayList<String> ANIMATRONICS = new ArrayList<>(Arrays.asList(NAMES));
+
     private final BufferedImage[][] animatronicFrames; // [character][frame]
     private int currentCharacter = 0;
     private int currentFrame = 0;
@@ -45,11 +50,13 @@ public class TitleState extends State
     {
         super(stateManager);
 
-        animatronicFrames = new BufferedImage[ANIMATRONICS.length][8];
-        for (int c = 0; c < ANIMATRONICS.length; c++)
+        Collections.shuffle(ANIMATRONICS);
+
+        animatronicFrames = new BufferedImage[ANIMATRONICS.size()][8];
+        for (int c = 0; c < ANIMATRONICS.size(); c++)
             for (int f = 0; f < 8; f++)
                 animatronicFrames[c][f] = Utility.loadImage(
-                        "/menu/" + ANIMATRONICS[c] + "/frame" + (f + 1) + ".png"
+                        "/menu/" + ANIMATRONICS.get(c) + "/frame" + (f + 1) + ".png"
                 );
 
         init();
@@ -73,20 +80,20 @@ public class TitleState extends State
 
     private int randomGlitchInterval()
     {
-        // 3-8 SECONDS BETWEEN GLITCHES (AT 30 FPS)
+        // 3-8 SECONDS BETWEEN GLITCHES
         return 60 + (int)(Math.random() * 120);
     }
 
     private int randomGlitchFrame()
     {
-        // ANY FRAME EXCEPT 0 (RESTING STATE)
+        // ANY FRAME EXCEPT 0
         return 1 + (int)(Math.random() * 7);
     }
 
     private int randomCharacterInterval()
     {
-        // 7-10 SECONDS BETWEEN CHARACTER SWAPS (AT 30 FPS)
-        return 150 + (int)(Math.random() * 90);
+        // 4-7 SECONDS BETWEEN CHARACTER SWAPS
+        return 120 + (int)(Math.random() * 90);
     }
 
     @Override
@@ -108,7 +115,7 @@ public class TitleState extends State
         {
             characterTimer--;
             if (characterTimer <= 0)
-                pendingSwap = true; // FLAG — SWAP ON NEXT GLITCH END
+                pendingSwap = true; // FLAG, SWAP ON NEXT GLITCH END
         }
 
         if (!glitching)
@@ -136,7 +143,7 @@ public class TitleState extends State
                 // SWAP CHARACTER IF FLAGGED
                 if (pendingSwap)
                 {
-                    currentCharacter = (currentCharacter + 1) % ANIMATRONICS.length;
+                    currentCharacter = (currentCharacter + 1) % ANIMATRONICS.size();
                     characterTimer = randomCharacterInterval();
                     pendingSwap = false;
                 }
@@ -160,7 +167,7 @@ public class TitleState extends State
         g2.drawString("iACADEMY", 75, 330);
 
         g2.setFont(FontManager.LCD_SMALL);
-        g2.drawString("Made by DWYANE SIDO, ver 1.0", 25, 700);
+        g2.drawString("Made by DWYANE SIDO, ver 1.1", 25, 700);
 
         g2.setColor(Color.DARK_GRAY);
         g2.drawString("DEBUG KEYS f1 - f5 to move between states", 25, 30);
@@ -312,8 +319,38 @@ public class TitleState extends State
         }
     }
 
-    @Override public void keyReleased(int key) {}
+    @Override
+    public void mouseClicked(int x, int y)
+    {
+        // CHECK IF MOUSE IS WITHIN THE X RANGE OF THE MENU
+        if (x < 75 || x > 500) return;
 
-    @Override public void mouseMoved(int x, int y) {}
-    @Override public void mouseClicked(int x, int y) {}
+        if (isHovering(y, 500)) selectedOption = NEW_GAME;
+        else if (hasSave && isHovering(y, 550)) selectedOption = CONTINUE;
+        else if (customNightUnlocked && isHovering(y, 620)) selectedOption = CUSTOM_NIGHT;
+        else return; // CLICKED OUTSIDE ANY OPTION — DO NOTHING
+
+        // CONFIRM SELECTION
+        keyPressed(KeyEvent.VK_ENTER);
+    }
+
+    @Override
+    public void mouseMoved(int x, int y)
+    {
+        if (x < 75 || x > 500) return;
+
+        if (isHovering(y, 500))
+            selectedOption = NEW_GAME;
+        else if (hasSave && isHovering(y, 550))
+            selectedOption = CONTINUE;
+        else if (customNightUnlocked && isHovering(y, 620))
+            selectedOption = CUSTOM_NIGHT;
+    }
+
+    private boolean isHovering(int mouseY, int optionY)
+    {
+        return mouseY >= optionY - 30 && mouseY <= optionY + 10;
+    }
+
+    @Override public void keyReleased(int key) {}
 }

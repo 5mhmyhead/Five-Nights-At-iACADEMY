@@ -26,7 +26,7 @@ public class Earl extends Animatronic
     private int moveTimer = 0;
     private int doorTimer = 0;
 
-    private static final int MOVE_INTERVAL = 510; // 17 SECONDS
+    private static final int MOVE_INTERVAL = 450; // 15 SECONDS
     private static final int DOOR_COUNTDOWN = 150; // 5 SECONDS
 
     // PLAYER HAS TO HOLD FOR AT LEAST 1 SECOND BEFORE EARL GOES AWAY

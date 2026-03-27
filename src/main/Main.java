@@ -2,6 +2,7 @@ package main;
 
 import utilities.Utility;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Main
@@ -10,6 +11,29 @@ public class Main
     BufferedImage icon = Utility.loadImage("/icons/icon.png");
 
     public static void main(String[] args) { new Main().startGame(); }
+
+    public static void toggleFullscreen()
+    {
+        GraphicsDevice device = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice();
+
+        if (device.getFullScreenWindow() == null)
+        {
+            window.dispose();
+            window.setUndecorated(true);
+            window.setVisible(true);
+            device.setFullScreenWindow(window);
+        }
+        else
+        {
+            device.setFullScreenWindow(null);
+            window.dispose();
+            window.setUndecorated(false);
+            window.setVisible(true);
+            window.setLocationRelativeTo(null);
+        }
+    }
 
     public void startGame()
     {

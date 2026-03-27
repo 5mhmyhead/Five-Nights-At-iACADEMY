@@ -111,7 +111,7 @@ public class WinState extends State
 
         g2.setColor(Color.DARK_GRAY);
         g2.setFont(FontManager.LCD_SMALL);
-        Utility.drawCentered(g2, "Press ENTER to continue", GamePanel.HEIGHT / 2 + 340);
+        Utility.drawCentered(g2, "Press any key to continue!", GamePanel.HEIGHT / 2 + 340);
 
         g2.setComposite(old);
         Utility.drawCRTScanlines(g2, 4, 2, 100);
@@ -160,7 +160,6 @@ public class WinState extends State
     @Override
     public void keyPressed(int key)
     {
-        if(key != KeyEvent.VK_ENTER) return;
         if(fadingOut) return;
 
         fadingOut = true;
@@ -194,9 +193,11 @@ public class WinState extends State
         }
     }
 
-    @Override
-    public void keyReleased(int key) {}
+    @Override public void mouseClicked(int x, int y)
+    {
+        keyPressed(KeyEvent.VK_ENTER);
+    }
 
+    @Override public void keyReleased(int key) {}
     @Override public void mouseMoved(int x, int y) {}
-    @Override public void mouseClicked(int x, int y) {}
 }
