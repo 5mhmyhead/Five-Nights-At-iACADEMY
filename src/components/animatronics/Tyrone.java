@@ -150,7 +150,7 @@ public class Tyrone extends Animatronic
             state = TyroneState.MAIN;
             doorTimer = 0;
             SoundManager.FOOTSTEPS.play();
-            SoundManager.FOOTSTEPS.setVolume(0.1);
+            SoundManager.FOOTSTEPS.setVolume(0.2);
         }
         else
         {

@@ -181,12 +181,12 @@ public class Dave extends Animatronic
         // SOUND CUES FOR DAVE MOVING
         if (next < currentCamera)
         {
-            SoundManager.DAVE_LEFT_TO_RIGHT.setVolume(0.2);
+            SoundManager.DAVE_LEFT_TO_RIGHT.setVolume(0.3);
             SoundManager.DAVE_LEFT_TO_RIGHT.play();
         }
         else
         {
-            SoundManager.DAVE_RIGHT_TO_LEFT.setVolume(0.2);
+            SoundManager.DAVE_RIGHT_TO_LEFT.setVolume(0.3);
             SoundManager.DAVE_RIGHT_TO_LEFT.play();
         }
 
