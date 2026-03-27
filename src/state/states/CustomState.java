@@ -18,6 +18,8 @@ public class CustomState extends State
     private final int[] aiLevels = { 0, 0, 0, 0, 0, 0 };
     private int selectedRow = 0;
 
+    private boolean startHovered = false;
+
     private final BufferedImage dave;
     private final BufferedImage earl;
     private final BufferedImage tyrone;
@@ -68,6 +70,15 @@ public class CustomState extends State
         // START PROMPT
         g2.setFont(FontManager.LCD_SMALL);
         Utility.drawCentered(g2, "ENTER to start  |  ESC to go back", GamePanel.HEIGHT - 25);
+
+        g2.setColor(startHovered ? Color.LIGHT_GRAY : Color.DARK_GRAY);
+        g2.fillRect(20, 650, 150, 50);
+        g2.setColor(Color.WHITE);
+        g2.drawRect(20, 650, 150, 50);
+
+
+        g2.setFont(FontManager.LCD_MEDIUM);
+        g2.drawString("START", 63, 685);
 
         g2.setColor(Color.DARK_GRAY);
         g2.setFont(FontManager.LCD_MEDIUM);
@@ -173,7 +184,57 @@ public class CustomState extends State
         stateManager.setState(StateManager.INTRO_STATE);
     }
 
+    @Override
+    public void mouseMoved(int x, int y)
+    {
+        // HIGHLIGHT ANIMATRONIC CARD ON HOVER
+        int[] rowX   = { 200, 565, 930, 200, 565, 930 };
+        int[] columnY = { 350, 350, 350, 600, 600, 600 };
+
+        startHovered = y >= 650 && y <= 700 && x >= 20 && x <= 170;
+
+        for (int i = 0; i < NAMES.length; i++)
+        {
+            if (x >= rowX[i] - 25 && x <= rowX[i] + 175
+                    && y >= columnY[i] - 235 && y <= columnY[i] + 15)
+            {
+                selectedRow = i;
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void mouseClicked(int x, int y)
+    {
+        int[] rowX    = { 200, 565, 930, 200, 565, 930 };
+        int[] columnY = { 350, 350, 350, 600, 600, 600 };
+
+        for (int i = 0; i < NAMES.length; i++)
+        {
+            // LEFT ARROW
+            if (x >= rowX[i] - 10 && x <= rowX[i] + 20
+                    && y >= columnY[i] - 25 && y <= columnY[i] + 10)
+            {
+                selectedRow = i;
+                aiLevels[i] = Math.max(0, aiLevels[i] - 1);
+                return;
+            }
+
+            // RIGHT ARROW
+            if (x >= rowX[i] + 55 && x <= rowX[i] + 90
+                    && y >= columnY[i] - 25 && y <= columnY[i] + 10)
+            {
+                selectedRow = i;
+                aiLevels[i] = Math.min(20, aiLevels[i] + 1);
+                return;
+            }
+        }
+
+        // START BUTTON
+        if (y >= 650 && y <= 700 && x >= 20 && x <= 170)
+            startCustomNight();
+    }
+
     @Override public void keyReleased(int key) {}
-    @Override public void mouseMoved(int x, int y) {}
-    @Override public void mouseClicked(int x, int y) {}
 }
