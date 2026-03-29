@@ -23,6 +23,13 @@ public class Utility
         g.drawString(text, x, y);
     }
 
+    // DRAW STRING TO THE CENTER OF WINDOW
+    public static void drawCenteredInWindow(Graphics2D g2, String text, int winX, int y, int winW)
+    {
+        int x = winX + (winW - g2.getFontMetrics().stringWidth(text)) / 2;
+        g2.drawString(text, x, y);
+    }
+
     // LOAD IMAGE FROM FILE
     public static BufferedImage loadImage(String path)
     {
@@ -74,6 +81,8 @@ public class Utility
     // FUNCTION THAT DRAWS STATIC ON THE SCREEN
     public static void drawStatic(Graphics2D g2, int staticTimer, int staticDuration, Color baseColor)
     {
+        if (GlobalSettings.isLowPerformance()) return;
+
         float minAlpha = 0.20f;
         float maxAlpha = 0.90f;
 
@@ -155,6 +164,8 @@ public class Utility
 
     public static void drawCRTScanlines(Graphics2D g2, int spacing, int lineHeight, int alpha)
     {
+        if (GlobalSettings.isLowPerformance()) return;
+
         g2.setColor(new Color(0, 0, 0, alpha));
         for(int y = 0; y < GamePanel.HEIGHT; y += spacing)
             g2.fillRect(0, y, GamePanel.WIDTH, lineHeight);

@@ -18,13 +18,13 @@ public class Lanze extends Animatronic
 
     // PATIENCE GOES DOWN BY 1 EVERY SUCCESSFUL MOVEMENT OPPORTUNITY
     // WHEN PATIENCE REACHES 0, THE PLAYER HAS 3 SECONDS OF BUFFER TIME TO REACT
-    private static final int MAX_PATIENCE = 100;
+    private static int maxPatience = 100;
     private static final int CRITICAL_COUNTDOWN = 90;
 
     private int patience = 100;
     private int criticalTimer = 0;
 
-    private static final int MOVE_INTERVAL = 7;
+    private static final int MOVE_INTERVAL = 9;
     private int moveTimer = 0;
 
     // SPRITES
@@ -119,9 +119,9 @@ public class Lanze extends Animatronic
         if(musicBox.isWinding())
         {
             patience++;
-            if(patience >= MAX_PATIENCE)
+            if(patience >= maxPatience)
             {
-                patience = MAX_PATIENCE;
+                patience = maxPatience;
                 musicBox.stopWinding(); // DONE WINDING
             }
 
@@ -233,6 +233,12 @@ public class Lanze extends Animatronic
                 && ctx.cameras.getCurrentCamera() == currentCamera;
 
         if(!playerWatching) displayedImage = getCurrentImage();
+    }
+
+    public void setMaxPatience(int max)
+    {
+        maxPatience = max;
+        patience = max;
     }
 
     private void updateMusicBoxSound(GameContext ctx)

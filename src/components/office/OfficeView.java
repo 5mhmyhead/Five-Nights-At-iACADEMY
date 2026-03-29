@@ -189,11 +189,12 @@ public class OfficeView
         }
     }
 
-    // CALLED BY THE GAME STATE WHEN MASK OR CAMERA COMES UP
-    public void forceNormalView()
+    public void toggleView()
     {
-        playerAtDoor = false;
-        wasInHoverZone = false;
+        if (transitioning) return;
+        transitioning = true;
+        transitionForward = !playerAtDoor;
+        transitionIndex = transitionForward ? 0 : TRANSITION_LENGTH - 1;
     }
 
     public boolean isPlayerAtDoor() { return playerAtDoor; }

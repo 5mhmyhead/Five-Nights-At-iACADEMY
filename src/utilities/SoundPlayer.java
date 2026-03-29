@@ -10,6 +10,9 @@ public class SoundPlayer
     private MediaPlayer mediaPlayer;
     private boolean isLooping;
 
+    private double masterVolume = 1.0;
+    private double localVolume = 1.0;
+
     public SoundPlayer(String path)
     {
         try
@@ -49,11 +52,23 @@ public class SoundPlayer
         mediaPlayer.stop();
     }
 
+    public void setMasterVolume(double master)
+    {
+        masterVolume = master;
+        applyVolume();
+    }
+
     public void setVolume(double volume)
     {
         // VOLUME IS 0.0 TO 1.0 IN JAVAFX
-        if(mediaPlayer == null) return;
-        mediaPlayer.setVolume(volume);
+        localVolume = volume;
+        applyVolume();
+    }
+
+    private void applyVolume()
+    {
+        if (mediaPlayer == null) return;
+        mediaPlayer.setVolume(localVolume * masterVolume);
     }
 
     public void mute()

@@ -24,7 +24,7 @@ public class CameraSystem
     private boolean cameraSwitched = false;
 
     // REBOOTING SYSTEM
-    private static final int REBOOT_DURATION = 360;
+    private static int REBOOT_DURATION = 360;
     private boolean rebooting = false;
     private int rebootTimer = 0;
 
@@ -45,6 +45,9 @@ public class CameraSystem
 
     private int disruptionTimer = 0;
     private static final int DISRUPTION_DURATION = 15;
+
+    private int clickCooldownTimer = 0;
+    private static final int CLICK_COOLDOWN_DURATION = 5;      // CLICK COOLDOWN TO PREVENT DOUBLE FIRING
 
     // X AND Y COORDINATES OF EACH BUTTON STORED IN AN ARRAY
     private static final int[] BUTTON_X = { 285, 160, 245, 160, 285, 185, 85 };
@@ -172,6 +175,7 @@ public class CameraSystem
         if(staticTimer > 0)   staticTimer--;
         if(scanlineTimer > 0) scanlineTimer--;
         if(disruptionTimer > 0) disruptionTimer--;
+        if (clickCooldownTimer > 0) clickCooldownTimer--;
 
         if(!monitorUp || transitioning) return;
 
@@ -217,7 +221,9 @@ public class CameraSystem
     {
         if(inputLocked) return;
         if(!monitorUp) return;
+        if (clickCooldownTimer > 0) return;
 
+        clickCooldownTimer = CLICK_COOLDOWN_DURATION;
         // CHECKS IF THE MOUSE CURSOR IS INSIDE THE BUTTON ZONE
         // CAMERA BUTTONS
         for(int i = 0; i < cameras.length; i++)
@@ -367,11 +373,19 @@ public class CameraSystem
     {
         int swayX = cameras[currentCamera].getSwayX();
 
-        for(Animatronic a : animatronics)
-            if(a.getAiLevel() > 0
-                    && a.getLocation() == Animatronic.Location.CAMERA
+        for (Animatronic a : animatronics)
+        {
+            if (a.getAiLevel() <= 0) continue;
+
+            if (a.getLocation() == Animatronic.Location.CAMERA
                     && a.getCurrentCamera() == currentCamera)
                 a.drawOnCamera(g2, swayX);
+
+            // DRAW JIRSTEN PHANTOM ON SECOND CAMERA
+            if (a instanceof Jirsten jirsten
+                    && jirsten.getPhantomCamera() == currentCamera)
+                jirsten.drawPhantomOnCamera(g2, swayX);
+        }
     }
 
     private void drawShockEffect(Graphics2D g2)
@@ -659,6 +673,26 @@ public class CameraSystem
         Utility.updateScanlines();
     }
 
+    public void toggleMonitor()
+    {
+        if (transitioning || inputLocked) return;
+
+        transitioning = true;
+        transitionForward = !monitorUp;
+        transitionIndex = transitionForward ? 0 : TRANSITION_LENGTH - 1;
+        SoundManager.MONITOR.setVolume(0.5);
+        SoundManager.MONITOR.play();
+    }
+
+    public void triggerReboot()
+    {
+        if (rebooting || !monitorUp || inputLocked) return;
+        rebooting   = true;
+        rebootTimer = REBOOT_DURATION;
+        SoundManager.CAMERA_REBOOTING.setVolume(0.7);
+        SoundManager.CAMERA_REBOOTING.loop();
+    }
+
     public MusicBox getMusicBox() { return musicBox; }
     public ControlledShock getShockButton() { return shockButton; }
 
@@ -671,4 +705,6 @@ public class CameraSystem
 
     public void lockInput() { inputLocked = true; }
     public void unlockInput() { inputLocked = false; }
+
+    public void setRebootDuration(int duration) { REBOOT_DURATION = duration; }
 }

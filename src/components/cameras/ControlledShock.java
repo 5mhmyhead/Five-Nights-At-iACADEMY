@@ -79,12 +79,23 @@ public class ControlledShock
         if(cooldownTimer > 0)
             label = "RECALIBRATING...";
         else
-            label = "SHOCK [" + charges + "/" + MAX_CHARGES + "]";
+            label = "SHOCK DAVE [" + charges + "/" + MAX_CHARGES + "]";
 
         int labelX = X + (W - g2.getFontMetrics().stringWidth(label)) / 2;
         int labelY = Y + H / 2 + 5;
         g2.drawString(label, labelX, labelY);
     }
 
+    public void triggerShock()
+    {
+        if (charges <= 0 || cooldownTimer > 0) return;
+        SoundManager.SHOCK.setVolume(0.5);
+        SoundManager.SHOCK.play();
+        shockPressed = true;
+        charges--;
+        cooldownTimer = COOLDOWN_DURATION;
+    }
+
     public boolean wasShockPressed() { return shockPressed; }
+    public void setCharges(int charges) { this.charges = charges; }
 }

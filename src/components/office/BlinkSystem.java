@@ -9,6 +9,7 @@ import java.awt.*;
 public class BlinkSystem
 {
     private boolean eyesClosed = false;
+    private boolean keyBlinking = false;
 
     // BLINK ANIMATION
     private static final int BLINK_DURATION = 3;
@@ -126,6 +127,21 @@ public class BlinkSystem
         g2.drawLine(centerX + eyeW / 2 - 5, centerY + eyeH / 4 - iconOffsetY, centerX + eyeW / 2, centerY + eyeH / 4 + lashLength - iconOffsetY);
 
         g2.setStroke(new BasicStroke(1));
+    }
+
+    public void setKeyBlink(boolean blink)
+    {
+        keyBlinking = blink;
+        if (blink && !eyesClosed)
+        {
+            eyesClosed = true;
+            closeTimer = BLINK_DURATION;
+        }
+        else if (!blink && eyesClosed && keyBlinking)
+        {
+            eyesClosed = false;
+            closeTimer = BLINK_DURATION;
+        }
     }
 
     // FORCES EYES OPEN

@@ -38,6 +38,10 @@ public class Tyrone extends Animatronic
     private int stareCancelTimer = 0;
     private int boostFrames = 0;
 
+    // SUPER BOOST MULTIPLIER AND FOOTSTEPS
+    private boolean superboosted = false;
+    private boolean footstepsEnabled = true;
+
     // SPRITES
     private final JumpscarePlayer jumpscare;
     private final BufferedImage mainImage;
@@ -129,8 +133,16 @@ public class Tyrone extends Animatronic
         // ADD MOVE TICK IF MUSIC BOX WAS WOUND
         // ADD ANOTHER MOVE TICK IF CAMERA IS BROKEN, REBOOTING, OR UNRESPONSIVE
         moveTimer++;
-        if(state == TyroneState.BOOST)moveTimer++;
         if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
+
+        if(state == TyroneState.BOOST)
+        {
+            moveTimer++;
+
+            // ADD ANOTHER MOVE TICK IF SUPER BOOST MODIFIER IS ACTIVE
+            if(superboosted)
+                moveTimer++;
+        }
 
         if(moveTimer >= MOVE_INTERVAL)
         {
@@ -149,8 +161,12 @@ public class Tyrone extends Animatronic
             location = Location.MAIN;
             state = TyroneState.MAIN;
             doorTimer = 0;
-            SoundManager.FOOTSTEPS.play();
-            SoundManager.FOOTSTEPS.setVolume(0.2);
+
+            if(footstepsEnabled)
+            {
+                SoundManager.FOOTSTEPS.play();
+                SoundManager.FOOTSTEPS.setVolume(0.2);
+            }
         }
         else
         {
@@ -271,4 +287,7 @@ public class Tyrone extends Animatronic
     {
         return jumpscare.isPlaying();
     }
+
+    public void setFootstepsEnabled(boolean enabled) { footstepsEnabled = enabled; }
+    public void setSuperboosted() { superboosted = true; }
 }

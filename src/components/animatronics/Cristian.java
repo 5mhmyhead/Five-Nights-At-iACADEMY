@@ -22,12 +22,12 @@ public class Cristian extends Animatronic
     private enum CristianState { IDLE, IMPATIENT, AGGRESSIVE, CRITICAL, RED_EYE, RED_EYE_CRITICAL }
     private enum FlickerState  { NONE, ACTIVE }
 
-    private static final int MAX_PATIENCE = 100;
     private static final int CRITICAL_COUNTDOWN = 150;
-    private static final int MOVE_INTERVAL = 7;
+    private static final int MOVE_INTERVAL = 9;
+    private static int maxPatience = 100;
 
     private CristianState state = CristianState.IDLE;
-    private int patience = MAX_PATIENCE;
+    private int patience = maxPatience;
     private int criticalTimer = 0;
     private int moveTimer = 0;
 
@@ -217,7 +217,7 @@ public class Cristian extends Animatronic
     {
         SoundManager.ITS_ME.stop();
         freezeTimer = FREEZE_DURATION;
-        patience = MAX_PATIENCE;
+        patience = maxPatience;
         stareTimer = 0;
         warningShown = false;
 
@@ -264,7 +264,7 @@ public class Cristian extends Animatronic
         if (ctx.office.isPlayerAtDoor())
         {
             // PATIENCE RECOVERS WHILE LOOKING AT THE DOOR
-            patience = Math.min(patience + 1, MAX_PATIENCE);
+            patience = Math.min(patience + 1, maxPatience);
             if (state == CristianState.CRITICAL && patience > 0)
                 state = CristianState.AGGRESSIVE;
         }
@@ -474,6 +474,12 @@ public class Cristian extends Animatronic
     public boolean isRedEyeActive()
     {
         return state == CristianState.RED_EYE || state == CristianState.RED_EYE_CRITICAL;
+    }
+
+    public void setMaxPatience(int max)
+    {
+        maxPatience = max;
+        patience = max;
     }
 
     @Override

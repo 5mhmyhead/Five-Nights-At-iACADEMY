@@ -4,6 +4,7 @@ import components.Clock;
 import components.GameContext;
 import components.animatronics.*;
 import components.cameras.CameraSystem;
+import components.nights.ChallengeConfig;
 import components.nights.NightConfig;
 import components.office.BlinkSystem;
 import components.office.OfficeView;
@@ -13,6 +14,7 @@ import utilities.SoundManager;
 import utilities.Utility;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class GameState extends State
 {
@@ -72,8 +74,48 @@ public class GameState extends State
     {
         // APPLY AI LEVELS DEPENDING ON THE NIGHT
         NightConfig config = stateManager.getNightManager().getConfig();
-        for(int i = 0; i < animatronics.length; i++)
+        for (int i = 0; i < animatronics.length; i++)
             animatronics[i].setAiLevel(config.aiLevels()[i]);
+
+        // APPLY CHALLENGES
+        ChallengeConfig challenges = stateManager.getNightManager().getChallengeConfig();
+
+        // START GAME WITH ZERO SHOCKS
+        if (challenges.zeroShocks())
+            ctx.cameras.getShockButton().setCharges(0);
+
+        // REBOOTS ARE NOW 20 SECONDS
+        if (challenges.longReboot())
+            ctx.cameras.setRebootDuration(600);
+
+        // NO FOOTSTEPS FOR DAVE, TYRONE, AND EARL
+        if (challenges.noFootsteps())
+            for (Animatronic a : animatronics)
+            {
+                if (a instanceof Dave dave) dave.setFootstepsEnabled(false);
+                if (a instanceof Dave tyrone) tyrone.setFootstepsEnabled(false);
+                if (a instanceof Earl earl) earl.setSoundEnabled(false);
+            }
+
+        // JIRSTEN HAS A PHANTOM OF HER
+        if (challenges.hallucinations())
+            for (Animatronic a : animatronics)
+                if (a instanceof Jirsten jirsten) jirsten.setHallucinations(true);
+
+        // PATIENCE OF CRISTIAN AND LANZE ARE HALVED
+        if (challenges.halvedPatience())
+            for (Animatronic a : animatronics)
+            {
+                if (a instanceof Cristian cristian) cristian.setMaxPatience(50);
+                if (a instanceof Lanze lanze) lanze.setMaxPatience(50);
+            }
+
+        if (challenges.superboost())
+            for (Animatronic a : animatronics)
+            {
+                if (a instanceof Earl earl) earl.setSuperboosted();
+                if (a instanceof Tyrone tyrone) tyrone.setSuperboosted();
+            }
     }
 
     @Override
@@ -249,6 +291,54 @@ public class GameState extends State
     {
         if(nightOver) return;
         ctx.cameras.keyPressed(key);
+
+
+        switch (key)
+        {
+            case KeyEvent.VK_Q ->
+            {
+                if (ctx.isInMainView() || ctx.isInCameras())
+                    ctx.cameras.toggleMonitor();
+            }
+
+            case KeyEvent.VK_E ->
+            {
+                if (!ctx.isInCameras())
+                    ctx.blink.setKeyBlink(true);
+            }
+
+            case KeyEvent.VK_R ->
+            {
+                if (ctx.isInCameras())
+                    ctx.cameras.triggerReboot();
+            }
+
+            case KeyEvent.VK_W ->
+            {
+                if (ctx.isInCameras() && ctx.cameras.getCurrentCamera() == 0)
+                    ctx.cameras.getMusicBox().triggerWind();
+            }
+
+            case KeyEvent.VK_S ->
+            {
+                if (ctx.isInCameras())
+                    ctx.cameras.getShockButton().triggerShock();
+            }
+
+            case KeyEvent.VK_SHIFT ->
+            {
+                if (!ctx.isInCameras())
+                    ctx.office.toggleView();
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(int key)
+    {
+        // RELEASE E TO STOP BLINKING
+        if (key == KeyEvent.VK_E)
+            ctx.blink.setKeyBlink(false);
     }
 
     @Override public void mouseClicked(int x, int y)
@@ -268,9 +358,7 @@ public class GameState extends State
         if(!ctx.isInCameras() && ctx.blink.getCloseTimer() == 0)
             ctx.office.mouseMoved(x, y);
 
-        if(!ctx.isInCameras() && !ctx.office.isTransitioning())
+        if(!ctx.isInCameras() && !ctx.office.isTransitioning() && !ctx.cameras.isTransitioning())
             ctx.blink.mouseMoved(x, y);
     }
-
-    @Override public void keyReleased(int key) {}
 }

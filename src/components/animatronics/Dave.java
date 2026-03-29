@@ -21,7 +21,7 @@ public class Dave extends Animatronic
     private static final int MAX_JUMPS = 5; // MOVES 5 CAMERAS BEFORE GOING TO THE DOOR
     private int moveCount = 0;
 
-    private static final int GRACE_DURATION = 300;
+    private static final int GRACE_DURATION = 210;
     private static final int MOVE_INTERVAL = 270;
     private static final int DOOR_COUNTDOWN = 90;
 
@@ -42,6 +42,8 @@ public class Dave extends Animatronic
 
     private final BufferedImage[] cameraSprites;
     private final BufferedImage doorImage;
+
+    private boolean footstepsEnabled = true;
 
     public Dave()
     {
@@ -164,8 +166,13 @@ public class Dave extends Animatronic
             location = Location.DOOR;
             state = DaveState.DOOR;
             doorTimer = DOOR_COUNTDOWN;
-            SoundManager.KNOCK_DAVE.play();
-            SoundManager.KNOCK_DAVE.setVolume(0.1);
+
+            if (footstepsEnabled)
+            {
+                SoundManager.KNOCK_DAVE.play();
+                SoundManager.KNOCK_DAVE.setVolume(0.2);
+            }
+
             return;
         }
 
@@ -179,15 +186,18 @@ public class Dave extends Animatronic
         while(next == currentCamera || next == watchedCamera);
 
         // SOUND CUES FOR DAVE MOVING
-        if (next < currentCamera)
+        if (footstepsEnabled)
         {
-            SoundManager.DAVE_LEFT_TO_RIGHT.setVolume(0.3);
-            SoundManager.DAVE_LEFT_TO_RIGHT.play();
-        }
-        else
-        {
-            SoundManager.DAVE_RIGHT_TO_LEFT.setVolume(0.3);
-            SoundManager.DAVE_RIGHT_TO_LEFT.play();
+            if (next < currentCamera)
+            {
+                SoundManager.DAVE_LEFT_TO_RIGHT.setVolume(0.3);
+                SoundManager.DAVE_LEFT_TO_RIGHT.play();
+            }
+            else
+            {
+                SoundManager.DAVE_RIGHT_TO_LEFT.setVolume(0.3);
+                SoundManager.DAVE_RIGHT_TO_LEFT.play();
+            }
         }
 
         currentCamera = next;
@@ -198,7 +208,9 @@ public class Dave extends Animatronic
     {
         currentCamera = 6;
         location = Location.CAMERA;
-        state = DaveState.MOVING;
+        state = DaveState.GRACE;
+
+        graceTimer = 0;
         moveTimer = 0;
         doorTimer = 0;
         moveCount = 0;
@@ -262,4 +274,6 @@ public class Dave extends Animatronic
     {
         return jumpscare.isPlaying();
     }
+
+    public void setFootstepsEnabled(boolean enabled) { footstepsEnabled = enabled; }
 }

@@ -7,6 +7,7 @@ public class NightManager
     private int currentNight = 0;
     private boolean isCustomNight = false;
     private NightConfig customConfig = null;
+    private ChallengeConfig challengeConfig = new ChallengeConfig(false, false, false, false, false, false);
 
     private static final NightConfig[] NIGHTS =
     {
@@ -28,6 +29,7 @@ public class NightManager
     {
         customConfig  = null;
         isCustomNight = false;
+        clearChallenges();
     }
 
     public void startNewGame()
@@ -40,6 +42,22 @@ public class NightManager
     {
         clearCustomNight();
         loadNight(savedNight);
+    }
+
+    // CHALLENGES FOR CUSTOM NIGHT
+    public void setChallengeConfig(ChallengeConfig config)
+    {
+        challengeConfig = config;
+    }
+
+    public void clearChallenges()
+    {
+        challengeConfig = new ChallengeConfig(false, false, false, false, false, false);
+    }
+
+    public ChallengeConfig getChallengeConfig()
+    {
+        return challengeConfig;
     }
 
     public void loadNight(int nightNumber)

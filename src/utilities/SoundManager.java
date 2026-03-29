@@ -51,6 +51,12 @@ public class SoundManager
         LOOK_AT_ME, RADIO, AC_ON, DAVE_LEFT_TO_RIGHT, DAVE_RIGHT_TO_LEFT, BUTTON_BROKEN
     };
 
+    public static void setMasterVolume(float volume)
+    {
+        for (SoundPlayer p : soundPlayers)
+            p.setMasterVolume(volume);
+    }
+
     public static void stopAll()
     {
         for(SoundPlayer soundPlayer : soundPlayers)

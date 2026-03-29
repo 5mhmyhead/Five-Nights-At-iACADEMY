@@ -38,6 +38,10 @@ public class Earl extends Animatronic
     private int stareCancelTimer = 0;
     private int boostFrames = 0;
 
+    // SUPER BOOST MULTIPLIER AND KNOCK
+    private boolean superboosted = false;
+    private boolean soundEnabled = true;
+
     // SPRITES
     private final JumpscarePlayer jumpscare;
     private final BufferedImage doorImage;
@@ -124,8 +128,16 @@ public class Earl extends Animatronic
         // ADD MOVE TICK IF MUSIC BOX WAS WOUND
         // ADD ANOTHER MOVE TICK IF CAMERA IS BROKEN, REBOOTING, OR UNRESPONSIVE
         moveTimer++;
-        if(state == EarlState.BOOST)moveTimer++;
         if(!ctx.cameras.isCameraViewable(currentCamera)) moveTimer++;
+
+        if(state == EarlState.BOOST)
+        {
+            moveTimer++;
+
+            // ADD ANOTHER MOVE TICK IF SUPER BOOST MODIFIER IS ACTIVE
+            if(superboosted)
+                moveTimer++;
+        }
 
         if(moveTimer >= MOVE_INTERVAL)
         {
@@ -144,8 +156,12 @@ public class Earl extends Animatronic
             location = Location.DOOR;
             state = EarlState.DOOR;
             doorTimer = 0;
-            SoundManager.KNOCK_EARL.play();
-            SoundManager.KNOCK_EARL.setVolume(0.1);
+
+            if(soundEnabled)
+            {
+                SoundManager.KNOCK_EARL.play();
+                SoundManager.KNOCK_EARL.setVolume(0.1);
+            }
         }
         else
         {
@@ -261,4 +277,7 @@ public class Earl extends Animatronic
     {
         return jumpscare.isPlaying();
     }
+
+    public void setSoundEnabled(boolean enabled) { soundEnabled = enabled; }
+    public void setSuperboosted() { superboosted = true; }
 }

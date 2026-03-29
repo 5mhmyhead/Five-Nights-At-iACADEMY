@@ -32,6 +32,10 @@ public class Jirsten extends Animatronic
     private final BufferedImage warningImage;
     private final BufferedImage[] cameraSprites;
 
+    // JIRSTEN CHALLENGE
+    private boolean hallucinations = false;
+    private int phantomCamera = -1; // -1 = NO PHANTOM
+
     public Jirsten()
     {
         currentCamera = 3;
@@ -107,7 +111,17 @@ public class Jirsten extends Animatronic
                 moveTimer = 0;
                 stareTimer = 0;
 
-                if (shouldMove()) currentCamera = pickRandomCamera(watchedCamera);
+                if (shouldMove())
+                {
+                    currentCamera = pickRandomCamera(watchedCamera);
+
+                    // PLACE PHANTOM ON A DIFFERENT CAMERA
+                    if (hallucinations)
+                    {
+                        do { phantomCamera = pickRandomCamera(watchedCamera); }
+                        while (phantomCamera == currentCamera);
+                    }
+                }
             }
         }
     }
@@ -156,7 +170,8 @@ public class Jirsten extends Animatronic
     private void handleStare(GameContext ctx)
     {
         int watchedCamera = ctx.cameras.getCurrentCamera();
-        boolean playerWatching = ctx.cameras.isMonitorUp() && (watchedCamera == currentCamera);
+        boolean playerWatching = ctx.cameras.isMonitorUp()
+                && (watchedCamera == currentCamera || watchedCamera == phantomCamera);
 
         if(playerWatching)
         {
@@ -166,8 +181,9 @@ public class Jirsten extends Animatronic
             if(stareTimer >= STARE_LIMIT && currentCamera != 3)
             {
                 stareTimer = 0;
+                int camToBreak = (watchedCamera == phantomCamera) ? phantomCamera : currentCamera;
                 // ONLY JUMPSCARE IF CAMERA IS VIEWABLE
-                if(ctx.cameras.isCameraViewable(currentCamera))
+                if (ctx.cameras.isCameraViewable(camToBreak))
                 {
                     jumpscare.play();
                     ctx.cameras.lockInput();
@@ -177,9 +193,10 @@ public class Jirsten extends Animatronic
         else
         {
             // SEND JIRSTEN BACK TO CAM 4 IF PLAYER LOOKED AWAY IN TIME
-            if(stareTimer > 0 && currentCamera != 3)
+            if (stareTimer > 0 && currentCamera != 3)
             {
                 currentCamera = 3;
+                phantomCamera = -1;
                 moveTimer = 0;
             }
 
@@ -225,6 +242,8 @@ public class Jirsten extends Animatronic
     @Override
     public void drawOnCamera(Graphics2D g2, int swayX)
     {
+        if(jumpscareIsPlaying()) return;
+
         if(currentCamera >= 0
                 && currentCamera < cameraSprites.length
                 && cameraSprites[currentCamera] != null)
@@ -242,6 +261,22 @@ public class Jirsten extends Animatronic
         }
     }
 
+    public void drawPhantomOnCamera(Graphics2D g2, int swayX)
+    {
+        if(jumpscareIsPlaying()) return;
+        if (phantomCamera < 0) return;
+        if (phantomCamera >= cameraSprites.length) return;
+        if (cameraSprites[phantomCamera] == null) return;
+
+        // DRAW AT 50% OPACITY
+        AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
+        Composite old = g2.getComposite();
+        g2.setComposite(ac);
+        g2.drawImage(cameraSprites[phantomCamera], swayX - 16, 0,
+                GamePanel.WIDTH + 16 * 2, GamePanel.HEIGHT, null);
+        g2.setComposite(old);
+    }
+
     @Override
     public boolean jumpscareIsPlaying()
     {
@@ -256,11 +291,14 @@ public class Jirsten extends Animatronic
     }
 
     // CALCULATES THE STAY LIMIT DEPENDING ON THE AI LEVEL OF JIRSTEN
-    // 10 SECONDS - 4 SECONDS RANGE
+    // 12 SECONDS - 4 SECONDS RANGE
     private int getStayLimit()
     {
-        int maxLimit = 300;
+        int maxLimit = 360;
         int minLimit = 120;
         return maxLimit - (int)((maxLimit - minLimit) * (aiLevel - 1) / 19.0);
     }
+
+    public void setHallucinations(boolean enabled) { hallucinations = enabled; }
+    public int getPhantomCamera() { return hallucinations ? phantomCamera : -1; }
 }
