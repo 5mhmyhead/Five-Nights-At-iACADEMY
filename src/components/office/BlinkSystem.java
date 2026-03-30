@@ -131,7 +131,6 @@ public class BlinkSystem
 
     public void setKeyBlink(boolean blink)
     {
-        keyBlinking = blink;
         if (blink && !eyesClosed)
         {
             eyesClosed = true;
@@ -142,8 +141,9 @@ public class BlinkSystem
             eyesClosed = false;
             closeTimer = BLINK_DURATION;
         }
-    }
 
+        keyBlinking = blink;
+    }
     // FORCES EYES OPEN
     public void forceOpen()
     {

@@ -55,6 +55,8 @@ public class SoundManager
     {
         for (SoundPlayer p : soundPlayers)
             p.setMasterVolume(volume);
+
+        JUMPSCARE.setMasterVolume(volume);
     }
 
     public static void stopAll()
