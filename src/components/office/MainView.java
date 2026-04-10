@@ -7,7 +7,7 @@ import utilities.Utility;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class MainView
+public class    MainView
 {
     private final BufferedImage mainImage;
 

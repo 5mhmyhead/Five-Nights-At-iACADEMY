@@ -20,7 +20,7 @@ import java.awt.image.BufferedImage;
 public class Cristian extends Animatronic
 {
     private enum CristianState { IDLE, IMPATIENT, AGGRESSIVE, CRITICAL, RED_EYE, RED_EYE_CRITICAL }
-    private enum FlickerState  { NONE, ACTIVE }
+    private enum FlickerState { NONE, ACTIVE }
 
     private static final int CRITICAL_COUNTDOWN = 150;
     private static final int MOVE_INTERVAL = 9;

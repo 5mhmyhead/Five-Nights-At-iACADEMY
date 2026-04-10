@@ -65,7 +65,7 @@ public class IntroState extends State
     {
         if(timer <= GLITCH_DURATION)
         {
-            drawGlitchedText(g2, getNightName(), GamePanel.HEIGHT / 2 - 30, FontManager.LCD_LARGE);
+            drawGlitchedText(g2, getCurrentNight(), GamePanel.HEIGHT / 2 - 30, FontManager.LCD_LARGE);
             drawGlitchedText(g2, "12:00 AM",  GamePanel.HEIGHT / 2 + 30, FontManager.LCD_CLOCK);
         }
         else
@@ -73,7 +73,7 @@ public class IntroState extends State
             // STABLE TEXT AFTER GLITCH PHASE
             g2.setColor(Color.WHITE);
             g2.setFont(FontManager.LCD_LARGE);
-            Utility.drawCentered(g2, getNightName(), GamePanel.HEIGHT / 2 - 30);
+            Utility.drawCentered(g2, getCurrentNight(), GamePanel.HEIGHT / 2 - 30);
 
             g2.setFont(FontManager.LCD_CLOCK);
             Utility.drawCentered(g2, "12:00 AM", GamePanel.HEIGHT / 2 + 30);
@@ -123,7 +123,7 @@ public class IntroState extends State
         Utility.drawStatic(g2, remainingStatic, SCANLINE_FADE_DURATION, new Color(180, 255, 180));
     }
 
-    private String getNightName()
+    private String getCurrentNight()
     {
         return "Night " + stateManager.getNightManager().getNightNumber();
     }
